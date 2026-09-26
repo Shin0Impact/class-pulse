@@ -1,0 +1,62 @@
+{
+  "id": "demo",
+  "title": "Classroom blindspot demo",
+  "questions": [
+    {
+      "id": "tree-dry-mass",
+      "topic": "Photosynthesis",
+      "prompt": "As a tree grows, where does most of its new dry mass come from?",
+      "correctOptionId": "air",
+      "options": [
+        {
+          "id": "soil",
+          "text": "Nutrients from the soil",
+          "misconception": {
+            "label": "Tree mass comes from soil",
+            "explanation": "Soil supplies minerals, but not most of the tree's new dry material."
+          }
+        },
+        {
+          "id": "air",
+          "text": "Carbon dioxide from the air"
+        },
+        {
+          "id": "water",
+          "text": "Water from the roots",
+          "misconception": {
+            "label": "Tree mass comes from water",
+            "explanation": "Water is needed, but it is not the main source of the tree's new dry material."
+          }
+        }
+      ]
+    },
+    {
+      "id": "earth-seasons",
+      "topic": "Seasons",
+      "prompt": "What is the main reason the Northern Hemisphere has summer?",
+      "correctOptionId": "tilt",
+      "options": [
+        {
+          "id": "distance",
+          "text": "Earth is much closer to the Sun",
+          "misconception": {
+            "label": "Summer means closer to the Sun",
+            "explanation": "The seasons mainly depend on Earth's tilted axis, not its distance from the Sun."
+          }
+        },
+        {
+          "id": "tilt",
+          "text": "The Northern Hemisphere is tilted toward the Sun"
+        },
+        {
+          "id": "rotation",
+          "text": "Earth rotates faster during summer",
+          "misconception": {
+            "label": "Rotation speed causes seasons",
+            "explanation": "Earth's daily rotation does not cause the yearly seasons."
+          }
+        }
+      ]
+    }
+  ]
+}
