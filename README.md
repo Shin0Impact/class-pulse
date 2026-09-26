@@ -94,10 +94,5 @@ client/src/
 - Never commit `.env`. Run `npm run smoke` before pushing.
 - If you change a socket event or its payload, change `shared/events.js` **and** tell the others: it is the contract between client and server.
 
-## Known limits (honest list)
 
-- **It is self-reported.** Students can tap green to look fine, or from overconfidence. Treat it as a signal that tells the teacher when to check verbally, not as a test. The reasons and the timeline make the signal richer, but they do not verify anything.
-- Live state is in server memory: restarting the server ends running classes. History in Supabase is kept.
-- Students are identified by name plus a per-tab id (no accounts). A student who clears their tab data rejoins as a new student.
-- Focus mode only reports that a student left the page (a second phone is invisible to it). Present it as a teacher signal.
-- The UI is in English. Arabic UI strings are a stretch item (names and topics already display right-to-left correctly).
+
