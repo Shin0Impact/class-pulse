@@ -1,0 +1,34 @@
+{
+  "id": "example",
+  "title": "Where plants get their mass",
+  "questions": [
+    {
+      "id": "plant-mass-1",
+      "topic": "Photosynthesis",
+      "prompt": "Where does most of a growing tree's mass come from?",
+      "correctOptionId": "air",
+      "options": [
+        {
+          "id": "air",
+          "text": "Carbon dioxide from the air"
+        },
+        {
+          "id": "soil",
+          "text": "Soil",
+          "misconception": {
+            "label": "Mass comes from soil",
+            "explanation": "The student thinks the tree takes most of its new material from soil."
+          }
+        },
+        {
+          "id": "water",
+          "text": "Water alone",
+          "misconception": {
+            "label": "Mass comes only from water",
+            "explanation": "The student overlooks the carbon that the tree takes from carbon dioxide."
+          }
+        }
+      ]
+    }
+  ]
+}
