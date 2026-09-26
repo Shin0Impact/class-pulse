@@ -22,4 +22,4 @@ Every wrong option must include `misconception` with a short `label` and a one-l
 
 ## Server API
 
-Import `listDecks()` and `loadDeck(deckId)` from `server/src/services/deckService.js`. Both are asynchronous. `loadDeck` validates the JSON and throws an error if the file or its content is invalid. Use `validateDeck(deck)` to get an array of validation errors directly.
+Import `listDecks()` and `loadDeck(deckId)` from `server/src/services/deckService.ts`. Both are asynchronous. `loadDeck` validates the JSON and throws an error if the file or its content is invalid. Use `validateDeck(deck)` to get an array of validation errors directly.

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "smoke": "node scripts/smoke.js"
+    "smoke": "node scripts/smoke.js",
+    "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
@@ -16,6 +17,8 @@
     "socket.io": "^4.8.4"
   },
   "devDependencies": {
-    "socket.io-client": "^4.8.4"
+    "@types/node": "^26.6.3",
+    "socket.io-client": "^4.8.4",
+    "typescript": "^7.0.2"
   }
 }
