@@ -1,4 +1,15 @@
-import type { CheckIn, Confidence, Pair, Status, Summary, TimelineSample } from '../../../shared/types.ts';
+import type {
+  CheckIn,
+  Confidence,
+  Pair,
+  Status,
+  Summary,
+  TimelineSample,
+} from '../../../shared/types.ts';
+import type {
+  ExplanationRubric,
+  ExplanationScore,
+} from './explanationRubric.ts';
 
 export type Student = {
   id: string;
@@ -10,20 +21,31 @@ export type Student = {
   focus: number;
 };
 
-// A launched Blindspot question. correctOptionId lives here (server-only) and must never reach
-// students -- questionService.ts's launchQuestion strips it (and any misconception fields) before
-// broadcasting QUESTION_STARTED.
+// The answer key and rubric stay on the server.
+// The public question sent to students includes only the prompt and option text.
 export type QuestionOption = { id: string; text: string };
+
 export type QuestionRound = {
   id: string;
   topic: string;
   prompt: string;
   correctOptionId: string;
   options: QuestionOption[];
+  rubric?: ExplanationRubric;
   startedAt: number;
 };
-export type StudentAnswer = { optionId: string; confidence: Confidence };
-export type AnswerRecord = { correct: boolean; confidence: Confidence };
+
+export type StudentAnswer = {
+  optionId: string;
+  confidence: Confidence;
+  explanation?: string;
+  explanationScore?: ExplanationScore;
+};
+
+export type AnswerRecord = {
+  correct: boolean;
+  confidence: Confidence;
+};
 
 export type Session = {
   id: string;
@@ -35,8 +57,8 @@ export type Session = {
   current: CheckIn;
   timeline: TimelineSample[];
   focusMode: boolean;
-  currentQuestion: QuestionRound | null;       // the live Blindspot question, if any
-  answers: Map<string, StudentAnswer>;         // studentId -> answer, for the current round only
-  answerHistory: Map<string, AnswerRecord[]>;  // studentId -> every past round's answer, for calibration
-  pairs: Pair[];                               // the latest teacher:pairUp result for the current question
+  currentQuestion: QuestionRound | null;
+  answers: Map<string, StudentAnswer>;
+  answerHistory: Map<string, AnswerRecord[]>;
+  pairs: Pair[];
 };
