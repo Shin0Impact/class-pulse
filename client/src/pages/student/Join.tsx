@@ -1,1 +1,125 @@
-import{useState}from'react';import{Link,useNavigate,useSearchParams}from'react-router-dom';import{fetchSession}from'../../api/http.ts';import Button from'../../components/ui/Button.tsx';import{usePreferences}from'../../context/PreferencesContext.tsx';import type{FormEvent}from'react';export const savedKey=(code:string)=>`classpulse:${code}`;export default function Join(){const nav=useNavigate(),[params]=useSearchParams(),{t}=usePreferences(),[code,setCode]=useState(params.get('code')??''),[name,setName]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();setError('');setBusy(true);try{await fetchSession(code.trim());try{sessionStorage.setItem(savedKey(code.trim()),JSON.stringify({name:name.trim()}))}catch{}nav(`/play/${code.trim()}`,{state:{name:name.trim()}})}catch{setError(t('classNotFound'));setBusy(false)}}return <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-10"><Link to="/" className="mb-4 text-sm text-slate-500 hover:underline">{t('back')}</Link><h1 className="text-3xl font-bold">{t('joinTitle')}</h1><form onSubmit={submit} className="mt-6 space-y-4"><label className="block"><span className="mb-1 block text-sm font-medium text-slate-600">{t('classCode')}</span><input className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-center font-mono text-3xl tracking-widest" inputMode="numeric" maxLength={4} placeholder="0000" value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,''))} required/></label><label className="block"><span className="mb-1 block text-sm font-medium text-slate-600">{t('yourName')}</span><input dir="auto" className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-lg" maxLength={24} value={name} onChange={e=>setName(e.target.value)} required/></label>{error&&<p className="rounded-lg bg-rose-50 p-3 text-rose-800">{error}</p>}<Button type="submit" className="w-full" disabled={busy||code.length!==4||!name.trim()}>{busy?t('joining'):t('join')}</Button></form></main>}
+import { useState } from "react";
+import type { FormEvent } from "react";
+
+import {
+  Link,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
+
+import { fetchSession } from "../../api/http";
+import { usePreferences } from "../../context/PreferencesContext";
+
+import JoinForm from "../../components/student/JoinForm/JoinForm";
+
+import "./Join.css";
+
+export const savedKey = (code: string) =>
+  `classpulse:${code}`;
+
+export default function Join() {
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const { t } = usePreferences();
+
+  const [code, setCode] = useState(
+    params.get("code") ?? ""
+  );
+
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function handleJoin(
+    event: FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+
+    setError("");
+    setBusy(true);
+
+    try {
+      const cleanCode = code.trim();
+      const cleanName = name.trim();
+
+      await fetchSession(cleanCode);
+
+      try {
+        sessionStorage.setItem(
+          savedKey(cleanCode),
+          JSON.stringify({
+            name: cleanName,
+          })
+        );
+      } catch {
+        // Joining should still work if storage is unavailable.
+      }
+
+      navigate(`/play/${cleanCode}`, {
+        state: {
+          name: cleanName,
+        },
+      });
+    } catch {
+      setError(t("classNotFound"));
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="student-join-page">
+      <header className="student-join-page__topbar">
+        <Link
+          to="/"
+          className="student-join-page__back"
+          aria-label={t("back")}
+        >
+          <span aria-hidden="true">←</span>
+          <span>{t("back")}</span>
+        </Link>
+      </header>
+
+      <section className="student-join-page__content">
+        <JoinForm
+          name={name}
+          code={code}
+          busy={busy}
+          error={error}
+          onNameChange={setName}
+          onCodeChange={setCode}
+          onSubmit={handleJoin}
+        />
+
+        <aside
+          className="student-join-page__visual"
+          aria-label="Class Pulse"
+        >
+          <div className="student-join-page__visual-label">
+            <span aria-hidden="true" />
+<span>{t("liveClass")}</span>          </div>
+
+          <div className="student-join-page__pulse">
+            <span />
+            <span />
+            <span />
+<strong>{t("pulseWord")}</strong>            <span />
+            <span />
+            <span />
+          </div>
+
+     <blockquote>
+  <p>
+    {t("pulseQuoteFirst")}
+    <br />
+    {t("pulseQuoteSecond")}
+  </p>
+</blockquote>
+
+          <div className="student-join-page__number">
+            01
+          </div>
+        </aside>
+      </section>
+    </main>
+  );
+}

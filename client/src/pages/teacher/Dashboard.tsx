@@ -92,8 +92,7 @@ export default function Dashboard() {
   }
 
   async function endClass() {
-    if (!window.confirm(t('endConfirm')) return;
-    await run(EVENTS.TEACHER_END_SESSION, {});
+if (!window.confirm(t('endConfirm'))) return;    await run(EVENTS.TEACHER_END_SESSION, {});
   }
 
   const joinUrl = `${window.location.origin}/join?code=${code}`;
