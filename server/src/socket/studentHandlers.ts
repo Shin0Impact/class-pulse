@@ -1,5 +1,6 @@
 import { EVENTS } from '../../../shared/events.ts';
 import { requireSession, getSession, joinStudent, setStatus, recordFocus, UserError } from '../services/sessionService.ts';
+import { recordAnswer, computeBlindspotUpdate } from '../services/questionService.ts';
 import { studentState } from '../services/views.ts';
 import { handle, teacherRoom, studentRoom, emitStudents, emitPulse } from './helpers.ts';
 import type { Server, Socket } from 'socket.io';
@@ -26,6 +27,15 @@ export function registerStudentHandlers(io: Server, socket: Socket): void {
     const { session, student } = requireStudent();
     setStatus(session, student, payload);
     emitPulse(io, session);
+    return {};
+  }));
+
+  // A student answers the live Blindspot question with a choice + confidence. The teacher's
+  // quadrant breakdown is recomputed and re-broadcast on every answer, same pattern as the pulse.
+  socket.on(EVENTS.STUDENT_ANSWER, handle((payload: { questionId?: unknown; optionId?: unknown; confidence?: unknown }) => {
+    const { session, student } = requireStudent();
+    recordAnswer(session, student, payload);
+    io.to(teacherRoom(session.code)).emit(EVENTS.BLINDSPOT_UPDATE, computeBlindspotUpdate(session));
     return {};
   }));
 

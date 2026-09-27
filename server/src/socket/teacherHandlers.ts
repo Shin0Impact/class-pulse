@@ -1,6 +1,7 @@
 import { EVENTS } from '../../../shared/events.ts';
 import { FEATURES } from '../../../shared/features.ts';
 import { createSession, getSession, requireSession, startCheckIn, endSession, UserError } from '../services/sessionService.ts';
+import { launchQuestion, computeBlindspotUpdate } from '../services/questionService.ts';
 import { teacherSnapshot } from '../services/views.ts';
 import { handle, teacherRoom, studentRoom, emitPulse } from './helpers.ts';
 import type { Server, Socket } from 'socket.io';
@@ -46,6 +47,17 @@ export function registerTeacherHandlers(io: Server, socket: Socket): void {
     session.focusMode = FEATURES.focusMode && Boolean(enabled);
     io.to(studentRoom(session.code)).emit(EVENTS.FOCUS_MODE, { enabled: session.focusMode });
     return { focusMode: session.focusMode };
+  }));
+
+  // Launches a Blindspot question: students get it with no correct answer attached (see
+  // questionService.ts), and the teacher gets a fresh, empty quadrant breakdown right away so the
+  // dashboard resets for the new round instead of showing stale data from the last question.
+  socket.on(EVENTS.TEACHER_LAUNCH_QUESTION, handle((payload: { question?: unknown }) => {
+    const session = requireTeacher();
+    const publicQuestion = launchQuestion(session, payload);
+    io.to(studentRoom(session.code)).emit(EVENTS.QUESTION_STARTED, publicQuestion);
+    io.to(teacherRoom(session.code)).emit(EVENTS.BLINDSPOT_UPDATE, computeBlindspotUpdate(session));
+    return {};
   }));
 
   socket.on(EVENTS.TEACHER_END_SESSION, handle(() => {
