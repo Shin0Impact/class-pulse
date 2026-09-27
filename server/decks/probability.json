@@ -1,0 +1,61 @@
+{
+  "id": "probability",
+  "title": "Probability: equally likely and independent events",
+  "questions": [
+    {
+      "id": "probability-two-coins-1",
+      "topic": "Two independent coin tosses",
+      "prompt": "A fair coin is tossed twice. What is the probability of getting heads both times?",
+      "correctOptionId": "one-fourth",
+      "options": [
+        { "id": "one-half", "text": "1/2", "misconception": { "label": "Consider only one toss", "explanation": "Both tosses must be heads, so multiply 1/2 by 1/2." } },
+        { "id": "one-third", "text": "1/3", "misconception": { "label": "Treat HH, HT and TT as equally likely", "explanation": "HT and TH are separate outcomes; the four ordered results are equally likely." } },
+        { "id": "one-fourth", "text": "1/4" }
+      ]
+    },
+    {
+      "id": "probability-die-2",
+      "topic": "Counting possible outcomes",
+      "prompt": "A fair six-sided die is rolled. What is the probability of rolling a number greater than 4?",
+      "correctOptionId": "one-third",
+      "options": [
+        { "id": "one-third", "text": "1/3 (2 out of 6)" },
+        { "id": "four-sixths", "text": "4/6", "misconception": { "label": "Count 4 as a successful outcome", "explanation": "Only 5 and 6 are greater than 4; 4 itself is not." } },
+        { "id": "two-fifths", "text": "2/5", "misconception": { "label": "Count only five possible die results", "explanation": "A six-sided die has six equally likely results, including 4." } }
+      ]
+    },
+    {
+      "id": "probability-bag-3",
+      "topic": "Drawing without replacement",
+      "prompt": "A bag has 2 red and 3 blue marbles. You draw one red marble and keep it out. What is the probability the next marble is red?",
+      "correctOptionId": "one-fourth",
+      "options": [
+        { "id": "two-fifths", "text": "2/5", "misconception": { "label": "Assume the first marble was replaced", "explanation": "After removing one red marble, only one red remains among four marbles." } },
+        { "id": "one-fourth", "text": "1/4" },
+        { "id": "one-fifth", "text": "1/5", "misconception": { "label": "Keep the original total after removing a marble", "explanation": "The bag now has four marbles, not five." } }
+      ]
+    },
+    {
+      "id": "probability-streak-4",
+      "topic": "Independent events",
+      "prompt": "A fair coin has landed heads four times in a row. What is the probability of heads on the next toss?",
+      "correctOptionId": "one-half",
+      "options": [
+        { "id": "one-fifth", "text": "1/5", "misconception": { "label": "Past heads make heads less likely", "explanation": "The fair coin does not remember previous tosses." } },
+        { "id": "one-half", "text": "1/2" },
+        { "id": "four-fifths", "text": "4/5", "misconception": { "label": "A streak makes heads more likely", "explanation": "Each independent toss of a fair coin still has two equally likely results." } }
+      ]
+    },
+    {
+      "id": "probability-spinner-5",
+      "topic": "Probability of a colored sector",
+      "prompt": "A fair spinner has 4 equal-sized sections: 1 red and 3 blue. What is the probability it lands on red?",
+      "correctOptionId": "one-fourth",
+      "options": [
+        { "id": "one-half", "text": "1/2", "misconception": { "label": "Two colors must be equally likely", "explanation": "The colors cover different numbers of equal-sized sections." } },
+        { "id": "three-fourths", "text": "3/4", "misconception": { "label": "Count the blue sections as red", "explanation": "Only one of the four equal-sized sections is red." } },
+        { "id": "one-fourth", "text": "1/4" }
+      ]
+    }
+  ]
+}
