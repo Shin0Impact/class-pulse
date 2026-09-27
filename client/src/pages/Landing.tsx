@@ -1,24 +1,8 @@
-import { Link } from 'react-router-dom';
+import Navbar from '../components/landing/Navbar/Navbar';
+import Hero from '../components/landing/Hero/Hero';
+import LivePulse from '../components/landing/LivePulse/LivePulse';
+import Features from '../components/landing/Features/Features';
+import { usePreferences } from '../context/PreferencesContext';
+import './Landing.css';
 
-export default function Landing() {
-  return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-4 py-10">
-      <h1 className="text-5xl font-extrabold tracking-tight">Class Pulse</h1>
-      <p className="mt-1 text-2xl text-slate-500" dir="rtl" lang="ar">نبض الصف</p>
-      <p className="mt-4 text-lg text-slate-600">
-        Students tap how well they are following while you teach. You see the class understanding live and where the class got lost, so you can slow down or repeat without anyone raising a hand.
-      </p>
-
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <Link to="/teacher" className="rounded-2xl bg-indigo-600 p-6 text-white shadow-sm transition hover:bg-indigo-700">
-          <div className="text-xl font-bold">I'm a teacher</div>
-          <div className="mt-1 text-indigo-100">Start a class and get a join code</div>
-        </Link>
-        <Link to="/join" className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-300 transition hover:bg-slate-50">
-          <div className="text-xl font-bold">I'm a student</div>
-          <div className="mt-1 text-slate-500">Join with the code on the board</div>
-        </Link>
-      </div>
-    </main>
-  );
-}
+export default function Landing(){const{language}=usePreferences();const ar=language==='ar';return <main className="landing-page"><Navbar/><Hero/><LivePulse/><Features/><section className="landing-final" id="how" aria-labelledby="final-title"><p>{ar?'جاهز تشوف نبض صفك؟':'Ready to see your class pulse?'}</p><h2 id="final-title">{ar?'خلّي الفهم يظهر قبل فوات الأوان.':'Make understanding visible before it is too late.'}</h2><a href="/teacher">{ar?'ابدأ أول حصة':'Start your first class'} <span aria-hidden="true">←</span></a></section><footer className="landing-footer"><strong>{ar?'نبض الصف':'Class Pulse'}</strong><span>{ar?'تعليم يستمع لكل طالب.':'Learning that listens to every student.'}</span></footer></main>}
