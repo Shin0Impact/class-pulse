@@ -17,7 +17,6 @@ export default function App() {
       <Route path="/play/:code" element={<Play />} />
       <Route path="/demo" element={<DemoIndex />} />
       <Route path="/demo/blindspot" element={<BlindspotDemo />} />
-      <Route path="/demo/blindspot" element={<BlindspotDemo />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
