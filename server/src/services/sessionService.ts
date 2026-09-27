@@ -3,7 +3,7 @@ import { REASONS } from '../../../shared/events.ts';
 import { store } from '../db/store.ts';
 import { tally, summarizeCurrent } from './pulseService.ts';
 import type { Mark, CheckIn } from '../../../shared/types.ts';
-import type { Session, Student, StudentAnswer } from './types.ts';
+import type { AnswerRecord, Session, Student, StudentAnswer } from './types.ts';
 
 // Live classroom state lives here, in memory (fast, no round trips). The database only records history.
 
@@ -33,8 +33,10 @@ export function createSession(title: unknown): Session {
     current: newCheckIn(''), // the check-in students are marking right now
     timeline: [],          // [{ t, pct, marked, total, checkInId }] for the "where did we lose them" chart
     focusMode: true,
-    currentQuestion: null,                       // the live Blindspot question, if any (see questionService.ts)
-    answers: new Map<string, StudentAnswer>(),   // studentId -> answer, for the current question round only
+    currentQuestion: null,                             // the live Blindspot question, if any (see questionService.ts)
+    answers: new Map<string, StudentAnswer>(),         // studentId -> answer, for the current question round only
+    answerHistory: new Map<string, AnswerRecord[]>(),  // studentId -> every past round's answer, for calibration
+    pairs: [],                                         // the latest teacher:pairUp result for the current question
   };
   sessions.set(code, session);
   store.saveSession(session);
