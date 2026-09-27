@@ -1,4 +1,4 @@
-import type { CheckIn, Confidence, Status, Summary, TimelineSample } from '../../../shared/types.ts';
+import type { CheckIn, Confidence, Pair, Status, Summary, TimelineSample } from '../../../shared/types.ts';
 
 export type Student = {
   id: string;
@@ -23,6 +23,7 @@ export type QuestionRound = {
   startedAt: number;
 };
 export type StudentAnswer = { optionId: string; confidence: Confidence };
+export type AnswerRecord = { correct: boolean; confidence: Confidence };
 
 export type Session = {
   id: string;
@@ -34,6 +35,8 @@ export type Session = {
   current: CheckIn;
   timeline: TimelineSample[];
   focusMode: boolean;
-  currentQuestion: QuestionRound | null; // the live Blindspot question, if any
-  answers: Map<string, StudentAnswer>;   // studentId -> answer, for the current question round only
+  currentQuestion: QuestionRound | null;       // the live Blindspot question, if any
+  answers: Map<string, StudentAnswer>;         // studentId -> answer, for the current round only
+  answerHistory: Map<string, AnswerRecord[]>;  // studentId -> every past round's answer, for calibration
+  pairs: Pair[];                               // the latest teacher:pairUp result for the current question
 };
