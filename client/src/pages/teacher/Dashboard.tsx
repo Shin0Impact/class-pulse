@@ -4,6 +4,7 @@ import { EVENTS } from '@shared/events.ts';
 import { FEATURES } from '@shared/features.ts';
 import { socket, emitAck } from '../../socket/socket.ts';
 import { useSocketEvents } from '../../socket/useSocketEvents.ts';
+import BlindspotHeadline from '../../components/BlindspotHeadline.tsx';
 import Button from '../../components/ui/Button.tsx';
 import Card from '../../components/ui/Card.tsx';
 import PulseBar from '../../components/PulseBar.tsx';
