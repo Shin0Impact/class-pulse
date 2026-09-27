@@ -9,37 +9,46 @@ import type {
   QuadrantStudent,
 } from '../../../shared/types.ts';
 
-// Pure functions: given answers to one question, sort students into the 2x2 quadrant.
-// STUB for now -- always returns a shape-correct result so the server and client can be built
-// against it today. Malak replaces the body of quadrantFor / computeQuadrants with the real
-// correctness x confidence logic (M1) without anyone else's code changing.
-
+// Sort each answer by correctness and confidence.
 export function quadrantFor(correct: boolean, confidence: Confidence): Quadrant {
-  const confident = confidence === CONFIDENCE.CERTAIN || confidence === CONFIDENCE.FAIRLY_SURE;
-  if (correct) return confident ? QUADRANTS.MASTERED : QUADRANTS.FRAGILE;
+  const confident =
+    confidence === CONFIDENCE.CERTAIN ||
+    confidence === CONFIDENCE.FAIRLY_SURE;
+
+  if (correct) {
+    return confident ? QUADRANTS.MASTERED : QUADRANTS.FRAGILE;
+  }
+
   return confident ? QUADRANTS.BLINDSPOT : QUADRANTS.AWARE;
 }
 
-// namesById: studentId -> display name, so quadrant rows can show a name without a second lookup.
+// namesById maps each student ID to the name shown to the teacher.
 export function computeQuadrants(
   questionId: string,
   answers: Answer[],
   correctOptionId: string,
   namesById: Map<string, string>,
 ): BlindspotUpdate {
-  const groups: QuadrantGroups = { mastered: [], fragile: [], blindspot: [], aware: [] };
+  const groups: QuadrantGroups = {
+    mastered: [],
+    fragile: [],
+    blindspot: [],
+    aware: [],
+  };
 
-  for (const a of answers) {
-    const correct = a.optionId === correctOptionId;
-    const q = quadrantFor(correct, a.confidence);
+  for (const answer of answers) {
+    const correct = answer.optionId === correctOptionId;
+    const quadrant = quadrantFor(correct, answer.confidence);
+
     const student: QuadrantStudent = {
-      id: a.studentId,
-      name: namesById.get(a.studentId) ?? 'Student',
-      optionId: a.optionId,
-      confidence: a.confidence,
+      id: answer.studentId,
+      name: namesById.get(answer.studentId) ?? 'Student',
+      optionId: answer.optionId,
+      confidence: answer.confidence,
       correct,
     };
-    groups[q].push(student);
+
+    groups[quadrant].push(student);
   }
 
   const counts: QuadrantCounts = {
@@ -49,12 +58,49 @@ export function computeQuadrants(
     aware: groups.aware.length,
   };
 
-  // TODO (M1): real illusion-gap math -- (felt-confident %) - (actually-correct %). Stub returns
-  // null until there is real data, so the UI can show "no data yet" instead of a fake number.
-  const illusionGap: number | null = null;
-  const headline = counts.blindspot > 0
-    ? `${counts.blindspot} student${counts.blindspot === 1 ? '' : 's'} confidently got it wrong`
-    : 'No blindspots yet';
+  const total = answers.length;
+  const confidentCount = counts.mastered + counts.blindspot;
+  const correctCount = counts.mastered + counts.fragile;
 
-  return { questionId, groups, counts, illusionGap, headline };
+  // Percentage points: felt confident minus actually correct.
+  // With no answers, there is no meaningful percentage yet.
+  const illusionGap: number | null =
+    total === 0
+      ? null
+      : Math.round(
+          (confidentCount / total - correctCount / total) * 100,
+        );
+
+  // Count wrong options chosen by confident students.
+  const wrongBeliefCounts = new Map<string, number>();
+
+  for (const student of groups.blindspot) {
+    wrongBeliefCounts.set(
+      student.optionId,
+      (wrongBeliefCounts.get(student.optionId) ?? 0) + 1,
+    );
+  }
+
+  let commonWrongOptionId: string | null = null;
+  let commonWrongCount = 0;
+
+  for (const [optionId, count] of wrongBeliefCounts) {
+    if (count > commonWrongCount) {
+      commonWrongOptionId = optionId;
+      commonWrongCount = count;
+    }
+  }
+
+  const headline =
+    commonWrongOptionId === null
+      ? 'No blindspots yet'
+      : `${commonWrongCount} student${commonWrongCount === 1 ? '' : 's'} confidently chose "${commonWrongOptionId}"`;
+
+  return {
+    questionId,
+    groups,
+    counts,
+    illusionGap,
+    headline,
+  };
 }
