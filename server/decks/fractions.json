@@ -1,0 +1,61 @@
+{
+  "id": "fractions",
+  "title": "Fractions: compare, combine and scale",
+  "questions": [
+    {
+      "id": "fractions-compare-1",
+      "topic": "Comparing fractions",
+      "prompt": "Which fraction is larger: 1/3 or 1/4?",
+      "correctOptionId": "one-third",
+      "options": [
+        { "id": "one-third", "text": "1/3" },
+        { "id": "one-fourth", "text": "1/4", "misconception": { "label": "A larger denominator means a larger piece", "explanation": "When the same whole is divided into more equal pieces, each piece is smaller." } },
+        { "id": "equal", "text": "They are equal", "misconception": { "label": "Equal numerators mean equal fractions", "explanation": "One piece out of three is larger than one piece out of four of the same whole." } }
+      ]
+    },
+    {
+      "id": "fractions-add-2",
+      "topic": "Adding fractions",
+      "prompt": "What is 1/2 + 1/4?",
+      "correctOptionId": "three-fourths",
+      "options": [
+        { "id": "two-sixths", "text": "2/6", "misconception": { "label": "Add both numerators and denominators", "explanation": "First express both fractions in equal-sized fourths: 2/4 + 1/4." } },
+        { "id": "three-fourths", "text": "3/4" },
+        { "id": "one-sixth", "text": "1/6", "misconception": { "label": "Combine denominators without adding parts", "explanation": "The sum of two positive fractions must be greater than either fraction." } }
+      ]
+    },
+    {
+      "id": "fractions-of-3",
+      "topic": "Finding a fraction of a quantity",
+      "prompt": "What is 2/3 of 12 apples?",
+      "correctOptionId": "eight",
+      "options": [
+        { "id": "eight", "text": "8 apples" },
+        { "id": "six", "text": "6 apples", "misconception": { "label": "Divide by the numerator", "explanation": "Divide 12 into three equal groups of 4, then take two groups." } },
+        { "id": "eighteen", "text": "18 apples", "misconception": { "label": "Invert the fraction", "explanation": "Two thirds of a positive quantity is smaller than the whole, not larger." } }
+      ]
+    },
+    {
+      "id": "fractions-multiply-4",
+      "topic": "Multiplying fractions",
+      "prompt": "What is 2/3 × 3/4?",
+      "correctOptionId": "one-half",
+      "options": [
+        { "id": "five-sevenths", "text": "5/7", "misconception": { "label": "Add across instead of multiply", "explanation": "Multiplication uses 2 × 3 over 3 × 4, which simplifies to 1/2." } },
+        { "id": "one-half", "text": "1/2" },
+        { "id": "six-sevenths", "text": "6/7", "misconception": { "label": "Multiply numerators but add denominators", "explanation": "Multiply both numerators and denominators: 6/12 = 1/2." } }
+      ]
+    },
+    {
+      "id": "fractions-divide-5",
+      "topic": "Dividing fractions",
+      "prompt": "How many halves fit into 3/4? In other words, what is 3/4 ÷ 1/2?",
+      "correctOptionId": "three-halves",
+      "options": [
+        { "id": "three-eighths", "text": "3/8", "misconception": { "label": "Multiply instead of divide", "explanation": "Dividing by 1/2 counts halves and doubles 3/4." } },
+        { "id": "two-thirds", "text": "2/3", "misconception": { "label": "Invert the number being divided", "explanation": "Invert the divisor 1/2, then calculate 3/4 × 2." } },
+        { "id": "three-halves", "text": "3/2 (one and a half)" }
+      ]
+    }
+  ]
+}
