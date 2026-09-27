@@ -7,6 +7,7 @@ export const mockCalibrationCardOverconfident: CalibrationCard = {
   avgConfidence: 83,
   calibration: 'overconfident',
   illusionGap: 50,
+  score: 33,
 };
 
 export const mockCalibrationCardWellCalibrated: CalibrationCard = {
@@ -15,4 +16,5 @@ export const mockCalibrationCardWellCalibrated: CalibrationCard = {
   avgConfidence: 88,
   calibration: 'well-calibrated',
   illusionGap: -2,
+  score: 95,
 };
