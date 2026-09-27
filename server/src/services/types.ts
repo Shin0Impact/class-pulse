@@ -27,6 +27,11 @@ export type QuestionOption = { id: string; text: string };
 
 export type QuestionRound = {
   id: string;
+  // Server-generated id for this launched question's row in blindspot_questions (db/store.ts).
+  // A teacher:recheck bumps `round` below but keeps this same dbId -- it's the same question,
+  // round 2 -- so answers/pairs/ratings from both rounds point back to one question row.
+  dbId: string;
+  round: number;
   topic: string;
   prompt: string;
   correctOptionId: string;
