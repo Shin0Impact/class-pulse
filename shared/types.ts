@@ -33,3 +33,47 @@ export type StudentState = {
   focusMode: boolean;
 };
 export type FocusAlert = { studentId: string; name: string; count: number };
+
+// ---- Blindspot ----
+
+export type Confidence = 'guess' | 'fairly-sure' | 'certain';
+export type Quadrant = 'mastered' | 'fragile' | 'blindspot' | 'aware';
+
+// A question's option as sent to students: never the correct answer, never a misconception hint.
+export type PublicQuestionOption = { id: string; text: string };
+
+// What TEACHER_LAUNCH_QUESTION/TEACHER_RECHECK broadcast to students as QUESTION_STARTED.
+export type PublicQuestion = {
+  questionId: string;
+  topic: string;
+  prompt: string;
+  options: PublicQuestionOption[];
+  isRecheck?: boolean;
+};
+
+export type Answer = { studentId: string; questionId: string; optionId: string; confidence: Confidence };
+
+// One student's row inside a quadrant group (see BlindspotUpdate).
+export type QuadrantStudent = { id: string; name: string; optionId: string; confidence: Confidence; correct: boolean };
+export type QuadrantGroups = { mastered: QuadrantStudent[]; fragile: QuadrantStudent[]; blindspot: QuadrantStudent[]; aware: QuadrantStudent[] };
+export type QuadrantCounts = { mastered: number; fragile: number; blindspot: number; aware: number };
+export type BlindspotUpdate = {
+  questionId: string;
+  groups: QuadrantGroups;
+  counts: QuadrantCounts;
+  illusionGap: number | null; // felt-confident % minus actually-correct %
+  headline: string;
+};
+
+export type PairPerson = { id: string; name: string };
+export type Pair = { pairId: string; explainer: PairPerson; listener: PairPerson };
+export type PairAssigned = { pairId: string; partner: PairPerson; role: 'explainer' | 'listener'; questionId: string };
+
+export type Calibration = 'well-calibrated' | 'overconfident' | 'underconfident' | 'no-data';
+export type CalibrationCard = {
+  studentId: string;
+  accuracy: number | null;
+  avgConfidence: number | null;
+  calibration: Calibration;
+  illusionGap: number | null;
+};
