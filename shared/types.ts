@@ -76,4 +76,5 @@ export type CalibrationCard = {
   avgConfidence: number | null;
   calibration: Calibration;
   illusionGap: number | null;
+  score: number | null;
 };
