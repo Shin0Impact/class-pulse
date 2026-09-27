@@ -7,6 +7,29 @@
       "topic": "Photosynthesis",
       "prompt": "As a tree grows, where does most of its new dry mass come from?",
       "correctOptionId": "air",
+      "rubric": {
+        "keyIdeas": [
+          "carbon dioxide",
+          "from the air",
+          "photosynthesis"
+        ],
+        "misconceptions": [
+          {
+            "label": "Mass comes from soil",
+            "phrases": [
+              "mass comes from soil",
+              "mostly from soil"
+            ]
+          },
+          {
+            "label": "Mass comes from water",
+            "phrases": [
+              "mass comes from water",
+              "mostly from water"
+            ]
+          }
+        ]
+      },
       "options": [
         {
           "id": "soil",
@@ -35,6 +58,29 @@
       "topic": "Seasons",
       "prompt": "What is the main reason the Northern Hemisphere has summer?",
       "correctOptionId": "tilt",
+      "rubric": {
+        "keyIdeas": [
+          "tilted toward the sun",
+          "tilt of earth",
+          "more direct sunlight"
+        ],
+        "misconceptions": [
+          {
+            "label": "Summer means closer to the Sun",
+            "phrases": [
+              "closer to the sun causes summer",
+              "summer because earth is closer"
+            ]
+          },
+          {
+            "label": "Rotation speed causes seasons",
+            "phrases": [
+              "rotates faster in summer",
+              "faster rotation causes summer"
+            ]
+          }
+        ]
+      },
       "options": [
         {
           "id": "distance",
