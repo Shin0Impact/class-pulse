@@ -1,12 +1,14 @@
 import { REASONS } from '@shared/events.ts';
 import { STATUS_UI } from './status.ts';
+import { usePreferences } from '../context/PreferencesContext.tsx';
 import type { StudentView } from '@shared/types.ts';
 
 const reasonLabel = (id: string | null) => REASONS.find((r) => r.id === id)?.label;
 
 // hideNames: for a projector, show only colored dots so nobody is singled out in front of the class.
 export default function StudentGrid({ students = [], hideNames = false }: { students?: StudentView[]; hideNames?: boolean }) {
-  if (!students.length) return <p className="text-sm text-slate-500">Nobody has joined yet. Share the code.</p>;
+  const { t } = usePreferences();
+  if (!students.length) return <p className="text-sm text-slate-500">{t('nobody')}</p>;
 
   if (hideNames) {
     return (

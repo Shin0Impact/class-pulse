@@ -1,3 +1,4 @@
+import { usePreferences } from '../context/PreferencesContext.tsx';
 import type { Comparison } from '@shared/types.ts';
 
 // The "60% -> 85%" moment: same topic, before and after re-teaching. Plain divs, no chart library needed.
@@ -19,14 +20,15 @@ function Bar({ label, pct, sub, color }: { label: string; pct: number; sub: stri
 }
 
 export default function BeforeAfterChart({ comparison }: { comparison: Comparison | null }) {
+  const { t } = usePreferences();
   if (!comparison) return null;
   const up = comparison.delta >= 0;
   return (
     <div className="space-y-3">
-      <Bar label="Before re-teaching" pct={comparison.before} sub={`${comparison.beforeMarked} marked`} color="bg-slate-500" />
+      <Bar label={t('before')} pct={comparison.before} sub={`${comparison.beforeMarked} marked`} color="bg-slate-500" />
       <Bar label="Now" pct={comparison.after} sub={`${comparison.afterMarked} marked`} color="bg-emerald-500" />
       <p className={`text-lg font-bold ${up ? 'text-emerald-700' : 'text-rose-700'}`} dir="auto">
-        {up ? '▲ +' : '▼ '}{comparison.delta} points on "{comparison.topic}"
+        {up ? '▲ +' : '▼ '}{comparison.delta} {t('points')} "{comparison.topic}"
       </p>
     </div>
   );

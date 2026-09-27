@@ -8,6 +8,7 @@ import { useFocusMode } from '../../hooks/useFocusMode.ts';
 import { savedKey } from './Join.tsx';
 import ColorPicker from './ColorPicker.tsx';
 import Button from '../../components/ui/Button.tsx';
+import { usePreferences } from '../../context/PreferencesContext.tsx';
 import type { Mark, StudentState } from '@shared/types.ts';
 
 type Saved = { name?: string; studentId?: string };
@@ -22,6 +23,7 @@ function writeSaved(code: string, data: Saved): void {
 // phase: joining | live | ended | error
 export default function Play() {
   const code = useParams().code ?? '';
+  const { t } = usePreferences();
   const navigate = useNavigate();
   const [phase, setPhase] = useState<'joining' | 'live' | 'ended' | 'error'>('joining');
   const [name, setName] = useState('');
@@ -113,39 +115,39 @@ export default function Play() {
         <span dir="auto">{name} · #{code}</span>
       </header>
 
-      {phase === 'joining' && <p className="py-16 text-center text-slate-500">Joining…</p>}
+      {phase === 'joining' && <p className="py-16 text-center text-slate-500">{t('joining')}</p>}
 
       {phase === 'live' && (
         <>
           {title && <p className="text-sm text-slate-500" dir="auto">{title}</p>}
           <h1 className="mb-1 text-2xl font-bold leading-snug" dir="auto">
-            {topic ? <>Now: {topic}</> : 'How well are you following?'}
+            {topic ? <>{t('now')}: {topic}</> : t('follow')}
           </h1>
-          <p className="mb-5 text-slate-600">Tap any time while your teacher talks. You can change it whenever you like.</p>
+          <p className="mb-5 text-slate-600">{t('studentHint')}</p>
 
           <ColorPicker status={status} reason={reason} onStatus={chooseStatus} onReason={chooseReason} />
 
           {error && <p className="mt-4 rounded-lg bg-rose-50 p-3 text-rose-800" role="alert">{error}</p>}
 
           <p className="mt-6 text-center text-xs text-slate-400">
-            Your teacher can see your color.
-            {FEATURES.focusMode && focusOn && ' 🔒 Focus mode is on: your teacher is told if you leave this page.'}
+            {t('teacherSees')}
+            {FEATURES.focusMode && focusOn && <> 🔒 {t('focusStudent')}</>}
           </p>
         </>
       )}
 
       {phase === 'ended' && (
         <div className="py-16 text-center">
-          <h2 className="text-2xl font-bold">Class ended</h2>
-          <p className="mt-2 text-slate-600">Thanks for joining!</p>
-          <Button className="mt-6" onClick={() => navigate('/')}>Home</Button>
+          <h2 className="text-2xl font-bold">{t('ended')}</h2>
+          <p className="mt-2 text-slate-600">{t('thanks')}</p>
+          <Button className="mt-6" onClick={() => navigate('/')}>{t('home')}</Button>
         </div>
       )}
 
       {phase === 'error' && (
         <div className="py-16 text-center">
           <p className="rounded-lg bg-rose-50 p-3 text-rose-800" role="alert">{error}</p>
-          <Button className="mt-6" onClick={() => navigate(`/join?code=${code}`)}>Try again</Button>
+          <Button className="mt-6" onClick={() => navigate(`/join?code=${code}`)}>{t('retry')}</Button>
         </div>
       )}
     </main>

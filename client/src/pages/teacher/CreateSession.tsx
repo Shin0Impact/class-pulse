@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { EVENTS } from '@shared/events.ts';
 import { emitAck } from '../../socket/socket.ts';
 import Button from '../../components/ui/Button.tsx';
+import { usePreferences } from '../../context/PreferencesContext.tsx';
 import type { FormEvent } from 'react';
 
 export default function CreateSession() {
   const navigate = useNavigate();
+  const { t } = usePreferences();
   const [title, setTitle] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -26,18 +28,18 @@ export default function CreateSession() {
 
   return (
     <main className="mx-auto max-w-md px-4 py-10">
-      <Link to="/" className="text-sm text-slate-500 hover:underline">← Back</Link>
-      <h1 className="mt-2 text-3xl font-bold">Start a class</h1>
-      <p className="mt-1 text-slate-600">You get a code for students to join. Then teach as usual.</p>
+      <Link to="/" className="text-sm text-slate-500 hover:underline">{t('back')}</Link>
+      <h1 className="mt-2 text-3xl font-bold">{t('startClass')}</h1>
+      <p className="mt-1 text-slate-600">{t('startDesc')}</p>
 
       <form onSubmit={start} className="mt-6 space-y-4">
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-600">Class name (optional)</span>
+          <span className="mb-1 block text-sm font-medium text-slate-600">{t('className')}</span>
           <input dir="auto" className="w-full rounded-xl border border-slate-300 px-4 py-3 text-lg" maxLength={60}
-                 placeholder="e.g. Math, period 3" value={title} onChange={(e) => setTitle(e.target.value)} />
+                 placeholder={t('classPlaceholder')} value={title} onChange={(e) => setTitle(e.target.value)} />
         </label>
         {error && <p className="rounded-lg bg-rose-50 p-3 text-rose-800" role="alert">{error}</p>}
-        <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Starting…' : 'Start class'}</Button>
+        <Button type="submit" className="w-full" disabled={busy}>{busy ? t('starting') : t('startClass')}</Button>
       </form>
     </main>
   );

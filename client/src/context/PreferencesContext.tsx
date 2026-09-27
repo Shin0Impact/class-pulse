@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { tr, type Language, type TranslationKey } from '../i18n/translations.ts';
 
-type Language = 'ar' | 'en';
 type Theme = 'light' | 'dark';
 
 type PreferencesValue = {
@@ -9,6 +9,7 @@ type PreferencesValue = {
   setLanguage: (language: Language) => void;
   toggleLanguage: () => void;
   toggleTheme: () => void;
+  t: (key: TranslationKey) => string;
 };
 
 const PreferencesContext = createContext<PreferencesValue | null>(null);
@@ -34,6 +35,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     setLanguage,
     toggleLanguage: () => setLanguage((current) => (current === 'ar' ? 'en' : 'ar')),
     toggleTheme: () => setTheme((current) => (current === 'light' ? 'dark' : 'light')),
+    t: (key: TranslationKey) => tr(language, key),
   }), [language, theme]);
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;

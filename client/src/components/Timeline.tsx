@@ -1,3 +1,4 @@
+import { usePreferences } from '../context/PreferencesContext.tsx';
 import type { TimelineSample } from '@shared/types.ts';
 const W = 640, H = 190, PL = 42, PR = 10, PT = 10, PB = 28;
 const MIN_LABEL_GAP = 96; // px between topic labels, so they never pile on top of each other
@@ -8,9 +9,10 @@ const short = (s: string, n = 18) => (s.length > n ? `${s.slice(0, n - 1)}…` :
 // samples: [{ t, pct, marked, checkInId }]   topics: { [checkInId]: topic }
 type MarkedSample = TimelineSample & { pct: number };
 export default function Timeline({ samples, topics }: { samples: TimelineSample[]; topics: Record<string, string> }) {
+  const { t } = usePreferences();
   const pts = samples.filter((s): s is MarkedSample => s.pct !== null);
   if (pts.length < 2) {
-    return <p className="text-sm text-slate-500">The chart draws itself as students mark how well they follow.</p>;
+    return <p className="text-sm text-slate-500">{t('chartWait')}</p>;
   }
 
   const t0 = samples[0].t;
@@ -57,7 +59,7 @@ export default function Timeline({ samples, topics }: { samples: TimelineSample[
       {dividers.map((s, i) => (
         <g key={`${s.checkInId}-${i}`}>
           <line x1={x(s.t)} x2={x(s.t)} y1={PT} y2={H - PB} className="stroke-slate-400" strokeDasharray="4 3" />
-          {s.showLabel && <text x={x(s.t) + 4} y={H - 10} className="fill-slate-600 text-[11px] font-semibold">{short(topics[s.checkInId] || 'General')}</text>}
+          {s.showLabel && <text x={x(s.t) + 4} y={H - 10} className="fill-slate-600 text-[11px] font-semibold">{short(topics[s.checkInId] || t('general'))}</text>}
         </g>
       ))}
 

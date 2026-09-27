@@ -14,10 +14,12 @@ import ReasonBars from '../../components/ReasonBars.tsx';
 import TopicHistory from '../../components/TopicHistory.tsx';
 import BeforeAfterChart from '../../components/BeforeAfterChart.tsx';
 import type { FormEvent } from 'react';
+import { usePreferences } from '../../context/PreferencesContext.tsx';
 import type { FocusAlert, Pulse, Summary, TeacherState, TimelineSample } from '@shared/types.ts';
 
 export default function Dashboard() {
   const { code } = useParams();
+  const { t } = usePreferences();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState('');
@@ -90,7 +92,7 @@ export default function Dashboard() {
   }
 
   async function endClass() {
-    if (!window.confirm('End this class for everyone?')) return;
+    if (!window.confirm(t('endConfirm')) return;
     await run(EVENTS.TEACHER_END_SESSION, {});
   }
 
@@ -104,65 +106,65 @@ export default function Dashboard() {
         <div>
           <div className="text-sm uppercase tracking-wide text-indigo-200" dir="auto">{title || 'Class Pulse'}</div>
           <div className="mt-1 flex items-baseline gap-3">
-            <span className="text-sm text-indigo-200">Join code</span>
+            <span className="text-sm text-indigo-200">{t('joinCode')}</span>
             <span className="font-mono text-5xl font-extrabold tracking-widest">{code}</span>
           </div>
-          <div className="mt-1 text-sm text-indigo-100">Students open <span className="font-semibold">{joinUrl}</span></div>
+          <div className="mt-1 text-sm text-indigo-100">{t('studentsOpen')} <span className="font-semibold">{joinUrl}</span></div>
         </div>
-        <Button variant="secondary" onClick={endClass}>End class</Button>
+        <Button variant="secondary" onClick={endClass}>{t('endClass')}</Button>
       </header>
 
       {error && <p className="mb-4 rounded-lg bg-rose-50 p-3 text-rose-800" role="alert">{error}</p>}
 
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
-          <Card title="Now teaching">
+          <Card title={t('teaching')}>
             <form onSubmit={checkIn} className="flex flex-wrap items-end gap-3">
               <label className="min-w-0 flex-1">
-                <span className="mb-1 block text-sm text-slate-500">Topic (so you can see where the class got lost)</span>
+                <span className="mb-1 block text-sm text-slate-500">{t('topicLabel')}</span>
                 <input dir="auto" className="w-full rounded-xl border border-slate-300 px-3 py-3 text-base" maxLength={80}
-                       placeholder="e.g. Common denominators" value={topic} onChange={(e) => setTopic(e.target.value)} />
+                       placeholder={t('topicPlaceholder')} value={topic} onChange={(e) => setTopic(e.target.value)} />
               </label>
-              <Button type="submit" disabled={busy}>Check in now</Button>
+              <Button type="submit" disabled={busy}>{t('check')}</Button>
             </form>
             <p className="mt-2 text-sm text-slate-500">
-              Students can change their color any time while you talk. <strong>Check in now</strong> clears everyone's color so they re-mark, for example after you re-explain. Use the same topic again to see the before/after.
+              {t('teacherHint')}
             </p>
             {FEATURES.focusMode && (
               <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-slate-600">
                 <input type="checkbox" checked={focusMode} onChange={toggleFocus} />
-                🔒 Focus mode: flag students who leave the page
+                🔒 {t('focusTeacher')}
               </label>
             )}
           </Card>
 
-          <Card title={pulse?.checkIn.topic ? `Class understanding: ${pulse.checkIn.topic}` : 'Class understanding'}>
+          <Card title={pulse?.checkIn.topic ? `${t('understanding')}: ${pulse.checkIn.topic}` : t('understanding')}>
             {pulse && <PulseBar pulse={pulse} />}
           </Card>
 
           {pulse?.comparison && (
-            <Card title="Did the re-teaching work?"><BeforeAfterChart comparison={pulse.comparison} /></Card>
+            <Card title={t('reteach')}><BeforeAfterChart comparison={pulse.comparison} /></Card>
           )}
 
-          <Card title="Where did we lose them?"><Timeline samples={timeline} topics={topics} /></Card>
+          <Card title={t('whereLost')}><Timeline samples={timeline} topics={topics} /></Card>
 
-          <Card title="What would help"><ReasonBars reasons={pulse?.reasons} /></Card>
+          <Card title={t('whatHelp')}><ReasonBars reasons={pulse?.reasons} /></Card>
         </div>
 
         <div className="space-y-5">
-          <Card title={`Students (${pulse?.total ?? 0})`}
-                right={<label className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-500"><input type="checkbox" checked={hideNames} onChange={(e) => setHideNames(e.target.checked)} />Hide names</label>}>
+          <Card title={`${t('students')} (${pulse?.total ?? 0})`}
+                right={<label className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-500"><input type="checkbox" checked={hideNames} onChange={(e) => setHideNames(e.target.checked)} />{t('hide')}</label>}>
             <StudentGrid students={pulse?.perStudent} hideNames={hideNames} />
           </Card>
 
-          <Card title="Topics so far"><TopicHistory history={history} pulse={pulse} /></Card>
+          <Card title={t('topics')}><TopicHistory history={history} pulse={pulse} /></Card>
 
           {FEATURES.focusMode && alerts.length > 0 && (
-            <Card title="🔒 Focus alerts">
+            <Card title={`🔒 ${t('alerts')}`}>
               <ul className="space-y-1 text-sm">
                 {alerts.map((a, i) => (
                   <li key={`${a.at}-${i}`} dir="auto" className="text-slate-700">
-                    <span className="font-semibold">{hideNames ? 'A student' : a.name}</span> left the page
+                    <span className="font-semibold">{hideNames ? t('aStudent') : a.name}</span> {t('left')}
                   </li>
                 ))}
               </ul>
