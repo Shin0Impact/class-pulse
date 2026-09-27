@@ -1,0 +1,27 @@
+# Render Blueprint for the Class Pulse server. Optional shortcut: on Render, "New +" > "Blueprint",
+# point it at this repo, and it pre-fills the service below instead of you clicking through the
+# dashboard by hand. You still have to type in the secret env vars marked "sync: false" yourself.
+services:
+  - type: web
+    name: class-pulse-server
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm install
+    startCommand: npm run start -w server
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Node 24+ is required -- the server runs .ts files directly (no build step) using Node's
+      # native TypeScript support. Render's default runtime is older than that without this.
+      - key: NODE_VERSION
+        value: 24.12.0
+      # Your deployed Vercel URL, e.g. https://class-pulse.vercel.app -- set after the client is deployed.
+      - key: CLIENT_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
