@@ -249,7 +249,68 @@ const D = {
   general: ["عام", "General"],
 
   before: ["قبل إعادة الشرح", "Before re-teaching"],
+  // ---- S4: Answer reveal & confidence calibration ----
 
+  answerReveal: ["نتيجتك", "YOUR RESULT"],
+
+  answerCorrect: ["إجابة صحيحة", "You got it right"],
+
+  answerWrong: ["ليست الإجابة الصحيحة", "Not quite"],
+
+  yourAnswer: ["إجابتك", "Your answer"],
+
+  correctAnswer: ["الإجابة الصحيحة", "Correct answer"],
+
+  surpriseMoment: ["لحظة تستحق الانتباه", "A SURPRISE MOMENT"],
+
+  surpriseTitle: [
+    "كنت متأكدًا… لكن الإجابة مختلفة",
+    "You were certain… but the answer was different",
+  ],
+
+  surpriseLead: [
+    "هذه بالضبط الفجوة التي نريد اكتشافها: شعور قوي بالثقة مع فكرة تحتاج مراجعة.",
+    "This is exactly the gap worth catching: high confidence in an idea that needs another look.",
+  ],
+
+  calibrationLabel: ["معايرة الثقة", "CONFIDENCE CHECK"],
+
+  calibrationCorrectCertain: [
+    "ثقتك كانت في مكانها.",
+    "Your confidence matched your understanding.",
+  ],
+
+  calibrationCorrectFairly: [
+    "كنت تعرف أكثر مما شعرت.",
+    "You knew more than you thought.",
+  ],
+
+  calibrationCorrectGuess: [
+    "أجبت بشكل صحيح، والآن تأكد أنك تعرف لماذا.",
+    "You got it right. Now make sure you know why.",
+  ],
+
+  calibrationWrongCertain: [
+    "ثقتك كانت أعلى من فهمك هذه المرة.",
+    "Your confidence was ahead of your understanding this time.",
+  ],
+
+  calibrationWrongFairly: [
+    "كان عندك جزء من الفكرة، لكن ما زالت هناك فجوة تحتاج مراجعة.",
+    "You had part of the idea, but there is still a gap to close.",
+  ],
+
+  calibrationWrongGuess: [
+    "كنت تعرف أنك غير متأكد، والآن تعرف أين تحتاج للمراجعة.",
+    "You knew you were unsure. Now you know where to focus.",
+  ],
+
+  surpriseWhyItMatters: [
+    "اكتشاف الخطأ وأنت واثق منه مهم، لأنه يكشف فكرة كنت تظن أنك فهمتها.",
+    "Catching a confident mistake matters because it reveals something you thought you already understood.",
+  ],
+
+  continueLearning: ["متابعة", "Continue"],
   points: ["نقطة في", "points on"],
 } as const;
 
