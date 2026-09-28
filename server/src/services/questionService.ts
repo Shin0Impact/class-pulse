@@ -1,9 +1,10 @@
+import { randomUUID } from 'node:crypto';
 import { UserError } from './sessionService.ts';
 import { computeQuadrants } from './quadrant.ts';
 import { pairUp } from './pairing.ts';
 import { calibrationCard } from './calibration.ts';
 import { scoreExplanation } from './explanationRubric.ts';
-import { tally } from './pulseService.ts';
+import { store } from '../db/store.ts';
 import type { ExplanationRubric } from './explanationRubric.ts';
 import type {
   Answer,
@@ -119,6 +120,8 @@ export function launchQuestion(
 
   const round: QuestionRound = {
     id,
+    dbId: randomUUID(),
+    round: 1,
     topic: typeof topic === 'string' ? topic.trim() : '',
     prompt: prompt.trim(),
     correctOptionId,
@@ -130,6 +133,7 @@ export function launchQuestion(
   session.currentQuestion = round;
   session.answers = new Map();
   session.pairs = [];
+  store.saveQuestion(session, round);
 
   return {
     questionId: round.id,
@@ -181,7 +185,7 @@ export function recordAnswer(
       ? payload.explanation.trim()
       : undefined;
 
-  session.answers.set(student.id, {
+  const answer = {
     optionId: payload.optionId,
     confidence: payload.confidence as Confidence,
     explanation,
@@ -189,7 +193,10 @@ export function recordAnswer(
       explanation && round.rubric
         ? scoreExplanation(explanation, round.rubric)
         : undefined,
-  });
+  };
+
+  session.answers.set(student.id, answer);
+  store.saveAnswer(round, student.id, answer, payload.optionId === round.correctOptionId);
 }
 
 // The teacher gets quadrant data and, where available, each student's explanation and score.
@@ -230,25 +237,49 @@ export function computeBlindspotUpdate(session: Session): BlindspotUpdate {
     }
   }
 
-  const pulsePct = tally([...session.students.values()]).pct;
-  const correctCount = update.counts.mastered + update.counts.fragile;
-  const realPct =
-    answers.length > 0
-      ? Math.round((correctCount / answers.length) * 100)
-      : null;
-  const illusionGap =
-    pulsePct !== null && realPct !== null ? pulsePct - realPct : null;
-
-  return { ...update, illusionGap };
+  // illusionGap/headline come straight from computeQuadrants: confident% minus correct% on THIS
+  // question, not the general classroom pulse -- a tighter signal than mixing in unrelated taps.
+  return update;
 }
 
 export function pairStudents(
   session: Session,
 ): { pairs: Pair[]; questionId: string } {
+  const round = session.currentQuestion;
+  if (!round) throw new UserError('No question is live');
+
   const update = computeBlindspotUpdate(session);
   const pairs = pairUp(update.groups.blindspot, update.groups.mastered);
   session.pairs = pairs;
+  if (pairs.length > 0) store.savePairs(round, pairs);
   return { pairs, questionId: update.questionId };
+}
+
+// The listener's rating of how clearly their partner explained (student:rateClarity). Only the
+// listener half of the pair may rate it -- the explainer being scored can't grade themselves.
+const CLARITY_RATINGS = [1, 2, 3, 4, 5];
+
+export function recordClarityRating(
+  session: Session,
+  student: { id: string },
+  payload: { pairId?: unknown; rating?: unknown },
+): void {
+  const round = session.currentQuestion;
+  if (!round) throw new UserError('No question is live');
+
+  const pair = session.pairs.find((p) => p.pairId === payload.pairId);
+  if (!pair) throw new UserError('That pair is no longer active');
+  if (pair.listener.id !== student.id) {
+    throw new UserError('Only the listener rates this pair');
+  }
+  if (
+    typeof payload.rating !== 'number' ||
+    !CLARITY_RATINGS.includes(payload.rating)
+  ) {
+    throw new UserError('Rating must be 1 to 5');
+  }
+
+  store.saveClarityRating(round, pair.pairId, student.id, payload.rating);
 }
 
 export function calibrationCardsForCurrentRound(
@@ -269,6 +300,7 @@ export function recheckQuestion(session: Session): PublicQuestion {
   const round = session.currentQuestion;
   if (!round) throw new UserError('No question is live');
 
+  round.round += 1; // same blindspot_questions row (dbId), a new round of child rows under it
   session.answers = new Map();
   session.pairs = [];
 

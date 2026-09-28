@@ -10,6 +10,7 @@ import {
 import {
   recordAnswer,
   computeBlindspotUpdate,
+  recordClarityRating,
 } from '../services/questionService.ts';
 import { studentState } from '../services/views.ts';
 import {
@@ -99,6 +100,18 @@ export function registerStudentHandlers(io: Server, socket: Socket): void {
         return {};
       },
     ),
+  );
+
+  // After being paired, the listener rates how clearly their partner explained their reasoning.
+  // Saved straight to Supabase (blindspot_clarity_ratings); there is no live gameplay use of it,
+  // so there is nothing to broadcast back.
+  socket.on(
+    EVENTS.STUDENT_RATE_CLARITY,
+    handle((payload: { pairId?: unknown; rating?: unknown }) => {
+      const { session, student } = requireStudent();
+      recordClarityRating(session, student, payload);
+      return {};
+    }),
   );
 
   socket.on(
