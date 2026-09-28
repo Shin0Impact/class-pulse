@@ -1,0 +1,46 @@
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-width: 320px;
+  overflow-x: hidden;
+}
+
+img,
+video,
+svg {
+  max-width: 100%;
+}
+
+.app-container {
+  width: min(
+    calc(100% - (var(--page-padding) * 2)),
+    var(--page-max-width)
+  );
+
+  margin-inline: auto;
+}
+
+/* Tablet */
+
+@media (max-width: 900px) {
+  :root {
+    --page-padding: 20px;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  :root {
+    --page-padding: 16px;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

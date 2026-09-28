@@ -1,0 +1,27 @@
+:root {
+  /* Layout */
+  --page-max-width: 1440px;
+  --page-padding: clamp(16px, 4vw, 64px);
+
+  /* Touch */
+  --touch-target: 48px;
+  --action-height: 56px;
+
+  /* Spacing */
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+
+  /* Typography */
+  --text-small: clamp(0.75rem, 1vw, 0.875rem);
+  --text-body: clamp(0.95rem, 1.2vw, 1rem);
+  --text-title: clamp(2rem, 5vw, 4rem);
+}

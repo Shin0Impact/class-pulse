@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { socket } from './socket.ts';
 import { EVENTS } from '@shared/events.ts';
-import type { CheckIn, FocusAlert, Pulse, Summary } from '@shared/types.ts';
+import type { CheckIn, FocusAlert, Pulse, Summary, PublicQuestion, PairAssigned } from '@shared/types.ts';
 
 type Handlers = {
   [EVENTS.PULSE_UPDATE]?: (data: Pulse) => void;
@@ -9,6 +9,8 @@ type Handlers = {
   [EVENTS.FOCUS_ALERT]?: (data: FocusAlert) => void;
   [EVENTS.FOCUS_MODE]?: (data: { enabled: boolean }) => void;
   [EVENTS.SESSION_ENDED]?: () => void;
+  [EVENTS.QUESTION_STARTED]?: (data: PublicQuestion) => void;
+  [EVENTS.PAIR_ASSIGNED]?: (data: PairAssigned) => void;
 };
 
 // useSocketEvents({ [EVENTS.PULSE_UPDATE]: (data) => ..., ... })

@@ -1,6 +1,93 @@
 export type Language = 'ar' | 'en';
 
 const D = {
+    waitingQuestion: [
+  'بانتظار سؤال المعلم',
+  'Waiting for the next question'
+],
+
+waitingQuestionHint: [
+  'خليك جاهز، سيظهر السؤال هنا فور أن يبدأه المعلم.',
+  'Stay ready. The question will appear here when your teacher launches it.'
+],
+
+answerSent: [
+  'تم إرسال إجابتك',
+  'Answer sent'
+],
+
+answerSentHint: [
+  'تم تسجيل إجابتك ودرجة ثقتك.',
+  'Your answer and confidence have been recorded.'
+],
+    question: [
+  'السؤال',
+  'QUESTION'
+],
+
+oneMoreThing: [
+  'خطوة أخيرة',
+  'ONE MORE THING'
+],
+
+howSure: [
+  'ما مدى ثقتك بإجابتك؟',
+  'How sure are you?'
+],
+
+confidenceHint: [
+  'لا تفكر فيها كثيرًا. اختر ما يعبّر عن شعورك.',
+  "Don't overthink it. Choose what feels right."
+],
+
+guessing: [
+  'أخمّن',
+  'Guessing'
+],
+
+guessingHint: [
+  'لست متأكدًا من الإجابة',
+  "I'm mostly guessing"
+],
+
+fairlySure: [
+  'متأكد إلى حد ما',
+  'Fairly sure'
+],
+
+fairlySureHint: [
+  'أعتقد أن إجابتي صحيحة',
+  "I think I've got it"
+],
+
+certain: [
+  'متأكد',
+  'Certain'
+],
+
+certainHint: [
+  'واثق من إجابتي',
+  "I'm confident in my answer"
+],
+  peerMoment: ['لحظة تعلّم مع زميل', 'PEER LEARNING MOMENT'],
+  yourPartner: ['شريكك', 'Your partner'],
+  yourRole: ['دورك الآن', 'Your role'],
+  explainRole: ['اشرح', 'Explain'],
+  listenRole: ['استمع', 'Listen'],
+  explainPromptLabel: ['مهمتك', 'Your prompt'],
+  listenPromptLabel: ['مهمتك', 'Your prompt'],
+  listenInstruction: ['استمع لشرح شريكك. ركّز على الفكرة والطريقة، مش بس الجواب النهائي.', 'Listen to your partner explain their reasoning. Focus on the idea and the path, not only the final answer.'],
+  explainTipTitle: ['فكرة تساعدك', 'A useful cue'],
+  explainTip: [' اشرح كيف فكرت خطوة بخطوة، واذكر أين كنت واثقًا ولماذا.', ' Explain your thinking step by step, including where you felt confident and why.'],
+  didItMakeSense: ['هل كان الشرح واضحًا؟', 'Did it make sense?'],
+  clarityHint: ['إجابتك تساعدنا نعرف إذا الشرح بين الطلاب فعلاً سدّ فجوة الفهم.', 'Your feedback helps reveal whether peer explanation actually closed the learning gap.'],
+  clarityYes: ['نعم', 'Yes'],
+  clarityPartly: ['جزئيًا', 'Partly'],
+  clarityNo: ['لا', 'No'],
+  clarityRecorded: ['تم تسجيل رأيك', 'Feedback recorded'],
+  clarityRecordedHint: ['شكرًا. هذه الإشارة تساعد المعلم يعرف إذا الفكرة وصلت.', 'Thanks. This signal helps the teacher see whether the idea landed.'],
+  peerFallbackPrompt: ['اشرح لشريكك كيف وصلت إلى إجابتك، خطوة بخطوة.', 'Explain to your partner how you reached your answer, step by step.'],
+
   back: [
     'رجوع →',
     '← Back'

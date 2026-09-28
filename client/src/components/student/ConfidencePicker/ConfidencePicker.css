@@ -1,0 +1,403 @@
+.confidence-picker {
+  width: 100%;
+
+  animation:
+    confidence-enter
+    360ms
+    cubic-bezier(0.2, 0.8, 0.2, 1)
+    both;
+}
+
+@keyframes confidence-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+
+.confidence-picker__header {
+  margin-bottom: clamp(22px, 4vw, 36px);
+}
+
+.confidence-picker__eyebrow {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: var(--student-accent, #6257e8);
+
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+}
+
+.confidence-picker__header h2 {
+  margin: 0;
+
+  color: var(--student-ink, #111318);
+
+  font-size: clamp(1.8rem, 3.2vw, 3rem);
+  font-weight: 780;
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.confidence-picker__header p {
+  margin: 10px 0 0;
+
+  color:
+    color-mix(
+      in srgb,
+      var(--student-ink, #111318) 52%,
+      transparent
+    );
+
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+/* Options */
+
+.confidence-picker__options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.confidence-picker__option {
+  min-height: 150px;
+
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 22px;
+
+  padding: 20px;
+
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--student-ink, #111318) 13%,
+      transparent
+    );
+
+  border-radius: 14px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--student-paper, #f4f1ea) 94%,
+      white 6%
+    );
+
+  color: var(--student-ink, #111318);
+
+  font: inherit;
+  text-align: start;
+
+  cursor: pointer;
+
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    background 170ms ease,
+    box-shadow 170ms ease;
+}
+
+/* Symbol */
+
+.confidence-picker__symbol {
+  width: 42px;
+  height: 42px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--student-ink, #111318) 15%,
+      transparent
+    );
+
+  border-radius: 50%;
+
+  color:
+    color-mix(
+      in srgb,
+      var(--student-ink, #111318) 70%,
+      transparent
+    );
+
+  font-size: 1rem;
+  font-weight: 850;
+
+  transition:
+    background 170ms ease,
+    color 170ms ease,
+    border-color 170ms ease;
+}
+
+/* Copy */
+
+.confidence-picker__copy {
+  display: block;
+
+  padding-inline-end: 24px;
+}
+
+.confidence-picker__copy strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.confidence-picker__copy > span {
+  display: block;
+
+  color:
+    color-mix(
+      in srgb,
+      var(--student-ink, #111318) 48%,
+      transparent
+    );
+
+  font-size: 0.75rem;
+  font-weight: 550;
+  line-height: 1.4;
+}
+
+/* Selection indicator */
+
+.confidence-picker__indicator {
+  width: 18px;
+  height: 18px;
+
+  position: absolute;
+
+  top: 20px;
+  inset-inline-end: 20px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1.5px solid
+    color-mix(
+      in srgb,
+      var(--student-ink, #111318) 18%,
+      transparent
+    );
+
+  border-radius: 50%;
+}
+
+.confidence-picker__indicator span {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: var(--student-accent, #6257e8);
+
+  opacity: 0;
+  transform: scale(0.4);
+
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+/* Hover */
+
+@media (hover: hover) {
+  .confidence-picker__option:hover {
+    transform: translateY(-3px);
+
+    border-color:
+      color-mix(
+        in srgb,
+        var(--student-accent, #6257e8) 50%,
+        var(--student-ink, #111318) 10%
+      );
+
+    box-shadow:
+      0 14px 36px
+      color-mix(
+        in srgb,
+        var(--student-ink, #111318) 7%,
+        transparent
+      );
+  }
+}
+
+/* Selected */
+
+.confidence-picker__option--selected {
+  border-color: var(--student-accent, #6257e8);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--student-accent, #6257e8) 9%,
+      var(--student-paper, #f4f1ea)
+    );
+}
+
+.confidence-picker__option--selected
+.confidence-picker__symbol {
+  border-color: var(--student-accent, #6257e8);
+
+  background: var(--student-accent, #6257e8);
+  color: #fff;
+}
+
+.confidence-picker__option--selected
+.confidence-picker__indicator {
+  border-color: var(--student-accent, #6257e8);
+}
+
+.confidence-picker__option--selected
+.confidence-picker__indicator span {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.confidence-picker__option:focus-visible {
+  outline: 3px solid
+    color-mix(
+      in srgb,
+      var(--student-accent, #6257e8) 35%,
+      transparent
+    );
+
+  outline-offset: 3px;
+}
+
+/* Dark */
+
+html[data-theme="dark"]
+.confidence-picker__option {
+  background:
+    color-mix(
+      in srgb,
+      var(--student-paper, #0d0f12) 92%,
+      white 8%
+    );
+}
+
+html[data-theme="dark"]
+.confidence-picker__option--selected {
+  background:
+    color-mix(
+      in srgb,
+      var(--student-accent, #9588ff) 14%,
+      var(--student-paper, #0d0f12)
+    );
+}
+
+/* Tablet */
+
+@media (max-width: 900px) {
+  .confidence-picker__options {
+    grid-template-columns: 1fr;
+  }
+
+  .confidence-picker__option {
+    min-height: 84px;
+
+    display: grid;
+    grid-template-columns:
+      48px
+      minmax(0, 1fr)
+      20px;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 15px 17px;
+  }
+
+  .confidence-picker__indicator {
+    position: static;
+    justify-self: end;
+  }
+
+  .confidence-picker__copy {
+    padding-inline-end: 0;
+  }
+}
+
+/* Phone — one-handed */
+
+@media (max-width: 600px) {
+  .confidence-picker {
+    padding-bottom:
+      calc(
+        10px +
+        env(safe-area-inset-bottom)
+      );
+  }
+
+  .confidence-picker__header {
+    margin-bottom: 18px;
+  }
+
+  .confidence-picker__header h2 {
+    font-size: 1.75rem;
+  }
+
+  .confidence-picker__header p {
+    font-size: 0.82rem;
+  }
+
+  .confidence-picker__options {
+    gap: 9px;
+  }
+
+  .confidence-picker__option {
+    min-height: 76px;
+
+    grid-template-columns:
+      44px
+      minmax(0, 1fr)
+      18px;
+
+    gap: 13px;
+
+    padding: 13px 14px;
+
+    border-radius: 11px;
+  }
+
+  .confidence-picker__symbol {
+    width: 44px;
+    height: 44px;
+  }
+
+  .confidence-picker__copy strong {
+    font-size: 0.95rem;
+  }
+
+  .confidence-picker__copy > span {
+    font-size: 0.7rem;
+  }
+}
