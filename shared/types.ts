@@ -1,14 +1,40 @@
-export type Status = 'green' | 'yellow' | 'red' | 'waiting';
-export type Mark = Exclude<Status, 'waiting'>;
+export type Status = "green" | "yellow" | "red" | "waiting";
+export type Mark = Exclude<Status, "waiting">;
 export type Counts = Record<Status, number>;
 export type CheckIn = { id: string; topic: string; startedAt: number };
-export type TimelineSample = { t: number; pct: number | null; marked: number; total: number; checkInId: string };
-export type Summary = CheckIn & { endedAt: number; counts: Counts; marked: number; total: number; pct: number | null };
-export type Comparison = { topic: string; before: number; after: number; delta: number; beforeMarked: number; afterMarked: number };
+export type TimelineSample = {
+  t: number;
+  pct: number | null;
+  marked: number;
+  total: number;
+  checkInId: string;
+};
+export type Summary = CheckIn & {
+  endedAt: number;
+  counts: Counts;
+  marked: number;
+  total: number;
+  pct: number | null;
+};
+export type Comparison = {
+  topic: string;
+  before: number;
+  after: number;
+  delta: number;
+  beforeMarked: number;
+  afterMarked: number;
+};
 export type ReasonCount = { id: string; label: string; count: number };
-export type StudentView = { id: string; name: string; connected: boolean; status: Status; reason: string | null; focusFlags: number };
+export type StudentView = {
+  id: string;
+  name: string;
+  connected: boolean;
+  status: Status;
+  reason: string | null;
+  focusFlags: number;
+};
 
-export type Pulse = Omit<TimelineSample, 'checkInId'> & {
+export type Pulse = Omit<TimelineSample, "checkInId"> & {
   checkIn: CheckIn;
   counts: Counts;
   reasons: ReasonCount[];
@@ -40,8 +66,8 @@ export type FocusAlert = { studentId: string; name: string; count: number };
 
 // ---- Blindspot ----
 
-export type Confidence = 'guess' | 'fairly-sure' | 'certain';
-export type Quadrant = 'mastered' | 'fragile' | 'blindspot' | 'aware';
+export type Confidence = "guess" | "fairly-sure" | "certain";
+export type Quadrant = "mastered" | "fragile" | "blindspot" | "aware";
 
 // A question's option as sent to students: never the correct answer, never a misconception hint.
 export type PublicQuestionOption = { id: string; text: string };
@@ -100,15 +126,23 @@ export type BlindspotUpdate = {
 };
 
 export type PairPerson = { id: string; name: string };
-export type Pair = { pairId: string; explainer: PairPerson; listener: PairPerson };
+export type Pair = {
+  pairId: string;
+  explainer: PairPerson;
+  listener: PairPerson;
+};
 export type PairAssigned = {
   pairId: string;
   partner: PairPerson;
-  role: 'explainer' | 'listener';
+  role: "explainer" | "listener";
   questionId: string;
 };
 
-export type Calibration = 'well-calibrated' | 'overconfident' | 'underconfident' | 'no-data';
+export type Calibration =
+  | "well-calibrated"
+  | "overconfident"
+  | "underconfident"
+  | "no-data";
 export type CalibrationCard = {
   studentId: string;
   accuracy: number | null;
@@ -116,4 +150,13 @@ export type CalibrationCard = {
   calibration: Calibration;
   illusionGap: number | null;
   score: number | null;
+};
+export type AnswerReveal = {
+  questionId: string;
+  selectedOptionId: string;
+  selectedOptionText: string;
+  correctOptionId: string;
+  correctOptionText: string;
+  confidence: Confidence;
+  correct: boolean;
 };

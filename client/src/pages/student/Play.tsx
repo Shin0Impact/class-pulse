@@ -11,8 +11,8 @@ import type {
   PublicQuestion,
   StudentState,
   PairAssigned,
+  AnswerReveal as AnswerRevealData,
 } from "@shared/types.ts";
-
 import { socket, emitAck } from "../../socket/socket.ts";
 import { useSocketEvents } from "../../socket/useSocketEvents.ts";
 import { useFocusMode } from "../../hooks/useFocusMode.ts";
@@ -25,7 +25,7 @@ import StudentHeader from "../../components/student/StudentHeader/StudentHeader.
 import QuestionCard from "../../components/student/QuestionCard/QuestionCard.tsx";
 import ConfidencePicker from "../../components/student/ConfidencePicker/ConfidencePicker.tsx";
 import PeerExplanation from "../../components/student/PeerExplanation/PeerExplanation.tsx";
-
+import AnswerReveal from "../../components/student/AnswerReveal/AnswerReveal.tsx";
 import Button from "../../components/ui/Button.tsx";
 
 import { usePreferences } from "../../context/PreferencesContext.tsx";
@@ -91,6 +91,9 @@ export default function Play() {
   const [confidence, setConfidence] = useState<Confidence | null>(null);
 
   const [answerSent, setAnswerSent] = useState(false);
+  const [answerReveal, setAnswerReveal] = useState<AnswerRevealData | null>(
+    null,
+  );
 
   const [pairAssignment, setPairAssignment] = useState<PairAssigned | null>(
     null,
@@ -229,6 +232,17 @@ export default function Play() {
       setClarityRated(false);
       setError("");
       if (navigator.vibrate) navigator.vibrate([18, 40, 18]);
+    },
+    [EVENTS.ANSWER_REVEAL]: (data) => {
+      setAnswerReveal(data);
+      setPairAssignment(null);
+      setError("");
+
+      if (navigator.vibrate) {
+        navigator.vibrate(
+          !data.correct && data.confidence === "certain" ? [40, 55, 40] : 25,
+        );
+      }
     },
 
     [EVENTS.QUESTION_STARTED]: (data) => {
@@ -376,12 +390,22 @@ export default function Play() {
           )}
 
           {/* LIVE */}
+          {/* LIVE */}
 
           {phase === "live" && (
             <div className="student-play__stage">
+              {/* S4 — ANSWER REVEAL */}
+
+              {answerReveal && (
+                <AnswerReveal
+                  result={answerReveal}
+                  onContinue={() => setAnswerReveal(null)}
+                />
+              )}
+
               {/* PEER EXPLANATION */}
 
-              {pairAssignment && (
+              {!answerReveal && pairAssignment && (
                 <PeerExplanation
                   assignment={pairAssignment}
                   prompt={question?.prompt ?? t("peerFallbackPrompt")}
@@ -392,7 +416,7 @@ export default function Play() {
 
               {/* ACTIVE QUESTION */}
 
-              {!pairAssignment && question && !answerSent && (
+              {!answerReveal && !pairAssignment && question && !answerSent && (
                 <div className="student-play__question">
                   <QuestionCard
                     topic={question.topic}
@@ -415,7 +439,7 @@ export default function Play() {
 
               {/* ANSWER SUBMITTED */}
 
-              {!pairAssignment && question && answerSent && (
+              {!answerReveal && !pairAssignment && question && answerSent && (
                 <section className="student-play__state">
                   <div className="student-play__state-mark" aria-hidden="true">
                     ✓
@@ -428,9 +452,9 @@ export default function Play() {
               )}
 
               {/* NO QUESTION:
-                  keep existing pulse interaction */}
+        keep existing pulse interaction */}
 
-              {!pairAssignment && !question && (
+              {!answerReveal && !pairAssignment && !question && (
                 <>
                   {topic && (
                     <p
