@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      # Server has no bundler build (it runs .ts files directly), but its own types still need
+      # checking -- catches the kind of error the client build alone would never see.
+      - name: Typecheck server
+        run: npm run typecheck -w server
+
+      # Typechecks and builds the client (root "build" script delegates to it).
+      - name: Build client
+        run: npm run build
+
+      # Full end-to-end run: starts the real server in memory mode and plays a teacher + 6 students
+      # through the pulse loop and the Blindspot loop over real sockets.
+      - name: Smoke test
+        run: npm run smoke
