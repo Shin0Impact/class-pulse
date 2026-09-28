@@ -1,4 +1,5 @@
 import { readFile, readdir } from "node:fs/promises";
+import type { ExplanationRubric } from "./explanationRubric.ts";
 
 export type Misconception = {
   label: string;
@@ -17,6 +18,7 @@ export type DeckQuestion = {
   prompt: string;
   correctOptionId: string;
   options: DeckOption[];
+  rubric?: ExplanationRubric;
 };
 
 export type Deck = {
@@ -72,6 +74,36 @@ export function validateDeck(deck: unknown): string[] {
     if (!nonEmpty(question.prompt)) errors.push(`${location}: prompt is required`);
     if (!nonEmpty(question.correctOptionId)) {
       errors.push(`${location}: correctOptionId is required`);
+    }
+
+    if (question.rubric !== undefined) {
+      const rubric = question.rubric;
+
+      if (!isRecord(rubric)) {
+        errors.push(`${location}: rubric must be an object`);
+      } else {
+        if (
+          !Array.isArray(rubric.keyIdeas) ||
+          rubric.keyIdeas.length === 0 ||
+          !rubric.keyIdeas.every(nonEmpty)
+        ) {
+          errors.push(`${location}: rubric needs non-empty keyIdeas`);
+        }
+
+        if (
+          !Array.isArray(rubric.misconceptions) ||
+          !rubric.misconceptions.every(
+            (item: unknown) =>
+              isRecord(item) &&
+              nonEmpty(item.label) &&
+              Array.isArray(item.phrases) &&
+              item.phrases.length > 0 &&
+              item.phrases.every(nonEmpty),
+          )
+        ) {
+          errors.push(`${location}: rubric misconceptions need a label and phrases`);
+        }
+      }
     }
 
     if (

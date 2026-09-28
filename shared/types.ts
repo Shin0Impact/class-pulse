@@ -7,6 +7,7 @@ export type Summary = CheckIn & { endedAt: number; counts: Counts; marked: numbe
 export type Comparison = { topic: string; before: number; after: number; delta: number; beforeMarked: number; afterMarked: number };
 export type ReasonCount = { id: string; label: string; count: number };
 export type StudentView = { id: string; name: string; connected: boolean; status: Status; reason: string | null; focusFlags: number };
+
 export type Pulse = Omit<TimelineSample, 'checkInId'> & {
   checkIn: CheckIn;
   counts: Counts;
@@ -14,6 +15,7 @@ export type Pulse = Omit<TimelineSample, 'checkInId'> & {
   comparison: Comparison | null;
   perStudent: StudentView[];
 };
+
 export type TeacherState = {
   code: string;
   title: string;
@@ -22,6 +24,7 @@ export type TeacherState = {
   history: Summary[];
   timeline: TimelineSample[];
 };
+
 export type StudentState = {
   studentId: string;
   name: string;
@@ -32,6 +35,7 @@ export type StudentState = {
   reason: string | null;
   focusMode: boolean;
 };
+
 export type FocusAlert = { studentId: string; name: string; count: number };
 
 // ---- Blindspot ----
@@ -51,12 +55,42 @@ export type PublicQuestion = {
   isRecheck?: boolean;
 };
 
-export type Answer = { studentId: string; questionId: string; optionId: string; confidence: Confidence };
+export type Answer = {
+  studentId: string;
+  questionId: string;
+  optionId: string;
+  confidence: Confidence;
+};
 
 // One student's row inside a quadrant group (see BlindspotUpdate).
-export type QuadrantStudent = { id: string; name: string; optionId: string; confidence: Confidence; correct: boolean };
-export type QuadrantGroups = { mastered: QuadrantStudent[]; fragile: QuadrantStudent[]; blindspot: QuadrantStudent[]; aware: QuadrantStudent[] };
-export type QuadrantCounts = { mastered: number; fragile: number; blindspot: number; aware: number };
+export type QuadrantStudent = {
+  id: string;
+  name: string;
+  optionId: string;
+  confidence: Confidence;
+  correct: boolean;
+  explanation?: string;
+  explanationScore?: {
+    matchedIdeas: string[];
+    matchedMisconceptions: string[];
+    score: number | null;
+  };
+};
+
+export type QuadrantGroups = {
+  mastered: QuadrantStudent[];
+  fragile: QuadrantStudent[];
+  blindspot: QuadrantStudent[];
+  aware: QuadrantStudent[];
+};
+
+export type QuadrantCounts = {
+  mastered: number;
+  fragile: number;
+  blindspot: number;
+  aware: number;
+};
+
 export type BlindspotUpdate = {
   questionId: string;
   groups: QuadrantGroups;
@@ -67,7 +101,12 @@ export type BlindspotUpdate = {
 
 export type PairPerson = { id: string; name: string };
 export type Pair = { pairId: string; explainer: PairPerson; listener: PairPerson };
-export type PairAssigned = { pairId: string; partner: PairPerson; role: 'explainer' | 'listener'; questionId: string };
+export type PairAssigned = {
+  pairId: string;
+  partner: PairPerson;
+  role: 'explainer' | 'listener';
+  questionId: string;
+};
 
 export type Calibration = 'well-calibrated' | 'overconfident' | 'underconfident' | 'no-data';
 export type CalibrationCard = {
@@ -76,4 +115,5 @@ export type CalibrationCard = {
   avgConfidence: number | null;
   calibration: Calibration;
   illusionGap: number | null;
+  score: number | null;
 };

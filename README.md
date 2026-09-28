@@ -85,8 +85,46 @@ client/src/
 
 ## Deploying
 
-- **Server** (Render / Railway): build `npm install`, start `npm run start -w server`. Environment: `NODE_ENV=production`, `CLIENT_URL=<your client URL>`, plus the Supabase keys. Free tiers sleep when idle: open `<server-url>/health` a few minutes before the demo.
-- **Client** (Vercel / Netlify): root directory `client`, build `npm run build`, output `dist`. Environment: `VITE_SERVER_URL=<your server URL>`. Enable "include files outside the root directory" (Vercel) so `shared/` is available.
+Chicken-and-egg: the server needs the client's URL (for CORS) and the client needs the server's URL
+(to connect the socket). Deploy the server first with a placeholder `CLIENT_URL`, then the client,
+then go back and fix `CLIENT_URL` on the server once you know the real one.
+
+### 1. Server on Render
+
+1. New + > **Web Service** (or **Blueprint**, pointing at this repo -- it reads `render.yaml` at
+   the repo root and pre-fills everything below except the secrets).
+2. If setting up by hand instead of the Blueprint: root directory = repo root (not `server/`).
+   Build command `npm install`. Start command `npm run start -w server`. Health check path `/health`.
+3. Environment variables:
+   - `NODE_ENV` = `production`
+   - `NODE_VERSION` = `24.12.0` -- **required**. The server runs `.ts` files directly with no build
+     step, using Node's native TypeScript support; Render's default Node is older than that and
+     `npm run start` will fail without this.
+   - `CLIENT_URL` = `http://localhost:5173` for now (placeholder; come back and fix this in step 3).
+   - `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` (see the Supabase setup above).
+4. Deploy, then open `https://<your-service>.onrender.com/health` -- should return
+   `{"ok":true,"db":"supabase"}` (or `"memory"` if you skipped Supabase).
+
+### 2. Client on Vercel
+
+1. New Project, import this repo. **Root Directory** = `client`.
+2. In that same screen, expand **"Include files outside the root directory in the Build Step"**
+   and enable it -- the client imports `../shared/*.ts`, which Vercel won't see otherwise.
+3. Build command `npm run build`, output directory `dist` (Vercel usually detects these from Vite).
+4. Environment variable: `VITE_SERVER_URL` = `https://<your-service>.onrender.com` (from step 1.4).
+5. Deploy. `vercel.json` already rewrites all routes to `index.html` so client-side routing works.
+
+### 3. Wire them together
+
+1. Copy the real Vercel URL (`https://<your-app>.vercel.app`).
+2. Back on Render: update `CLIENT_URL` to that URL (comma-separate if you keep more than one, e.g.
+   a Vercel preview URL too) and let it redeploy.
+3. Confirm from a **phone on mobile data** (not the venue wifi -- that's the point of this check):
+   open the Vercel URL, join a class with a code from another device, mark a color, watch it show
+   up live. If it hangs on join, check the browser console for a CORS error first (means
+   `CLIENT_URL` doesn't match exactly -- no trailing slash, right scheme) and the Render logs second.
+4. Free tiers sleep when idle and cold-start slowly: open `<server-url>/health` a few minutes before
+   the demo to warm it up, and again right before you go on.
 
 ## Team workflow
 

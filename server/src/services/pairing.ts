@@ -1,19 +1,40 @@
 import type { Pair, QuadrantStudent } from '../../../shared/types.ts';
 
-// Pure functions: turn a quadrant breakdown into explainer/listener pairs.
-// STUB for now -- pairs students in whatever order they arrive so the server/client can wire up
-// teacher:pairUp -> pair:assigned today. Malak replaces the matching logic (M2): the real version
-// should prefer pairing each "blindspot" student with a "mastered" student who chose the SAME
-// wrong option (so the explanation is relevant), falling back to any "mastered" student if none match.
-
-export function pairUp(blindspot: QuadrantStudent[], mastered: QuadrantStudent[]): Pair[] {
+// Pair each confident-wrong student with a confident-right student.
+// Prefer an explainer who has not been paired yet. If there are more
+// listeners than explainers, reuse explainers as evenly as possible.
+export function pairUp(
+  blindspot: QuadrantStudent[],
+  mastered: QuadrantStudent[],
+): Pair[] {
   const pairs: Pair[] = [];
-  const pool = [...mastered];
+  const timesUsed = new Map<string, number>();
 
-  for (const explainer of blindspot) {
-    if (pool.length === 0) break; // more blindspots than mastered students: leave the rest unpaired for now
-    const listener = pool.shift();
-    if (!listener) break;
+  for (const listener of blindspot) {
+    const candidates = mastered.filter(
+      (student) => student.id !== listener.id,
+    );
+
+    if (candidates.length === 0) {
+      continue;
+    }
+
+    let explainer = candidates[0];
+
+    for (const candidate of candidates) {
+      if (
+        (timesUsed.get(candidate.id) ?? 0) <
+        (timesUsed.get(explainer.id) ?? 0)
+      ) {
+        explainer = candidate;
+      }
+    }
+
+    timesUsed.set(
+      explainer.id,
+      (timesUsed.get(explainer.id) ?? 0) + 1,
+    );
+
     pairs.push({
       pairId: `pair-${explainer.id}-${listener.id}`,
       explainer: { id: explainer.id, name: explainer.name },
