@@ -4,6 +4,7 @@ import { listDecks, loadDeck } from '../services/deckService.ts';
 const router = Router();
 
 // Lets the teacher's question launcher list available decks without loading each one in full.
+// Bare array response (not wrapped in { decks: [...] }) -- matches what the client reads.
 router.get('/', async (_req, res) => {
   try {
     const ids = await listDecks();
@@ -13,7 +14,7 @@ router.get('/', async (_req, res) => {
         return { id: deck.id, title: deck.title, questionCount: deck.questions.length };
       }),
     );
-    res.json({ decks });
+    res.json(decks);
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : String(e) });
   }
