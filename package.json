@@ -15,7 +15,8 @@
     "smoke": "npm run smoke -w server"
   },
   "devDependencies": {
-    "concurrently": "^10.0.5"
+    "concurrently": "^10.0.5",
+    "tsx": "^4.23.15"
   },
   "engines": {
     "node": ">=24.12.0"

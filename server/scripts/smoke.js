@@ -19,8 +19,7 @@ const ok = (cond, msg) => {
   if (!cond) failures++;
 };
 
-const server = spawn('node', ['src/index.js'], {
-  cwd: root,
+const server = spawn('npx', ['tsx', 'src/index.ts'], {  cwd: root,
   env: { ...process.env, PORT: String(PORT), SUPABASE_URL: '', SUPABASE_SERVICE_KEY: '' },
   stdio: ['ignore', 'pipe', 'inherit'],
 });

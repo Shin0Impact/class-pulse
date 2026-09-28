@@ -1,0 +1,52 @@
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  min-height: var(--touch-target);
+}
+
+input,
+select,
+textarea {
+  min-height: var(--touch-target);
+}
+
+:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+
+.touch-action {
+  min-height: var(--action-height);
+}
+
+.mobile-safe-bottom {
+  padding-bottom:
+    calc(16px + env(safe-area-inset-bottom));
+}
+
+.full-mobile-height {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

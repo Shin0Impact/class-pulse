@@ -1,8 +1,11 @@
-import type { ReasonCount } from '@shared/types.ts';
+import { usePreferences } from "../context/PreferencesContext.tsx";
+import type { ReasonCount } from "@shared/types.ts";
 
 // "What would help": the reasons students gave when they marked Not sure / Lost.
 export default function ReasonBars({ reasons }: { reasons?: ReasonCount[] }) {
-  if (!reasons?.length) return <p className="text-sm text-slate-500">Nobody has given a reason yet. Students can add one after marking Not sure or Lost.</p>;
+  const { t } = usePreferences();
+  if (!reasons?.length)
+    return <p className="text-sm text-slate-500">{t("noReason")}</p>;
   const max = Math.max(...reasons.map((r) => r.count));
   return (
     <ul className="space-y-2">
@@ -13,7 +16,10 @@ export default function ReasonBars({ reasons }: { reasons?: ReasonCount[] }) {
             <span className="tabular-nums text-slate-500">{r.count}</span>
           </div>
           <div className="h-3 overflow-hidden rounded-full bg-slate-100">
-            <div className="h-full rounded-full bg-indigo-500 transition-all duration-500" style={{ width: `${(100 * r.count) / max}%` }} />
+            <div
+              className="h-full rounded-full bg-indigo-500 transition-all duration-500"
+              style={{ width: `${(100 * r.count) / max}%` }}
+            />
           </div>
         </li>
       ))}

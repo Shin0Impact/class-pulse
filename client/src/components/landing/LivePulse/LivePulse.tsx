@@ -1,3 +1,57 @@
-import { usePreferences } from '../../../context/PreferencesContext';
-import './LivePulse.css';
-export default function LivePulse(){const{language}=usePreferences();const ar=language==='ar';return <section className="live-pulse" id="pulse" aria-labelledby="pulse-title"><header className="section-heading"><span>{ar?'لحظة بلحظة':'LIVE FEEDBACK'}</span><h2 id="pulse-title">{ar?'الصف يحكي… بدون ما يقاطع الحصة':'The class speaks without interrupting the lesson'}</h2><p>{ar?'كل طالب يرسل نبضه بنقرة، والمعلم يرى الصورة الحقيقية بدل التخمين.':'Every student sends a pulse with one tap, giving the teacher a real picture instead of a guess.'}</p></header><div className="pulse-flow"><article><b className="flow-number">01</b><span className="flow-icon">◉</span><h3>{ar?'الطالب يختار نبضه':'Student sends a pulse'}</h3><p>{ar?'أخضر، أصفر أو أحمر — بدون إحراج وبدون رفع يد.':'Green, yellow, or red — privately and instantly.'}</p></article><i className="flow-line"/><article><b className="flow-number">02</b><span className="flow-icon">⌁</span><h3>{ar?'الصورة تتحدث فورًا':'The picture updates live'}</h3><p>{ar?'التوزيع يتغير أمام المعلم أثناء الشرح.':'The class distribution changes while teaching.'}</p></article><i className="flow-line"/><article><b className="flow-number">03</b><span className="flow-icon">✦</span><h3>{ar?'المعلم يتدخل بذكاء':'Teacher responds early'}</h3><p>{ar?'يعيد المثال أو يبطئ قبل أن يضيع المزيد من الطلاب.':'Repeat, slow down, or clarify before more students get lost.'}</p></article></div></section>}
+import { usePreferences } from "../../../context/PreferencesContext";
+import "./LivePulse.css";
+export default function LivePulse() {
+  const { language } = usePreferences();
+  const ar = language === "ar";
+  return (
+    <section className="live-pulse" id="pulse" aria-labelledby="pulse-title">
+      <header className="section-heading">
+        <span>{ar ? "لحظة بلحظة" : "LIVE FEEDBACK"}</span>
+        <h2 id="pulse-title">
+          {ar
+            ? "الصف يحكي… بدون ما يقاطع الحصة"
+            : "The class speaks without interrupting the lesson"}
+        </h2>
+        <p>
+          {ar
+            ? "كل طالب يرسل نبضه بنقرة، والمعلم يرى الصورة الحقيقية بدل التخمين."
+            : "Every student sends a pulse with one tap, giving the teacher a real picture instead of a guess."}
+        </p>
+      </header>
+      <div className="pulse-flow">
+        <article>
+          <b className="flow-number">01</b>
+          <span className="flow-icon">◉</span>
+          <h3>{ar ? "الطالب يختار نبضه" : "Student sends a pulse"}</h3>
+          <p>
+            {ar
+              ? "أخضر، أصفر أو أحمر — بدون إحراج وبدون رفع يد."
+              : "Green, yellow, or red — privately and instantly."}
+          </p>
+        </article>
+        <i className="flow-line" />
+        <article>
+          <b className="flow-number">02</b>
+          <span className="flow-icon">⌁</span>
+          <h3>{ar ? "الصورة تتحدث فورًا" : "The picture updates live"}</h3>
+          <p>
+            {ar
+              ? "التوزيع يتغير أمام المعلم أثناء الشرح."
+              : "The class distribution changes while teaching."}
+          </p>
+        </article>
+        <i className="flow-line" />
+        <article>
+          <b className="flow-number">03</b>
+          <span className="flow-icon">✦</span>
+          <h3>{ar ? "المعلم يتدخل بذكاء" : "Teacher responds early"}</h3>
+          <p>
+            {ar
+              ? "يعيد المثال أو يبطئ قبل أن يضيع المزيد من الطلاب."
+              : "Repeat, slow down, or clarify before more students get lost."}
+          </p>
+        </article>
+      </div>
+    </section>
+  );
+}

@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { EVENTS } from '@shared/events.ts';
-import { socket } from '../socket/socket.ts';
+import { useEffect } from "react";
+import { EVENTS } from "@shared/events.ts";
+import { socket } from "../socket/socket.ts";
 
 // Focus mode (student side): report when the student leaves the page (switches tab or app).
 // It only REPORTS to the teacher. It never blocks the student.
@@ -12,14 +12,14 @@ export function useFocusMode(active: boolean): void {
       const now = Date.now();
       if (now - last < 800) return; // blur and visibilitychange often fire together
       last = now;
-      socket.emit(EVENTS.STUDENT_FOCUS_EVENT, { type: 'left' });
+      socket.emit(EVENTS.STUDENT_FOCUS_EVENT, { type: "left" });
     };
     const onHidden = () => document.hidden && report();
-    document.addEventListener('visibilitychange', onHidden);
-    window.addEventListener('blur', report);
+    document.addEventListener("visibilitychange", onHidden);
+    window.addEventListener("blur", report);
     return () => {
-      document.removeEventListener('visibilitychange', onHidden);
-      window.removeEventListener('blur', report);
+      document.removeEventListener("visibilitychange", onHidden);
+      window.removeEventListener("blur", report);
     };
   }, [active]);
 }

@@ -1,0 +1,201 @@
+.student-play {
+  --student-ink: var(--text);
+  --student-paper: var(--page);
+  --student-accent: var(--primary);
+  --student-line: var(--border);
+  min-height: 100dvh;
+  position: relative;
+  background: var(--student-paper);
+  color: var(--student-ink);
+  overflow-x: hidden;
+}
+.student-play:before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(97, 231, 211, 0.1), transparent 28%),
+    radial-gradient(
+      circle at 92% 82%,
+      rgba(81, 70, 229, 0.09),
+      transparent 30%
+    ),
+    linear-gradient(rgba(16, 20, 16, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 20, 16, 0.025) 1px, transparent 1px);
+  background-size:
+    auto,
+    auto,
+    56px 56px,
+    56px 56px;
+}
+.student-play__container {
+  width: min(calc(100% - 64px), 1240px);
+  min-height: 100dvh;
+  position: relative;
+  z-index: 1;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+}
+.student-play__content {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: clamp(44px, 7vh, 92px) 0 clamp(70px, 9vh, 120px);
+}
+.student-play__stage {
+  width: 100%;
+}
+.student-play__question {
+  animation: student-enter 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.student-play__confidence {
+  margin-top: clamp(40px, 6vw, 72px);
+  padding-top: clamp(30px, 4vw, 48px);
+  border-top: 1px solid var(--student-line);
+}
+.student-play__error {
+  max-width: 720px;
+  margin: 24px auto 0;
+  padding: 15px 18px;
+  border: 1px solid rgba(228, 95, 102, 0.22);
+  border-radius: 16px;
+  background: rgba(228, 95, 102, 0.07);
+  color: #c84b54;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+.student-play__state,
+.student-play__waiting {
+  width: min(100%, 720px);
+  margin: auto;
+  padding: clamp(70px, 14vh, 160px) 0;
+  text-align: center;
+}
+.student-play__state-mark {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: var(--text);
+  color: var(--signal);
+  font-size: 1.45rem;
+  font-weight: 950;
+  box-shadow: var(--shadow-md);
+}
+.student-play__state h1,
+.student-play__state h2,
+.student-play__waiting h1 {
+  margin: 0;
+  font-size: clamp(2.7rem, 6vw, 5.8rem);
+  line-height: 0.94;
+  letter-spacing: -0.06em;
+}
+.student-play__state p,
+.student-play__waiting p {
+  max-width: 540px;
+  margin: 18px auto 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+.student-play__waiting-pulse {
+  height: 90px;
+  margin-bottom: 26px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+}
+.student-play__waiting-pulse span {
+  width: 4px;
+  border-radius: 999px;
+  background: var(--primary);
+  animation: student-wave 1.15s ease-in-out infinite;
+}
+.student-play__waiting-pulse span:nth-child(1),
+.student-play__waiting-pulse span:nth-child(5) {
+  height: 20px;
+}
+.student-play__waiting-pulse span:nth-child(2),
+.student-play__waiting-pulse span:nth-child(4) {
+  height: 48px;
+}
+.student-play__waiting-pulse span:nth-child(3) {
+  height: 72px;
+}
+.student-play__waiting-pulse span:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.student-play__waiting-pulse span:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.student-play__waiting-pulse span:nth-child(4) {
+  animation-delay: 0.24s;
+}
+.student-play__waiting-pulse span:nth-child(5) {
+  animation-delay: 0.32s;
+}
+@keyframes student-wave {
+  0%,
+  100% {
+    transform: scaleY(0.55);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+@keyframes student-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+html[data-theme="dark"] .student-play:before {
+  background:
+    radial-gradient(
+      circle at 8% 12%,
+      rgba(97, 231, 211, 0.06),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 92% 82%,
+      rgba(142, 134, 255, 0.08),
+      transparent 30%
+    ),
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size:
+    auto,
+    auto,
+    56px 56px,
+    56px 56px;
+}
+@media (max-width: 700px) {
+  .student-play__container {
+    width: calc(100% - 30px);
+  }
+  .student-play__content {
+    align-items: flex-start;
+    padding: 32px 0 92px;
+  }
+  .student-play__state,
+  .student-play__waiting {
+    padding: 90px 0;
+  }
+  .student-play__state h1,
+  .student-play__state h2,
+  .student-play__waiting h1 {
+    font-size: clamp(2.4rem, 13vw, 4rem);
+  }
+}

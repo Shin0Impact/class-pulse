@@ -1,0 +1,278 @@
+.peer {
+  width: min(100%, 980px);
+  margin-inline: auto;
+  animation: peer-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.peer__header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 28px;
+  align-items: end;
+  padding-bottom: clamp(28px, 4vw, 48px);
+  border-bottom: 1px solid var(--student-line);
+}
+.peer__kicker {
+  grid-column: 1/-1;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--student-accent);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.peer__kicker span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid color-mix(in srgb, var(--student-accent) 30%, transparent);
+  border-radius: 50%;
+  font-size: 0.68rem;
+}
+.peer__identity {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.peer__avatar {
+  width: clamp(58px, 7vw, 78px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background: var(--student-ink);
+  color: var(--student-paper);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 900;
+  box-shadow: 0 18px 45px rgba(17, 19, 24, 0.14);
+}
+.peer__identity span,
+.peer__role span {
+  display: block;
+  margin-bottom: 4px;
+  color: color-mix(in srgb, var(--student-ink) 52%, transparent);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+.peer__identity h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 5vw, 4.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+.peer__role {
+  min-width: 150px;
+  padding: 14px 18px;
+  border: 1px solid var(--student-line);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--student-paper) 84%, transparent);
+}
+.peer__role strong {
+  font-size: 1.15rem;
+}
+.peer__role--explainer strong {
+  color: #5a4fe0;
+}
+.peer__role--listener strong {
+  color: #0a8f73;
+}
+.peer__prompt {
+  margin-top: clamp(32px, 5vw, 60px);
+  padding: clamp(26px, 4vw, 44px);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 22px;
+  border: 1px solid var(--student-line);
+  border-radius: clamp(24px, 3vw, 36px);
+  background: color-mix(in srgb, var(--student-paper) 88%, white 12%);
+  box-shadow: 0 28px 80px rgba(17, 19, 24, 0.07);
+  position: relative;
+  overflow: hidden;
+}
+.peer__prompt:after {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  inset-inline-end: -110px;
+  top: -150px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--student-accent) 16%, transparent),
+    transparent 68%
+  );
+  pointer-events: none;
+}
+.peer__prompt-index {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--student-accent);
+  color: white;
+  font-size: 1.4rem;
+}
+.peer__prompt p {
+  margin: 2px 0 10px;
+  color: var(--student-accent);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.peer__prompt h2 {
+  max-width: 760px;
+  margin: 0;
+  font-size: clamp(1.7rem, 3.6vw, 3.15rem);
+  line-height: 1.14;
+  letter-spacing: -0.04em;
+}
+.peer__coach,
+.peer__rated {
+  margin-top: 20px;
+  padding: 20px 22px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--student-accent) 8%, transparent);
+}
+.peer__coach > span,
+.peer__rated > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--student-accent);
+  color: #fff;
+}
+.peer__coach p,
+.peer__rated p {
+  margin: 0;
+  color: color-mix(in srgb, var(--student-ink) 65%, transparent);
+  line-height: 1.65;
+}
+.peer__coach strong,
+.peer__rated strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--student-ink);
+}
+.peer__clarity {
+  margin: clamp(34px, 5vw, 58px) 0 0;
+  padding: 0;
+  border: 0;
+}
+.peer__clarity legend {
+  padding: 0;
+  font-size: clamp(1.8rem, 4vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.peer__clarity > p {
+  margin: 12px 0 24px;
+  color: color-mix(in srgb, var(--student-ink) 55%, transparent);
+  font-size: 1rem;
+}
+.peer__clarity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.peer__rating {
+  min-height: 112px;
+  padding: 18px;
+  border: 1px solid var(--student-line);
+  border-radius: 24px;
+  background: transparent;
+  color: var(--student-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.peer__rating span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--student-ink) 6%, transparent);
+  font-size: 1.2rem;
+}
+.peer__rating strong {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+}
+.peer__rating:hover,
+.peer__rating:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 38px rgba(17, 19, 24, 0.09);
+  outline: 0;
+}
+.peer__rating--yes:hover {
+  border-color: #18a77f;
+  background: rgba(24, 167, 127, 0.07);
+}
+.peer__rating--partly:hover {
+  border-color: #d69b22;
+  background: rgba(214, 155, 34, 0.07);
+}
+.peer__rating--no:hover {
+  border-color: #d95c62;
+  background: rgba(217, 92, 98, 0.07);
+}
+@keyframes peer-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+html[data-theme="dark"] .peer__prompt {
+  background: rgba(255, 255, 255, 0.025);
+}
+@media (max-width: 640px) {
+  .peer {
+    padding-bottom: 28px;
+  }
+  .peer__header {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .peer__role {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .peer__role span {
+    margin: 0;
+  }
+  .peer__prompt {
+    grid-template-columns: 1fr;
+    padding: 24px 20px;
+  }
+  .peer__clarity-grid {
+    grid-template-columns: 1fr;
+  }
+  .peer__rating {
+    min-height: 76px;
+    justify-content: flex-start;
+    padding-inline: 20px;
+  }
+  .peer__identity h1 {
+    font-size: 2.6rem;
+  }
+}

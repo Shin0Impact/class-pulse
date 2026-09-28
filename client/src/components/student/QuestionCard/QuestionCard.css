@@ -1,0 +1,386 @@
+.question-card {
+  width: 100%;
+  position: relative;
+}
+
+/* ================================
+   Header
+================================ */
+
+.question-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: clamp(24px, 4vw, 42px);
+}
+
+.question-card__meta {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.question-card__eyebrow {
+  color: var(--student-accent, #6257e8);
+
+  font-size: 0.67rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+}
+
+.question-card__topic {
+  max-width: min(340px, 50vw);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: color-mix(in srgb, var(--student-ink, #111318) 48%, transparent);
+
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.question-card__number {
+  color: color-mix(in srgb, var(--student-ink, #111318) 28%, transparent);
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.72rem;
+}
+
+/* ================================
+   Question
+================================ */
+
+.question-card__prompt {
+  max-width: 950px;
+
+  margin: 0 0 clamp(30px, 5vw, 52px);
+
+  color: var(--student-ink, #111318);
+
+  font-size: clamp(2rem, 4.3vw, 4.4rem);
+
+  font-weight: 760;
+  line-height: 1.06;
+  letter-spacing: -0.055em;
+
+  text-wrap: balance;
+}
+
+/* ================================
+   Options
+================================ */
+
+.question-card__options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.question-card__option {
+  width: 100%;
+  min-height: 92px;
+
+  position: relative;
+
+  display: grid;
+  grid-template-columns:
+    48px
+    minmax(0, 1fr)
+    24px;
+
+  align-items: center;
+
+  gap: 17px;
+
+  padding: 18px 20px;
+
+  border: 1px solid
+    color-mix(in srgb, var(--student-ink, #111318) 13%, transparent);
+
+  border-radius: 12px;
+
+  background: color-mix(in srgb, var(--student-paper, #f4f1ea) 94%, white 6%);
+
+  color: var(--student-ink, #111318);
+
+  font: inherit;
+
+  text-align: start;
+
+  cursor: pointer;
+
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+/* Option letter */
+
+.question-card__option-letter {
+  width: 48px;
+  height: 48px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid
+    color-mix(in srgb, var(--student-ink, #111318) 15%, transparent);
+
+  border-radius: 50%;
+
+  color: color-mix(in srgb, var(--student-ink, #111318) 65%, transparent);
+
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+/* Text */
+
+.question-card__option-text {
+  min-width: 0;
+
+  font-size: clamp(0.95rem, 1.4vw, 1.08rem);
+
+  font-weight: 680;
+  line-height: 1.45;
+}
+
+/* Right indicator */
+
+.question-card__option-indicator {
+  width: 20px;
+  height: 20px;
+
+  display: grid;
+  place-items: center;
+
+  justify-self: end;
+
+  border: 1.5px solid
+    color-mix(in srgb, var(--student-ink, #111318) 20%, transparent);
+
+  border-radius: 50%;
+
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.question-card__option-indicator span {
+  width: 8px;
+  height: 8px;
+
+  display: block;
+
+  border-radius: 50%;
+
+  background: var(--student-accent, #6257e8);
+
+  opacity: 0;
+  transform: scale(0.4);
+
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+/* ================================
+   Hover
+================================ */
+
+@media (hover: hover) {
+  .question-card__option:hover:not(:disabled) {
+    transform: translateY(-2px);
+
+    border-color: color-mix(
+      in srgb,
+      var(--student-accent, #6257e8) 50%,
+      var(--student-ink, #111318) 10%
+    );
+
+    box-shadow: 0 12px 35px
+      color-mix(in srgb, var(--student-ink, #111318) 7%, transparent);
+  }
+}
+
+/* ================================
+   Selected
+================================ */
+
+.question-card__option--selected {
+  border-color: var(--student-accent, #6257e8);
+
+  background: color-mix(
+    in srgb,
+    var(--student-accent, #6257e8) 8%,
+    var(--student-paper, #f4f1ea)
+  );
+
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--student-accent, #6257e8) 15%, transparent);
+}
+
+.question-card__option--selected .question-card__option-letter {
+  border-color: var(--student-accent, #6257e8);
+
+  background: var(--student-accent, #6257e8);
+  color: #ffffff;
+
+  transform: scale(1.04);
+}
+
+.question-card__option--selected .question-card__option-indicator {
+  border-color: var(--student-accent, #6257e8);
+}
+
+.question-card__option--selected .question-card__option-indicator span {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Keyboard */
+
+.question-card__option:focus-visible {
+  outline: 3px solid
+    color-mix(in srgb, var(--student-accent, #6257e8) 35%, transparent);
+
+  outline-offset: 3px;
+}
+
+/* Disabled */
+
+.question-card__option:disabled {
+  cursor: default;
+}
+
+/* ================================
+   DARK MODE
+================================ */
+
+html[data-theme="dark"] .question-card__option {
+  background: color-mix(in srgb, var(--student-paper, #0d0f12) 92%, white 8%);
+}
+
+html[data-theme="dark"] .question-card__option--selected {
+  background: color-mix(
+    in srgb,
+    var(--student-accent, #9588ff) 14%,
+    var(--student-paper, #0d0f12)
+  );
+}
+
+/* ================================
+   Tablet
+================================ */
+
+@media (max-width: 900px) {
+  .question-card__prompt {
+    max-width: 720px;
+  }
+
+  .question-card__options {
+    grid-template-columns: 1fr;
+  }
+
+  .question-card__option {
+    min-height: 84px;
+  }
+}
+
+/* ================================
+   Mobile
+================================ */
+
+@media (max-width: 600px) {
+  .question-card__header {
+    margin-bottom: 22px;
+  }
+
+  .question-card__topic {
+    max-width: 160px;
+  }
+
+  .question-card__prompt {
+    margin-bottom: 28px;
+
+    font-size: clamp(1.75rem, 8.3vw, 2.65rem);
+
+    line-height: 1.08;
+  }
+
+  .question-card__options {
+    gap: 10px;
+  }
+
+  .question-card__option {
+    min-height: 76px;
+
+    grid-template-columns:
+      44px
+      minmax(0, 1fr)
+      20px;
+
+    gap: 13px;
+
+    padding: 14px 15px;
+
+    border-radius: 10px;
+  }
+
+  .question-card__option-letter {
+    width: 44px;
+    height: 44px;
+  }
+
+  .question-card__option-text {
+    font-size: 0.96rem;
+    line-height: 1.35;
+  }
+}
+
+/* ================================
+   Very small phones
+================================ */
+
+@media (max-width: 360px) {
+  .question-card__prompt {
+    font-size: 1.7rem;
+  }
+
+  .question-card__option {
+    grid-template-columns:
+      40px
+      minmax(0, 1fr)
+      18px;
+
+    gap: 10px;
+
+    padding-inline: 12px;
+  }
+
+  .question-card__option-letter {
+    width: 40px;
+    height: 40px;
+  }
+}
