@@ -1,1 +1,117 @@
-.teacher-create{min-height:100dvh;padding:clamp(90px,12vh,150px) 28px;display:grid;place-items:center;background:var(--page);position:relative;overflow:hidden}.teacher-create:before{content:"";position:absolute;width:760px;height:760px;inset-inline-end:-260px;top:-330px;border-radius:50%;background:radial-gradient(circle,rgba(81,70,229,.14),transparent 65%)}.teacher-create__shell{width:min(100%,760px);position:relative}.teacher-create__back{color:var(--muted);font-size:.8rem;font-weight:800;text-decoration:none}.teacher-create__eyebrow{margin:50px 0 14px;color:var(--primary);font-size:.72rem;font-weight:950;letter-spacing:.14em}.teacher-create h1{margin:0;font-size:clamp(3.5rem,7vw,6.8rem);line-height:.9;letter-spacing:-.07em}.teacher-create__lead{max-width:620px;margin:24px 0 0;color:var(--muted);font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.7}.teacher-create form{margin-top:46px;padding:30px;border:1px solid var(--border);border-radius:30px;background:var(--surface);box-shadow:var(--shadow-md)}.teacher-create label span{display:block;margin-bottom:10px;color:var(--muted);font-size:.78rem;font-weight:850}.teacher-create input{width:100%;height:62px;padding:0 18px;border:1px solid var(--border);border-radius:17px;background:var(--surface-alt);color:var(--text);font-size:1.05rem;outline:0}.teacher-create input:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-soft)}.teacher-create form button{width:100%;min-height:60px;margin-top:14px;border-radius:17px;font-weight:900}.teacher-create__error{margin:12px 0 0;padding:13px 15px;border-radius:14px;background:rgba(228,95,102,.08);color:#c84b54}.teacher-create__meta{margin-top:18px;display:flex;gap:16px;color:var(--muted);font-size:.72rem;font-weight:750}@media(max-width:600px){.teacher-create{padding:70px 18px}.teacher-create__eyebrow{margin-top:36px}.teacher-create form{padding:20px;border-radius:24px}.teacher-create__meta{flex-direction:column;gap:5px}}
+.teacher-create {
+  min-height: 100dvh;
+  padding: clamp(90px, 12vh, 150px) 28px;
+  display: grid;
+  place-items: center;
+  background: var(--page);
+  position: relative;
+  overflow: hidden;
+}
+.teacher-create:before {
+  content: "";
+  position: absolute;
+  width: 760px;
+  height: 760px;
+  inset-inline-end: -260px;
+  top: -330px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(81, 70, 229, 0.14), transparent 65%);
+}
+.teacher-create__shell {
+  width: min(100%, 760px);
+  position: relative;
+}
+.teacher-create__back {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.teacher-create__eyebrow {
+  margin: 50px 0 14px;
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+}
+.teacher-create h1 {
+  margin: 0;
+  font-size: clamp(3.5rem, 7vw, 6.8rem);
+  line-height: 0.9;
+  letter-spacing: -0.07em;
+}
+.teacher-create__lead {
+  max-width: 620px;
+  margin: 24px 0 0;
+  color: var(--muted);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  line-height: 1.7;
+}
+.teacher-create form {
+  margin-top: 46px;
+  padding: 30px;
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+.teacher-create label span {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+.teacher-create input {
+  width: 100%;
+  height: 62px;
+  padding: 0 18px;
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  background: var(--surface-alt);
+  color: var(--text);
+  font-size: 1.05rem;
+  outline: 0;
+}
+.teacher-create input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-soft);
+}
+.teacher-create form button {
+  width: 100%;
+  min-height: 60px;
+  margin-top: 14px;
+  border-radius: 17px;
+  font-weight: 900;
+}
+.teacher-create__error {
+  margin: 12px 0 0;
+  padding: 13px 15px;
+  border-radius: 14px;
+  background: rgba(228, 95, 102, 0.08);
+  color: #c84b54;
+}
+.teacher-create__meta {
+  margin-top: 18px;
+  display: flex;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+@media (max-width: 600px) {
+  .teacher-create {
+    padding: 70px 18px;
+  }
+  .teacher-create__eyebrow {
+    margin-top: 36px;
+  }
+  .teacher-create form {
+    padding: 20px;
+    border-radius: 24px;
+  }
+  .teacher-create__meta {
+    flex-direction: column;
+    gap: 5px;
+  }
+}

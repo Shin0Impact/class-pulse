@@ -1,14 +1,6 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { EVENTS } from "@shared/events.ts";
 import { FEATURES } from "@shared/features.ts";
@@ -47,25 +39,15 @@ type Saved = {
 
 function readSaved(code: string): Saved {
   try {
-    return (
-      JSON.parse(
-        sessionStorage.getItem(savedKey(code)) ?? "null",
-      ) || {}
-    );
+    return JSON.parse(sessionStorage.getItem(savedKey(code)) ?? "null") || {};
   } catch {
     return {};
   }
 }
 
-function writeSaved(
-  code: string,
-  data: Saved,
-): void {
+function writeSaved(code: string, data: Saved): void {
   try {
-    sessionStorage.setItem(
-      savedKey(code),
-      JSON.stringify(data),
-    );
+    sessionStorage.setItem(savedKey(code), JSON.stringify(data));
   } catch {
     // Storage may be blocked.
   }
@@ -82,47 +64,37 @@ export default function Play() {
      Existing Class Pulse state
   -------------------------------- */
 
-  const [phase, setPhase] = useState<
-    "joining" | "live" | "ended" | "error"
-  >("joining");
+  const [phase, setPhase] = useState<"joining" | "live" | "ended" | "error">(
+    "joining",
+  );
 
   const [name, setName] = useState("");
   const [title, setTitle] = useState("");
   const [topic, setTopic] = useState("");
 
-  const [status, setStatus] =
-    useState<Mark | null>(null);
+  const [status, setStatus] = useState<Mark | null>(null);
 
-  const [reason, setReason] =
-    useState<string | null>(null);
+  const [reason, setReason] = useState<string | null>(null);
 
-  const [focusOn, setFocusOn] =
-    useState(false);
+  const [focusOn, setFocusOn] = useState(false);
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
 
   /* --------------------------------
      Blindspot question state
   -------------------------------- */
 
-  const [question, setQuestion] =
-    useState<PublicQuestion | null>(null);
+  const [question, setQuestion] = useState<PublicQuestion | null>(null);
 
-  const [
-    selectedOptionId,
-    setSelectedOptionId,
-  ] = useState<string | null>(null);
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
 
-  const [
-    confidence,
-    setConfidence,
-  ] = useState<Confidence | null>(null);
+  const [confidence, setConfidence] = useState<Confidence | null>(null);
 
-  const [answerSent, setAnswerSent] =
-    useState(false);
+  const [answerSent, setAnswerSent] = useState(false);
 
-  const [pairAssignment, setPairAssignment] = useState<PairAssigned | null>(null);
+  const [pairAssignment, setPairAssignment] = useState<PairAssigned | null>(
+    null,
+  );
   const [clarityRated, setClarityRated] = useState(false);
 
   /* --------------------------------
@@ -131,8 +103,7 @@ export default function Play() {
 
   const joining = useRef(false);
 
-  const checkInId =
-    useRef<string | null>(null);
+  const checkInId = useRef<string | null>(null);
 
   const mine = useRef<{
     status: Mark | null;
@@ -151,11 +122,7 @@ export default function Play() {
      Focus mode
   -------------------------------- */
 
-  useFocusMode(
-    FEATURES.focusMode &&
-      focusOn &&
-      phase === "live",
-  );
+  useFocusMode(FEATURES.focusMode && focusOn && phase === "live");
 
   /* --------------------------------
      Join / reconnect
@@ -167,10 +134,7 @@ export default function Play() {
     const saved = readSaved(code);
 
     if (!saved.name) {
-      navigate(
-        `/join?code=${code}`,
-        { replace: true },
-      );
+      navigate(`/join?code=${code}`, { replace: true });
 
       return;
     }
@@ -178,15 +142,11 @@ export default function Play() {
     joining.current = true;
 
     try {
-      const res =
-        await emitAck<StudentState>(
-          EVENTS.STUDENT_JOIN,
-          {
-            code,
-            name: saved.name,
-            studentId: saved.studentId,
-          },
-        );
+      const res = await emitAck<StudentState>(EVENTS.STUDENT_JOIN, {
+        code,
+        name: saved.name,
+        studentId: saved.studentId,
+      });
 
       writeSaved(code, {
         name: res.name,
@@ -199,47 +159,30 @@ export default function Play() {
       setFocusOn(res.focusMode);
       setError("");
 
-      const sameCheckIn =
-        checkInId.current ===
-        res.checkInId;
+      const sameCheckIn = checkInId.current === res.checkInId;
 
       const local = mine.current;
 
       if (
         sameCheckIn &&
         local.status &&
-        (
-          local.status !== res.status ||
-          local.reason !== res.reason
-        )
+        (local.status !== res.status || local.reason !== res.reason)
       ) {
-        emitAck(
-          EVENTS.STUDENT_SET_STATUS,
-          {
-            status: local.status,
-            reason: local.reason,
-          },
-        ).catch(() => {});
+        emitAck(EVENTS.STUDENT_SET_STATUS, {
+          status: local.status,
+          reason: local.reason,
+        }).catch(() => {});
       } else {
-        setStatus(
-          res.status === "waiting"
-            ? null
-            : res.status,
-        );
+        setStatus(res.status === "waiting" ? null : res.status);
 
         setReason(res.reason);
       }
 
-      checkInId.current =
-        res.checkInId;
+      checkInId.current = res.checkInId;
 
       setPhase("live");
     } catch (e) {
-      setError(
-        e instanceof Error
-          ? e.message
-          : String(e),
-      );
+      setError(e instanceof Error ? e.message : String(e));
 
       setPhase("error");
     } finally {
@@ -265,8 +208,7 @@ export default function Play() {
     [EVENTS.CHECK_IN_STARTED]: (data) => {
       if (!("checkInId" in data)) return;
 
-      checkInId.current =
-        data.checkInId;
+      checkInId.current = data.checkInId;
 
       setTopic(data.topic);
 
@@ -274,9 +216,7 @@ export default function Play() {
       setReason(null);
     },
 
-    [EVENTS.FOCUS_MODE]: ({
-      enabled,
-    }) => {
+    [EVENTS.FOCUS_MODE]: ({ enabled }) => {
       setFocusOn(enabled);
     },
 
@@ -291,9 +231,7 @@ export default function Play() {
       if (navigator.vibrate) navigator.vibrate([18, 40, 18]);
     },
 
-    [EVENTS.QUESTION_STARTED]: (
-      data,
-    ) => {
+    [EVENTS.QUESTION_STARTED]: (data) => {
       const nextQuestion = data;
 
       setQuestion(nextQuestion);
@@ -324,27 +262,20 @@ export default function Play() {
       navigator.vibrate(15);
     }
 
-    emitAck(
-      EVENTS.STUDENT_SET_STATUS,
-      { status: s },
-    ).catch((e) => {
+    emitAck(EVENTS.STUDENT_SET_STATUS, { status: s }).catch((e) => {
       setError(e.message);
     });
   }
 
   function chooseReason(r: string) {
-    const next =
-      reason === r ? null : r;
+    const next = reason === r ? null : r;
 
     setReason(next);
 
-    emitAck(
-      EVENTS.STUDENT_SET_STATUS,
-      {
-        status,
-        reason: next,
-      },
-    ).catch((e) => {
+    emitAck(EVENTS.STUDENT_SET_STATUS, {
+      status,
+      reason: next,
+    }).catch((e) => {
       setError(e.message);
     });
   }
@@ -353,9 +284,7 @@ export default function Play() {
      Question controls
   -------------------------------- */
 
-  function chooseAnswer(
-    optionId: string,
-  ) {
+  function chooseAnswer(optionId: string) {
     if (answerSent) return;
 
     setSelectedOptionId(optionId);
@@ -371,14 +300,8 @@ export default function Play() {
     }
   }
 
-  async function chooseConfidence(
-    nextConfidence: Confidence,
-  ) {
-    if (
-      !question ||
-      !selectedOptionId ||
-      answerSent
-    ) {
+  async function chooseConfidence(nextConfidence: Confidence) {
+    if (!question || !selectedOptionId || answerSent) {
       return;
     }
 
@@ -390,36 +313,28 @@ export default function Play() {
     }
 
     try {
-      await emitAck(
-        EVENTS.STUDENT_ANSWER,
-        {
-          questionId:
-            question.questionId,
+      await emitAck(EVENTS.STUDENT_ANSWER, {
+        questionId: question.questionId,
 
-          optionId:
-            selectedOptionId,
+        optionId: selectedOptionId,
 
-          confidence:
-            nextConfidence,
-        },
-      );
+        confidence: nextConfidence,
+      });
 
       setAnswerSent(true);
     } catch (e) {
-      setError(
-        e instanceof Error
-          ? e.message
-          : String(e),
-      );
+      setError(e instanceof Error ? e.message : String(e));
     }
   }
-
 
   async function rateClarity(rating: 1 | 3 | 5) {
     if (!pairAssignment || pairAssignment.role !== "listener") return;
     setError("");
     try {
-      await emitAck(EVENTS.STUDENT_RATE_CLARITY, { pairId: pairAssignment.pairId, rating });
+      await emitAck(EVENTS.STUDENT_RATE_CLARITY, {
+        pairId: pairAssignment.pairId,
+        rating,
+      });
       setClarityRated(true);
       if (navigator.vibrate) navigator.vibrate(16);
     } catch (e) {
@@ -434,7 +349,6 @@ export default function Play() {
   return (
     <main className="student-play">
       <div className="student-play__container">
-
         {phase !== "joining" && (
           <StudentHeader
             name={name}
@@ -445,15 +359,11 @@ export default function Play() {
         )}
 
         <div className="student-play__content">
-
           {/* JOINING */}
 
           {phase === "joining" && (
             <section className="student-play__waiting">
-              <div
-                className="student-play__waiting-pulse"
-                aria-hidden="true"
-              >
+              <div className="student-play__waiting-pulse" aria-hidden="true">
                 <span />
                 <span />
                 <span />
@@ -469,7 +379,6 @@ export default function Play() {
 
           {phase === "live" && (
             <div className="student-play__stage">
-
               {/* PEER EXPLANATION */}
 
               {pairAssignment && (
@@ -485,30 +394,22 @@ export default function Play() {
 
               {!pairAssignment && question && !answerSent && (
                 <div className="student-play__question">
-
                   <QuestionCard
                     topic={question.topic}
                     prompt={question.prompt}
                     options={question.options}
-                    selectedOptionId={
-                      selectedOptionId
-                    }
-                    onSelect={
-                      chooseAnswer
-                    }
+                    selectedOptionId={selectedOptionId}
+                    onSelect={chooseAnswer}
                   />
 
                   {selectedOptionId && (
                     <div className="student-play__confidence">
                       <ConfidencePicker
                         value={confidence}
-                        onSelect={
-                          chooseConfidence
-                        }
+                        onSelect={chooseConfidence}
                       />
                     </div>
                   )}
-
                 </div>
               )}
 
@@ -516,20 +417,13 @@ export default function Play() {
 
               {!pairAssignment && question && answerSent && (
                 <section className="student-play__state">
-                  <div
-                    className="student-play__state-mark"
-                    aria-hidden="true"
-                  >
+                  <div className="student-play__state-mark" aria-hidden="true">
                     ✓
                   </div>
 
-                  <h2>
-                    {t("answerSent")}
-                  </h2>
+                  <h2>{t("answerSent")}</h2>
 
-                  <p>
-                    {t("answerSentHint")}
-                  </p>
+                  <p>{t("answerSentHint")}</p>
                 </section>
               )}
 
@@ -577,26 +471,18 @@ export default function Play() {
                     <ColorPicker
                       status={status}
                       reason={reason}
-                      onStatus={
-                        chooseStatus
-                      }
-                      onReason={
-                        chooseReason
-                      }
+                      onStatus={chooseStatus}
+                      onReason={chooseReason}
                     />
                   </div>
                 </>
               )}
 
               {error && (
-                <p
-                  className="student-play__error"
-                  role="alert"
-                >
+                <p className="student-play__error" role="alert">
                   {error}
                 </p>
               )}
-
             </div>
           )}
 
@@ -604,27 +490,15 @@ export default function Play() {
 
           {phase === "ended" && (
             <section className="student-play__state">
-              <div
-                className="student-play__state-mark"
-                aria-hidden="true"
-              >
+              <div className="student-play__state-mark" aria-hidden="true">
                 ✓
               </div>
 
-              <h2>
-                {t("ended")}
-              </h2>
+              <h2>{t("ended")}</h2>
 
-              <p>
-                {t("thanks")}
-              </p>
+              <p>{t("thanks")}</p>
 
-              <Button
-                className="mt-6"
-                onClick={() =>
-                  navigate("/")
-                }
-              >
+              <Button className="mt-6" onClick={() => navigate("/")}>
                 {t("home")}
               </Button>
             </section>
@@ -634,28 +508,18 @@ export default function Play() {
 
           {phase === "error" && (
             <section className="student-play__state">
-
-              <p
-                className="student-play__error"
-                role="alert"
-              >
+              <p className="student-play__error" role="alert">
                 {error}
               </p>
 
               <Button
                 className="mt-6"
-                onClick={() =>
-                  navigate(
-                    `/join?code=${code}`,
-                  )
-                }
+                onClick={() => navigate(`/join?code=${code}`)}
               >
                 {t("retry")}
               </Button>
-
             </section>
           )}
-
         </div>
       </div>
     </main>

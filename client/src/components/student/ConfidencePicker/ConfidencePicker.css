@@ -1,11 +1,7 @@
 .confidence-picker {
   width: 100%;
 
-  animation:
-    confidence-enter
-    360ms
-    cubic-bezier(0.2, 0.8, 0.2, 1)
-    both;
+  animation: confidence-enter 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 @keyframes confidence-enter {
@@ -52,12 +48,7 @@
 .confidence-picker__header p {
   margin: 10px 0 0;
 
-  color:
-    color-mix(
-      in srgb,
-      var(--student-ink, #111318) 52%,
-      transparent
-    );
+  color: color-mix(in srgb, var(--student-ink, #111318) 52%, transparent);
 
   font-size: 0.88rem;
   line-height: 1.6;
@@ -87,20 +78,11 @@
   padding: 20px;
 
   border: 1px solid
-    color-mix(
-      in srgb,
-      var(--student-ink, #111318) 13%,
-      transparent
-    );
+    color-mix(in srgb, var(--student-ink, #111318) 13%, transparent);
 
   border-radius: 14px;
 
-  background:
-    color-mix(
-      in srgb,
-      var(--student-paper, #f4f1ea) 94%,
-      white 6%
-    );
+  background: color-mix(in srgb, var(--student-paper, #f4f1ea) 94%, white 6%);
 
   color: var(--student-ink, #111318);
 
@@ -129,20 +111,11 @@
   place-items: center;
 
   border: 1px solid
-    color-mix(
-      in srgb,
-      var(--student-ink, #111318) 15%,
-      transparent
-    );
+    color-mix(in srgb, var(--student-ink, #111318) 15%, transparent);
 
   border-radius: 50%;
 
-  color:
-    color-mix(
-      in srgb,
-      var(--student-ink, #111318) 70%,
-      transparent
-    );
+  color: color-mix(in srgb, var(--student-ink, #111318) 70%, transparent);
 
   font-size: 1rem;
   font-weight: 850;
@@ -173,12 +146,7 @@
 .confidence-picker__copy > span {
   display: block;
 
-  color:
-    color-mix(
-      in srgb,
-      var(--student-ink, #111318) 48%,
-      transparent
-    );
+  color: color-mix(in srgb, var(--student-ink, #111318) 48%, transparent);
 
   font-size: 0.75rem;
   font-weight: 550;
@@ -200,11 +168,7 @@
   place-items: center;
 
   border: 1.5px solid
-    color-mix(
-      in srgb,
-      var(--student-ink, #111318) 18%,
-      transparent
-    );
+    color-mix(in srgb, var(--student-ink, #111318) 18%, transparent);
 
   border-radius: 50%;
 }
@@ -231,20 +195,14 @@
   .confidence-picker__option:hover {
     transform: translateY(-3px);
 
-    border-color:
-      color-mix(
-        in srgb,
-        var(--student-accent, #6257e8) 50%,
-        var(--student-ink, #111318) 10%
-      );
+    border-color: color-mix(
+      in srgb,
+      var(--student-accent, #6257e8) 50%,
+      var(--student-ink, #111318) 10%
+    );
 
-    box-shadow:
-      0 14px 36px
-      color-mix(
-        in srgb,
-        var(--student-ink, #111318) 7%,
-        transparent
-      );
+    box-shadow: 0 14px 36px
+      color-mix(in srgb, var(--student-ink, #111318) 7%, transparent);
   }
 }
 
@@ -253,64 +211,48 @@
 .confidence-picker__option--selected {
   border-color: var(--student-accent, #6257e8);
 
-  background:
-    color-mix(
-      in srgb,
-      var(--student-accent, #6257e8) 9%,
-      var(--student-paper, #f4f1ea)
-    );
+  background: color-mix(
+    in srgb,
+    var(--student-accent, #6257e8) 9%,
+    var(--student-paper, #f4f1ea)
+  );
 }
 
-.confidence-picker__option--selected
-.confidence-picker__symbol {
+.confidence-picker__option--selected .confidence-picker__symbol {
   border-color: var(--student-accent, #6257e8);
 
   background: var(--student-accent, #6257e8);
   color: #fff;
 }
 
-.confidence-picker__option--selected
-.confidence-picker__indicator {
+.confidence-picker__option--selected .confidence-picker__indicator {
   border-color: var(--student-accent, #6257e8);
 }
 
-.confidence-picker__option--selected
-.confidence-picker__indicator span {
+.confidence-picker__option--selected .confidence-picker__indicator span {
   opacity: 1;
   transform: scale(1);
 }
 
 .confidence-picker__option:focus-visible {
   outline: 3px solid
-    color-mix(
-      in srgb,
-      var(--student-accent, #6257e8) 35%,
-      transparent
-    );
+    color-mix(in srgb, var(--student-accent, #6257e8) 35%, transparent);
 
   outline-offset: 3px;
 }
 
 /* Dark */
 
-html[data-theme="dark"]
-.confidence-picker__option {
-  background:
-    color-mix(
-      in srgb,
-      var(--student-paper, #0d0f12) 92%,
-      white 8%
-    );
+html[data-theme="dark"] .confidence-picker__option {
+  background: color-mix(in srgb, var(--student-paper, #0d0f12) 92%, white 8%);
 }
 
-html[data-theme="dark"]
-.confidence-picker__option--selected {
-  background:
-    color-mix(
-      in srgb,
-      var(--student-accent, #9588ff) 14%,
-      var(--student-paper, #0d0f12)
-    );
+html[data-theme="dark"] .confidence-picker__option--selected {
+  background: color-mix(
+    in srgb,
+    var(--student-accent, #9588ff) 14%,
+    var(--student-paper, #0d0f12)
+  );
 }
 
 /* Tablet */
@@ -350,11 +292,7 @@ html[data-theme="dark"]
 
 @media (max-width: 600px) {
   .confidence-picker {
-    padding-bottom:
-      calc(
-        10px +
-        env(safe-area-inset-bottom)
-      );
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
   }
 
   .confidence-picker__header {

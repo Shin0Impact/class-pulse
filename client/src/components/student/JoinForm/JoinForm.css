@@ -36,11 +36,7 @@
   max-width: 410px;
   margin: 18px 0 0;
 
-  color: color-mix(
-    in srgb,
-    var(--join-ink) 60%,
-    transparent
-  );
+  color: color-mix(in srgb, var(--join-ink) 60%, transparent);
 
   font-size: 0.98rem;
   line-height: 1.8;
@@ -59,11 +55,7 @@
 }
 
 .student-join-form__field > span {
-  color: color-mix(
-    in srgb,
-    var(--join-ink) 76%,
-    transparent
-  );
+  color: color-mix(in srgb, var(--join-ink) 76%, transparent);
 
   font-size: 0.79rem;
   font-weight: 750;
@@ -79,22 +71,12 @@
 
   padding: 0 20px;
 
-  border: 1px solid
-    color-mix(
-      in srgb,
-      var(--join-ink) 16%,
-      transparent
-    );
+  border: 1px solid color-mix(in srgb, var(--join-ink) 16%, transparent);
 
   border-radius: 6px;
   outline: none;
 
-  background:
-    color-mix(
-      in srgb,
-      var(--join-paper) 94%,
-      var(--join-ink) 6%
-    );
+  background: color-mix(in srgb, var(--join-paper) 94%, var(--join-ink) 6%);
 
   color: var(--join-ink);
 
@@ -111,39 +93,19 @@
 }
 
 .student-join-form__field input::placeholder {
-  color: color-mix(
-    in srgb,
-    var(--join-ink) 37%,
-    transparent
-  );
+  color: color-mix(in srgb, var(--join-ink) 37%, transparent);
 }
 
 .student-join-form__field input:hover {
-  border-color:
-    color-mix(
-      in srgb,
-      var(--join-ink) 30%,
-      transparent
-    );
+  border-color: color-mix(in srgb, var(--join-ink) 30%, transparent);
 }
 
 .student-join-form__field input:focus {
   border-color: var(--join-accent);
 
-  background:
-    color-mix(
-      in srgb,
-      var(--join-paper) 97%,
-      var(--join-ink) 3%
-    );
+  background: color-mix(in srgb, var(--join-paper) 97%, var(--join-ink) 3%);
 
-  box-shadow:
-    0 0 0 4px
-    color-mix(
-      in srgb,
-      var(--join-accent) 13%,
-      transparent
-    );
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--join-accent) 13%, transparent);
 }
 
 /* Session code */
@@ -209,13 +171,7 @@
 .student-join-form__submit:hover:not(:disabled) {
   transform: translateY(-2px);
 
-  box-shadow:
-    0 12px 30px
-    color-mix(
-      in srgb,
-      var(--join-ink) 15%,
-      transparent
-    );
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--join-ink) 15%, transparent);
 }
 
 .student-join-form__submit:active:not(:disabled) {
@@ -223,12 +179,7 @@
 }
 
 .student-join-form__submit:focus-visible {
-  outline: 3px solid
-    color-mix(
-      in srgb,
-      var(--join-accent) 35%,
-      transparent
-    );
+  outline: 3px solid color-mix(in srgb, var(--join-accent) 35%, transparent);
 
   outline-offset: 3px;
 }
@@ -252,12 +203,7 @@
   align-items: center;
   gap: 10px;
 
-  color:
-    color-mix(
-      in srgb,
-      var(--join-ink) 52%,
-      transparent
-    );
+  color: color-mix(in srgb, var(--join-ink) 52%, transparent);
 
   font-size: 0.75rem;
   font-weight: 600;
@@ -273,8 +219,7 @@
 
   background: #29a66a;
 
-  box-shadow:
-    0 0 0 5px rgba(41, 166, 106, 0.1);
+  box-shadow: 0 0 0 5px rgba(41, 166, 106, 0.1);
 
   animation: join-live-pulse 2.2s ease-in-out infinite;
 }
@@ -282,13 +227,11 @@
 @keyframes join-live-pulse {
   0%,
   100% {
-    box-shadow:
-      0 0 0 4px rgba(41, 166, 106, 0.08);
+    box-shadow: 0 0 0 4px rgba(41, 166, 106, 0.08);
   }
 
   50% {
-    box-shadow:
-      0 0 0 8px rgba(41, 166, 106, 0.02);
+    box-shadow: 0 0 0 8px rgba(41, 166, 106, 0.02);
   }
 }
 

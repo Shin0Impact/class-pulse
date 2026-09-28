@@ -10,11 +10,7 @@
   padding: 18px 0;
 
   border-bottom: 1px solid
-    color-mix(
-      in srgb,
-      var(--student-ink, #111318) 10%,
-      transparent
-    );
+    color-mix(in srgb, var(--student-ink, #111318) 10%, transparent);
 }
 
 /* Brand */
@@ -41,11 +37,7 @@
   gap: 3px;
 
   border: 1px solid
-    color-mix(
-      in srgb,
-      var(--student-ink, #111318) 12%,
-      transparent
-    );
+    color-mix(in srgb, var(--student-ink, #111318) 12%, transparent);
 
   border-radius: 50%;
 }
@@ -95,12 +87,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 
-  color:
-    color-mix(
-      in srgb,
-      var(--student-ink, #111318) 50%,
-      transparent
-    );
+  color: color-mix(in srgb, var(--student-ink, #111318) 50%, transparent);
 
   font-size: 0.7rem;
   font-weight: 600;
@@ -139,20 +126,11 @@
   padding: 5px 8px;
 
   border: 1px solid
-    color-mix(
-      in srgb,
-      var(--student-ink, #111318) 12%,
-      transparent
-    );
+    color-mix(in srgb, var(--student-ink, #111318) 12%, transparent);
 
   border-radius: 999px;
 
-  color:
-    color-mix(
-      in srgb,
-      var(--student-ink, #111318) 62%,
-      transparent
-    );
+  color: color-mix(in srgb, var(--student-ink, #111318) 62%, transparent);
 
   font-size: 0.67rem;
   font-weight: 800;
@@ -175,15 +153,13 @@
 .student-header__connection--online {
   background: #25a66a;
 
-  box-shadow:
-    0 0 0 5px rgba(37, 166, 106, 0.09);
+  box-shadow: 0 0 0 5px rgba(37, 166, 106, 0.09);
 }
 
 .student-header__connection--offline {
   background: #e14d4d;
 
-  box-shadow:
-    0 0 0 5px rgba(225, 77, 77, 0.09);
+  box-shadow: 0 0 0 5px rgba(225, 77, 77, 0.09);
 }
 
 /* Mobile */
@@ -192,10 +168,7 @@
   .student-header {
     gap: 12px;
 
-    padding:
-      max(14px, env(safe-area-inset-top))
-      0
-      14px;
+    padding: max(14px, env(safe-area-inset-top)) 0 14px;
   }
 
   .student-header__pulse-mark {

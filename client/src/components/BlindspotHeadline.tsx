@@ -11,7 +11,7 @@ export default function BlindspotHeadline({
     return null;
   }
 
-  const studentLabel = studentCount === 1 ? 'student is' : 'students are';
+  const studentLabel = studentCount === 1 ? "student is" : "students are";
 
   return (
     <section
@@ -29,7 +29,7 @@ export default function BlindspotHeadline({
       </div>
 
       <p className="text-2xl font-bold leading-snug text-slate-900">
-        {studentCount} {studentLabel} sure that{' '}
+        {studentCount} {studentLabel} sure that{" "}
         <span className="text-amber-800">“{belief}”</span>
       </p>
 

@@ -1,11 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 
-import {
-  Link,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { fetchSession } from "../../api/http";
 import { usePreferences } from "../../context/PreferencesContext";
@@ -14,25 +10,20 @@ import JoinForm from "../../components/student/JoinForm/JoinForm";
 
 import "./Join.css";
 
-export const savedKey = (code: string) =>
-  `classpulse:${code}`;
+export const savedKey = (code: string) => `classpulse:${code}`;
 
 export default function Join() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { t } = usePreferences();
 
-  const [code, setCode] = useState(
-    params.get("code") ?? ""
-  );
+  const [code, setCode] = useState(params.get("code") ?? "");
 
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  async function handleJoin(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function handleJoin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setError("");
@@ -49,7 +40,7 @@ export default function Join() {
           savedKey(cleanCode),
           JSON.stringify({
             name: cleanName,
-          })
+          }),
         );
       } catch {
         // Joining should still work if storage is unavailable.
@@ -69,11 +60,7 @@ export default function Join() {
   return (
     <main className="student-join-page">
       <header className="student-join-page__topbar">
-        <Link
-          to="/"
-          className="student-join-page__back"
-          aria-label={t("back")}
-        >
+        <Link to="/" className="student-join-page__back" aria-label={t("back")}>
           <span aria-hidden="true">←</span>
           <span>{t("back")}</span>
         </Link>
@@ -90,34 +77,30 @@ export default function Join() {
           onSubmit={handleJoin}
         />
 
-        <aside
-          className="student-join-page__visual"
-          aria-label="Class Pulse"
-        >
+        <aside className="student-join-page__visual" aria-label="Class Pulse">
           <div className="student-join-page__visual-label">
             <span aria-hidden="true" />
-<span>{t("liveClass")}</span>          </div>
+            <span>{t("liveClass")}</span>{" "}
+          </div>
 
           <div className="student-join-page__pulse">
             <span />
             <span />
             <span />
-<strong>{t("pulseWord")}</strong>            <span />
+            <strong>{t("pulseWord")}</strong> <span />
             <span />
             <span />
           </div>
 
-     <blockquote>
-  <p>
-    {t("pulseQuoteFirst")}
-    <br />
-    {t("pulseQuoteSecond")}
-  </p>
-</blockquote>
+          <blockquote>
+            <p>
+              {t("pulseQuoteFirst")}
+              <br />
+              {t("pulseQuoteSecond")}
+            </p>
+          </blockquote>
 
-          <div className="student-join-page__number">
-            01
-          </div>
+          <div className="student-join-page__number">01</div>
         </aside>
       </section>
     </main>

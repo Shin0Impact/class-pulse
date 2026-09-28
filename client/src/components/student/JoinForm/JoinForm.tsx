@@ -24,28 +24,16 @@ export default function JoinForm({
   const { t } = usePreferences();
 
   return (
-    <section
-      className="student-join-form"
-      aria-labelledby="student-join-title"
-    >
+    <section className="student-join-form" aria-labelledby="student-join-title">
       <header className="student-join-form__header">
-        <p className="student-join-form__eyebrow">
-          CLASS PULSE
-        </p>
+        <p className="student-join-form__eyebrow">CLASS PULSE</p>
 
-        <h1 id="student-join-title">
-          {t("joinTitle")}
-        </h1>
+        <h1 id="student-join-title">{t("joinTitle")}</h1>
 
-        <p className="student-join-form__description">
-          {t("joinDescription")}
-        </p>
+        <p className="student-join-form__description">{t("joinDescription")}</p>
       </header>
 
-      <form
-        className="student-join-form__fields"
-        onSubmit={onSubmit}
-      >
+      <form className="student-join-form__fields" onSubmit={onSubmit}>
         <label className="student-join-form__field">
           <span>{t("yourName")}</span>
 
@@ -80,10 +68,7 @@ export default function JoinForm({
         </label>
 
         {error && (
-          <p
-            className="student-join-form__error"
-            role="alert"
-          >
+          <p className="student-join-form__error" role="alert">
             {error}
           </p>
         )}
@@ -91,21 +76,12 @@ export default function JoinForm({
         <button
           className="student-join-form__submit"
           type="submit"
-          disabled={
-            busy ||
-            code.length !== 4 ||
-            !name.trim()
-          }
+          disabled={busy || code.length !== 4 || !name.trim()}
         >
-          <span>
-            {busy ? t("joining") : t("join")}
-          </span>
+          <span>{busy ? t("joining") : t("join")}</span>
 
           {!busy && (
-            <span
-              className="student-join-form__arrow"
-              aria-hidden="true"
-            >
+            <span className="student-join-form__arrow" aria-hidden="true">
               ←
             </span>
           )}
@@ -113,10 +89,7 @@ export default function JoinForm({
       </form>
 
       <footer className="student-join-form__status">
-        <span
-          className="student-join-form__status-dot"
-          aria-hidden="true"
-        />
+        <span className="student-join-form__status-dot" aria-hidden="true" />
 
         <span>{t("joinReady")}</span>
       </footer>

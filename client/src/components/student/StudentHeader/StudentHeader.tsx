@@ -23,9 +23,7 @@ export default function StudentHeader({
         </div>
 
         <div>
-          <strong className="student-header__logo">
-            Class Pulse
-          </strong>
+          <strong className="student-header__logo">Class Pulse</strong>
 
           {title && (
             <span className="student-header__class-title" dir="auto">
@@ -41,9 +39,7 @@ export default function StudentHeader({
             {name}
           </span>
 
-          <span className="student-header__code">
-            #{code}
-          </span>
+          <span className="student-header__code">#{code}</span>
         </div>
 
         <span

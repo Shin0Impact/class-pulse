@@ -28,15 +28,10 @@ export default function QuestionCard({
   const { t } = usePreferences();
 
   return (
-    <section
-      className="question-card"
-      aria-labelledby="student-question-title"
-    >
+    <section className="question-card" aria-labelledby="student-question-title">
       <header className="question-card__header">
         <div className="question-card__meta">
-          <span className="question-card__eyebrow">
-            {t("question")}
-          </span>
+          <span className="question-card__eyebrow">{t("question")}</span>
 
           {topic && (
             <span className="question-card__topic" dir="auto">
@@ -78,17 +73,11 @@ export default function QuestionCard({
               }`}
               onClick={() => onSelect(option.id)}
             >
-              <span
-                className="question-card__option-letter"
-                aria-hidden="true"
-              >
+              <span className="question-card__option-letter" aria-hidden="true">
                 {OPTION_LETTERS[index] ?? index + 1}
               </span>
 
-              <span
-                className="question-card__option-text"
-                dir="auto"
-              >
+              <span className="question-card__option-text" dir="auto">
                 {option.text}
               </span>
 

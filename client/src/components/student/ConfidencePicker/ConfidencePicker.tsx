@@ -44,18 +44,11 @@ export default function ConfidencePicker({
   const { t } = usePreferences();
 
   return (
-    <section
-      className="confidence-picker"
-      aria-labelledby="confidence-title"
-    >
+    <section className="confidence-picker" aria-labelledby="confidence-title">
       <header className="confidence-picker__header">
-        <span className="confidence-picker__eyebrow">
-          {t("oneMoreThing")}
-        </span>
+        <span className="confidence-picker__eyebrow">{t("oneMoreThing")}</span>
 
-        <h2 id="confidence-title">
-          {t("howSure")}
-        </h2>
+        <h2 id="confidence-title">{t("howSure")}</h2>
 
         <p>{t("confidenceHint")}</p>
       </header>
@@ -75,16 +68,11 @@ export default function ConfidencePicker({
               role="radio"
               aria-checked={selected}
               className={`confidence-picker__option ${
-                selected
-                  ? "confidence-picker__option--selected"
-                  : ""
+                selected ? "confidence-picker__option--selected" : ""
               }`}
               onClick={() => onSelect(option.id)}
             >
-              <span
-                className="confidence-picker__symbol"
-                aria-hidden="true"
-              >
+              <span className="confidence-picker__symbol" aria-hidden="true">
                 {option.symbol}
               </span>
 
@@ -93,10 +81,7 @@ export default function ConfidencePicker({
                 <span>{t(option.hint)}</span>
               </span>
 
-              <span
-                className="confidence-picker__indicator"
-                aria-hidden="true"
-              >
+              <span className="confidence-picker__indicator" aria-hidden="true">
                 <span />
               </span>
             </button>
