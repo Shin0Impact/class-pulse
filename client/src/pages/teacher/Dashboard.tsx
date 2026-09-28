@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EVENTS } from "@shared/events.ts";
 import { FEATURES } from "@shared/features.ts";
-import { socket, emitAck } from "../../socket/socket.ts";
+import { socket, emitAck, SERVER_URL } from "../../socket/socket.ts";
 import { useSocketEvents } from "../../socket/useSocketEvents.ts";
 import BlindspotHeadline from "../../components/BlindspotHeadline.tsx";
 import Button from "../../components/ui/Button.tsx";
@@ -15,13 +15,41 @@ import TopicHistory from "../../components/TopicHistory.tsx";
 import BeforeAfterChart from "../../components/BeforeAfterChart.tsx";
 import type { FormEvent } from "react";
 import { usePreferences } from "../../context/PreferencesContext.tsx";
+import QuadrantChart from "../../components/QuadrantChart.tsx";
+import IllusionGapChart from "../../components/IllusionGapChart.tsx";
 import type {
+  BlindspotUpdate,
+  CalibrationCard,
   FocusAlert,
   Pulse,
   Summary,
   TeacherState,
   TimelineSample,
 } from "@shared/types.ts";
+
+type DeckSummary = {
+  id: string;
+  title: string;
+  questionCount: number;
+};
+
+type DeckQuestion = {
+  id: string;
+  topic: string;
+  prompt: string;
+  correctOptionId: string;
+  options: {
+    id: string;
+    text: string;
+  }[];
+  rubric?: unknown;
+};
+
+type Deck = {
+  id: string;
+  title: string;
+  questions: DeckQuestion[];
+};
 
 export default function Dashboard() {
   const { code } = useParams();
@@ -38,6 +66,63 @@ export default function Dashboard() {
   const [hideNames, setHideNames] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [decks, setDecks] = useState<DeckSummary[]>([]);
+  const [selectedDeckId, setSelectedDeckId] = useState("");
+  const [questions, setQuestions] = useState<DeckQuestion[]>([]);
+  const [selectedQuestionId, setSelectedQuestionId] = useState("");
+  const [blindspotUpdate, setBlindspotUpdate] =
+    useState<BlindspotUpdate | null>(null);
+
+  const [calibrationCard, setCalibrationCard] =
+    useState<CalibrationCard | null>(null);
+
+  useEffect(() => {
+    async function loadDecks() {
+      try {
+        const res = await fetch(`${SERVER_URL}/decks`);
+
+        if (!res.ok) {
+          throw new Error("Failed to load decks");
+        }
+
+        const data: DeckSummary[] = await res.json();
+        setDecks(data);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
+    }
+
+    loadDecks();
+  }, []);
+
+
+  useEffect(() => {
+    if (!selectedDeckId) {
+      setQuestions([]);
+      setSelectedQuestionId("");
+      return;
+    }
+
+    async function loadDeck() {
+      try {
+        const res = await fetch(`${SERVER_URL}/decks/${selectedDeckId}`);
+
+        if (!res.ok) {
+          throw new Error("Failed to load deck");
+        }
+
+        const data: Deck = await res.json();
+
+        setQuestions(data.questions);
+        setSelectedQuestionId("");
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
+    }
+
+    loadDeck();
+  }, [selectedDeckId]);
+
 
   // Every pulse is also a point on the timeline (skipping exact repeats).
   const addSample = useCallback((p: Pulse) => {
@@ -93,14 +178,25 @@ export default function Dashboard() {
       setPulse(p);
       addSample(p);
     },
+
     [EVENTS.CHECK_IN_STARTED]: (data) => {
       if ("history" in data) {
         setHistory(data.history);
         setAlerts([]);
       }
     },
+
     [EVENTS.FOCUS_ALERT]: (a) =>
       setAlerts((l) => [{ ...a, at: Date.now() }, ...l].slice(0, 6)),
+
+    [EVENTS.BLINDSPOT_UPDATE]: (update: BlindspotUpdate) => {
+      setBlindspotUpdate(update);
+    },
+
+    [EVENTS.CALIBRATION_CARD]: (card: CalibrationCard) => {
+      setCalibrationCard(card);
+    },
+
     [EVENTS.SESSION_ENDED]: () => navigate("/"),
   });
 
@@ -118,6 +214,30 @@ export default function Dashboard() {
       setBusy(false);
     }
   }
+
+  const selectedQuestion = questions.find(
+    (question) => question.id === selectedQuestionId,
+  );
+
+  async function launchQuestion() {
+    if (!selectedQuestion) return;
+
+    setBlindspotUpdate(null);
+    setCalibrationCard(null);
+
+    await run(EVENTS.TEACHER_LAUNCH_QUESTION, {
+      question: selectedQuestion,
+    });
+  }
+
+  async function pairUp() {
+    await run(EVENTS.TEACHER_PAIR_UP, {});
+  }
+
+  async function recheckQuestion() {
+    await run(EVENTS.TEACHER_RECHECK, {});
+  }
+
 
   const checkIn = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -180,6 +300,205 @@ export default function Dashboard() {
 
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
+
+          <Card title="Question launcher">
+            <div className="space-y-4">
+              <label className="block">
+                <span className="mb-1 block text-sm text-slate-500">
+                  Deck
+                </span>
+
+                <select
+                  className="w-full rounded-xl border border-slate-300 px-3 py-3"
+                  value={selectedDeckId}
+                  onChange={(e) => setSelectedDeckId(e.target.value)}
+                  disabled={busy}
+                >
+                  <option value="">Choose a deck</option>
+
+                  {decks.map((deck) => (
+                    <option key={deck.id} value={deck.id}>
+                      {deck.title} ({deck.questionCount})
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-sm text-slate-500">
+                  Question
+                </span>
+
+                <select
+                  className="w-full rounded-xl border border-slate-300 px-3 py-3"
+                  value={selectedQuestionId}
+                  onChange={(e) => setSelectedQuestionId(e.target.value)}
+                  disabled={!selectedDeckId || busy}
+                >
+                  <option value="">{t("chooseQuestion")}</option>
+
+                  {questions.map((question) => (
+                    <option key={question.id} value={question.id}>
+                      {question.topic} — {question.prompt}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  onClick={launchQuestion}
+                  disabled={!selectedQuestion || busy}
+                >
+                  {t("launchQuestion")}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled
+                >
+                  {t("closeQuestion")}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={pairUp}
+                  disabled={!blindspotUpdate || busy}
+                >
+                  {t("pairUp")}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={recheckQuestion}
+                  disabled={!blindspotUpdate || busy}
+                >
+                  {t("recheckQuestion")}
+                </Button>
+              </div>
+            </div>
+          </Card>
+
+          <Card title={t("questionLauncher")}>
+            <div className="space-y-4">
+              <label className="block">
+                <span className="mb-1 block text-sm text-slate-500">
+                  {t("deck")}
+                </span>
+
+                <select
+                  className="w-full rounded-xl border border-slate-300 px-3 py-3"
+                  value={selectedDeckId}
+                  onChange={(e) => setSelectedDeckId(e.target.value)}
+                  disabled={busy}
+                >
+                  <option value="">Choose a deck</option>
+
+                  {decks.map((deck) => (
+                    <option key={deck.id} value={deck.id}>
+                      {deck.title} ({deck.questionCount})
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-sm text-slate-500">
+                  Question
+                </span>
+
+                <select
+                  className="w-full rounded-xl border border-slate-300 px-3 py-3"
+                  value={selectedQuestionId}
+                  onChange={(e) => setSelectedQuestionId(e.target.value)}
+                  disabled={!selectedDeckId || busy}
+                >
+                  <option value="">Choose a question</option>
+
+                  {questions.map((question) => (
+                    <option key={question.id} value={question.id}>
+                      {question.topic} — {question.prompt}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  onClick={launchQuestion}
+                  disabled={!selectedQuestion || busy}
+                >
+                  Launch
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled
+                  title="Close question event is not available yet"
+                >
+                  Close
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={pairUp}
+                  disabled={!blindspotUpdate || busy}
+                >
+                  Pair up
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={recheckQuestion}
+                  disabled={!blindspotUpdate || busy}
+                >
+                  Re-check
+                </Button>
+              </div>
+            </div>
+          </Card>
+
+
+          {blindspotUpdate && (
+            <>
+              <BlindspotHeadline
+                studentCount={blindspotUpdate.counts.blindspot}
+                belief={blindspotUpdate.headline}
+              />
+
+              <QuadrantChart update={blindspotUpdate} />
+
+              <IllusionGapChart update={blindspotUpdate} />
+            </>
+          )}
+
+
+          {blindspotUpdate && (
+            <>
+              <BlindspotHeadline
+                studentCount={blindspotUpdate.counts.blindspot}
+                belief={blindspotUpdate.headline}
+              />
+
+              <Card title="Blindspot quadrants">
+                <QuadrantChart update={blindspotUpdate} />
+              </Card>
+
+              <Card title="Illusion gap">
+                <IllusionGapChart update={blindspotUpdate} />
+              </Card>
+            </>
+          )}
+
+
           <Card title={t("teaching")}>
             <form onSubmit={checkIn} className="flex flex-wrap items-end gap-3">
               <label className="min-w-0 flex-1">

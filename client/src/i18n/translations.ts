@@ -311,6 +311,14 @@ const D = {
   ],
 
   continueLearning: ["متابعة", "Continue"],
+  questionLauncher: ["لوحة تشغيل الأسئلة", "Question launcher"],
+  deck: ["مجموعة الأسئلة", "Deck"],
+  chooseDeck: ["اختر مجموعة", "Choose a deck"],
+  chooseQuestion: ["اختر سؤالًا", "Choose a question"],
+  launchQuestion: ["ابدأ السؤال", "Launch"],
+  closeQuestion: ["إغلاق", "Close"],
+  pairUp: ["تكوين أزواج", "Pair up"],
+  recheckQuestion: ["إعادة الفحص", "Re-check"],
   points: ["نقطة في", "points on"],
 } as const;
 
