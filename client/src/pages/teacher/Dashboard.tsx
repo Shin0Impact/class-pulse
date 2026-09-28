@@ -19,7 +19,6 @@ import QuadrantChart from "../../components/QuadrantChart.tsx";
 import IllusionGapChart from "../../components/IllusionGapChart.tsx";
 import type {
   BlindspotUpdate,
-  CalibrationCard,
   FocusAlert,
   Pulse,
   Summary,
@@ -72,9 +71,6 @@ export default function Dashboard() {
   const [selectedQuestionId, setSelectedQuestionId] = useState("");
   const [blindspotUpdate, setBlindspotUpdate] =
     useState<BlindspotUpdate | null>(null);
-
-  const [calibrationCard, setCalibrationCard] =
-    useState<CalibrationCard | null>(null);
 
   useEffect(() => {
     async function loadDecks() {
@@ -193,10 +189,6 @@ export default function Dashboard() {
       setBlindspotUpdate(update);
     },
 
-    [EVENTS.CALIBRATION_CARD]: (card: CalibrationCard) => {
-      setCalibrationCard(card);
-    },
-
     [EVENTS.SESSION_ENDED]: () => navigate("/"),
   });
 
@@ -223,7 +215,6 @@ export default function Dashboard() {
     if (!selectedQuestion) return;
 
     setBlindspotUpdate(null);
-    setCalibrationCard(null);
 
     await run(EVENTS.TEACHER_LAUNCH_QUESTION, {
       question: selectedQuestion,
@@ -301,11 +292,11 @@ export default function Dashboard() {
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
 
-          <Card title="Question launcher">
+          <Card title={t("questionLauncher")}>
             <div className="space-y-4">
               <label className="block">
                 <span className="mb-1 block text-sm text-slate-500">
-                  Deck
+                  {t("deck")}
                 </span>
 
                 <select
@@ -314,7 +305,7 @@ export default function Dashboard() {
                   onChange={(e) => setSelectedDeckId(e.target.value)}
                   disabled={busy}
                 >
-                  <option value="">Choose a deck</option>
+                  <option value="">{t("chooseDeck")}</option>
 
                   {decks.map((deck) => (
                     <option key={deck.id} value={deck.id}>
@@ -326,7 +317,7 @@ export default function Dashboard() {
 
               <label className="block">
                 <span className="mb-1 block text-sm text-slate-500">
-                  Question
+                  {t("chooseQuestion")}
                 </span>
 
                 <select
@@ -358,6 +349,7 @@ export default function Dashboard() {
                   type="button"
                   variant="secondary"
                   disabled
+                  title="Close question event is not available yet"
                 >
                   {t("closeQuestion")}
                 </Button>
@@ -382,104 +374,6 @@ export default function Dashboard() {
               </div>
             </div>
           </Card>
-
-          <Card title={t("questionLauncher")}>
-            <div className="space-y-4">
-              <label className="block">
-                <span className="mb-1 block text-sm text-slate-500">
-                  {t("deck")}
-                </span>
-
-                <select
-                  className="w-full rounded-xl border border-slate-300 px-3 py-3"
-                  value={selectedDeckId}
-                  onChange={(e) => setSelectedDeckId(e.target.value)}
-                  disabled={busy}
-                >
-                  <option value="">Choose a deck</option>
-
-                  {decks.map((deck) => (
-                    <option key={deck.id} value={deck.id}>
-                      {deck.title} ({deck.questionCount})
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="block">
-                <span className="mb-1 block text-sm text-slate-500">
-                  Question
-                </span>
-
-                <select
-                  className="w-full rounded-xl border border-slate-300 px-3 py-3"
-                  value={selectedQuestionId}
-                  onChange={(e) => setSelectedQuestionId(e.target.value)}
-                  disabled={!selectedDeckId || busy}
-                >
-                  <option value="">Choose a question</option>
-
-                  {questions.map((question) => (
-                    <option key={question.id} value={question.id}>
-                      {question.topic} — {question.prompt}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  onClick={launchQuestion}
-                  disabled={!selectedQuestion || busy}
-                >
-                  Launch
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled
-                  title="Close question event is not available yet"
-                >
-                  Close
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={pairUp}
-                  disabled={!blindspotUpdate || busy}
-                >
-                  Pair up
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={recheckQuestion}
-                  disabled={!blindspotUpdate || busy}
-                >
-                  Re-check
-                </Button>
-              </div>
-            </div>
-          </Card>
-
-
-          {blindspotUpdate && (
-            <>
-              <BlindspotHeadline
-                studentCount={blindspotUpdate.counts.blindspot}
-                belief={blindspotUpdate.headline}
-              />
-
-              <QuadrantChart update={blindspotUpdate} />
-
-              <IllusionGapChart update={blindspotUpdate} />
-            </>
-          )}
-
 
           {blindspotUpdate && (
             <>
