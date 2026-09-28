@@ -10,6 +10,8 @@ import type {
   PublicQuestion,
   PairAssigned,
   AnswerReveal,
+  BlindspotUpdate,
+  CalibrationCard,
 } from "@shared/types.ts";
 
 type Handlers = {
@@ -33,6 +35,10 @@ type Handlers = {
 
   // S4 — sent privately to the student when the round closes.
   [EVENTS.ANSWER_REVEAL]?: (data: AnswerReveal) => void;
+
+  [EVENTS.BLINDSPOT_UPDATE]?: (data: BlindspotUpdate) => void;
+  
+  [EVENTS.CALIBRATION_CARD]?: (data: CalibrationCard) => void;
 };
 
 // useSocketEvents({
