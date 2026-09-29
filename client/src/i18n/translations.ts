@@ -515,6 +515,18 @@ const D = {
   noAnswersYet: ["لا توجد إجابات بعد.", "No answers yet."],
   openAnswerPlaceholder: ["اكتب إجابتك بكلماتك…", "Write your answer in your own words…"],
   teacherClosedQuestion: ["أغلق المعلم السؤال.", "Your teacher closed the question."],
+
+  // ---- Reasons (what would help) ----
+  reasonTooFast: ["الشرح سريع جدًا", "Too fast"],
+  reasonUnclearSteps: ["الخطوات غير واضحة", "Steps unclear"],
+  reasonNeedExample: ["أحتاج مثالًا", "Need an example"],
+  reasonMissingBasics: ["تنقصني الأساسيات", "Missing basics"],
+  reasonOther: ["سبب آخر", "Other reason"],
+  reasonOtherLabel: ["اكتب السبب بطريقتك", "Tell us in your own words"],
+  reasonOtherPlaceholder: ["مثلًا: لم أفهم لماذا قسمنا هنا", "For example: I didn't get why we divided here"],
+  reasonSend: ["إرسال", "Send"],
+  reasonSent: ["وصلت رسالتك للمعلم", "Your teacher got it"],
+
 } as const;
 
 export type TranslationKey = keyof typeof D;

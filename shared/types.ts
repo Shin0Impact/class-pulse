@@ -38,6 +38,8 @@ export type Pulse = Omit<TimelineSample, "checkInId"> & {
   checkIn: CheckIn;
   counts: Counts;
   reasons: ReasonCount[];
+  // The students' own words from "Other" (anonymous, de-duplicated). The bars only carry a count.
+  otherNotes: string[];
   comparison: Comparison | null;
   perStudent: StudentView[];
 };

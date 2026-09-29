@@ -1,4 +1,4 @@
-import { REASONS, WEIGHTS } from '../../../shared/events.ts';
+import { REASONS, WEIGHTS, OTHER_REASON_ID, isCustomReason, customReasonText } from '../../../shared/events.ts';
 import type { CheckIn, Counts, Pulse, Summary } from '../../../shared/types.ts';
 import type { Session, Student } from './types.ts';
 
@@ -39,10 +39,22 @@ export function computePulse(session: Session): Pulse {
   const t = tally(list);
 
   const byReason = new Map<string, number>();
+  // Every custom "Other" reason is its own sentence, so one bar per sentence would be a wall of 1s.
+  // They are counted as one "Other" bar, and the words are listed separately (de-duplicated).
+  let otherCount = 0;
+  const otherNotes: string[] = [];
   for (const s of list) {
-    if ((s.status === 'yellow' || s.status === 'red') && s.reason) byReason.set(s.reason, (byReason.get(s.reason) || 0) + 1);
+    if ((s.status !== 'yellow' && s.status !== 'red') || !s.reason) continue;
+    if (isCustomReason(s.reason)) {
+      otherCount++;
+      const note = customReasonText(s.reason);
+      if (note && !otherNotes.some((n) => n.toLowerCase() === note.toLowerCase())) otherNotes.push(note);
+    } else {
+      byReason.set(s.reason, (byReason.get(s.reason) || 0) + 1);
+    }
   }
-  const reasons = REASONS.map((r) => ({ ...r, count: byReason.get(r.id) || 0 }))
+  const reasons = [...REASONS, { id: OTHER_REASON_ID, label: 'Other' }]
+    .map((r) => ({ ...r, count: r.id === OTHER_REASON_ID ? otherCount : byReason.get(r.id) || 0 }))
     .filter((r) => r.count > 0)
     .sort((a, b) => b.count - a.count);
 
@@ -51,6 +63,7 @@ export function computePulse(session: Session): Pulse {
     checkIn: { id: session.current.id, topic: session.current.topic, startedAt: session.current.startedAt },
     ...t,
     reasons,
+    otherNotes: otherNotes.slice(0, 20),
     comparison: comparisonFor(session, t),
     perStudent: list.map((s) => ({
       id: s.id, name: s.name, connected: s.connected, status: s.status, reason: s.reason, focusFlags: s.focus,
