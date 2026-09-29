@@ -62,7 +62,7 @@ export default function Dashboard() {
   const [focusMode, setFocusMode] = useState(true);
   const [alerts, setAlerts] = useState<(FocusAlert & { at: number })[]>([]);
   const [topic, setTopic] = useState("");
-  const [hideNames, setHideNames] = useState(false);
+  const [hideNames, setHideNames] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [decks, setDecks] = useState<DeckSummary[]>([]);
@@ -255,23 +255,25 @@ export default function Dashboard() {
   ]);
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6">
+    <main className="mx-auto max-w-6xl px-4 py-6 text-lg text-slate-950">
       {/* header: the join code is the star, it is on the projector */}
       <header className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-indigo-600 p-5 text-white">
         <div>
           <div
-            className="text-sm uppercase tracking-wide text-indigo-200"
+            className="text-xl font-bold uppercase tracking-wide text-white"
             dir="auto"
           >
             {title || "Class Pulse"}
           </div>
           <div className="mt-1 flex items-baseline gap-3">
-            <span className="text-sm text-indigo-200">{t("joinCode")}</span>
+            <span className="text-lg font-semibold text-white">
+              {t("joinCode")}
+            </span>
             <span className="font-mono text-5xl font-extrabold tracking-widest">
               {code}
             </span>
           </div>
-          <div className="mt-1 text-sm text-indigo-100">
+          <div className="mt-1 text-base text-indigo-100">
             {t("studentsOpen")} <span className="font-semibold">{joinUrl}</span>
           </div>
         </div>
@@ -295,7 +297,7 @@ export default function Dashboard() {
           <Card title={t("questionLauncher")}>
             <div className="space-y-4">
               <label className="block">
-                <span className="mb-1 block text-sm text-slate-500">
+                <span className="mb-1 block text-base text-slate-500">
                   {t("deck")}
                 </span>
 
@@ -316,7 +318,7 @@ export default function Dashboard() {
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm text-slate-500">
+                <span className="mb-1 block text-base text-slate-500">
                   {t("chooseQuestion")}
                 </span>
 
@@ -396,7 +398,7 @@ export default function Dashboard() {
           <Card title={t("teaching")}>
             <form onSubmit={checkIn} className="flex flex-wrap items-end gap-3">
               <label className="min-w-0 flex-1">
-                <span className="mb-1 block text-sm text-slate-500">
+                <span className="mb-1 block text-base text-slate-500">
                   {t("topicLabel")}
                 </span>
                 <input
@@ -412,9 +414,9 @@ export default function Dashboard() {
                 {t("check")}
               </Button>
             </form>
-            <p className="mt-2 text-sm text-slate-500">{t("teacherHint")}</p>
+            <p className="mt-2 text-base text-slate-500">{t("teacherHint")}</p>
             {FEATURES.focusMode && (
-              <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-slate-600">
+              <label className="mt-3 flex cursor-pointer items-center gap-2 text-base text-slate-600">
                 <input
                   type="checkbox"
                   checked={focusMode}
@@ -454,7 +456,7 @@ export default function Dashboard() {
           <Card
             title={`${t("students")} (${pulse?.total ?? 0})`}
             right={
-              <label className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-500">
+              <label className="flex cursor-pointer items-center gap-1.5 text-base text-slate-500">
                 <input
                   type="checkbox"
                   checked={hideNames}
@@ -473,7 +475,7 @@ export default function Dashboard() {
 
           {FEATURES.focusMode && alerts.length > 0 && (
             <Card title={`🔒 ${t("alerts")}`}>
-              <ul className="space-y-1 text-sm">
+              <ul className="space-y-1 text-base">
                 {alerts.map((a, i) => (
                   <li
                     key={`${a.at}-${i}`}
