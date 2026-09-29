@@ -53,6 +53,7 @@ export type TeacherState = {
 
 export type StudentState = {
   studentId: string;
+  rejoinKey: string; // keep with studentId; both are needed to reconnect as this student
   name: string;
   title: string;
   topic: string;
@@ -159,4 +160,127 @@ export type AnswerReveal = {
   correctOptionText: string;
   confidence: Confidence;
   correct: boolean;
+};
+
+// ---- Accounts ----
+
+export type Role = "teacher" | "student";
+
+export type AccountProfile = {
+  id: string;
+  role: Role;
+  displayName: string;
+  email: string;
+};
+
+export type AuthTokens = {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number; // ms since epoch
+};
+
+// What POST /auth/signup, /auth/login and /auth/refresh return.
+export type AuthResult = { session: AuthTokens; profile: AccountProfile };
+
+// ---- History & progress (GET /me/...) ----
+// Accuracy and calibration always use each student's FIRST attempt at a question (round 1): a
+// re-check comes after peer discussion, so it measures what they learned, not what they knew.
+
+export type CalibrationStats = {
+  answered: number;
+  accuracy: number | null; // % correct
+  avgConfidence: number | null; // 0-100
+  calibration: Calibration;
+  illusionGap: number | null; // avgConfidence - accuracy
+  score: number | null;
+};
+
+// GET /me/classes (teacher): one row per class they ran, newest first.
+export type ClassListItem = {
+  id: string;
+  code: string;
+  title: string;
+  status: string; // "active" | "ended"
+  createdAt: string;
+  endedAt: string | null;
+  studentCount: number;
+  questionCount: number;
+  firstTryAccuracy: number | null;
+  blindspotCount: number; // confident-and-wrong first attempts
+};
+
+export type ClassStudent = CalibrationStats & {
+  id: string;
+  name: string;
+  signedIn: boolean;
+  blindspots: number;
+};
+
+export type ClassQuestionRound = {
+  round: number;
+  answered: number;
+  correctPct: number | null;
+  counts: QuadrantCounts;
+};
+
+export type ClassQuestion = {
+  id: string;
+  topic: string;
+  prompt: string;
+  startedAt: string;
+  options: PublicQuestionOption[];
+  correctOptionId: string;
+  optionCounts: Record<string, number>; // first attempts per option
+  rounds: ClassQuestionRound[]; // round 1, then each re-check
+};
+
+export type ClassCheckIn = {
+  topic: string;
+  startedAt: string;
+  endedAt: string | null;
+  pct: number | null;
+  green: number;
+  yellow: number;
+  red: number;
+  unmarked: number;
+};
+
+// GET /me/classes/:id (teacher): the class summary page.
+export type ClassDetail = {
+  id: string;
+  code: string;
+  title: string;
+  status: string;
+  createdAt: string;
+  endedAt: string | null;
+  totals: {
+    students: number;
+    questions: number;
+    answers: number;
+    firstTryAccuracy: number | null;
+    illusionGap: number | null;
+  };
+  students: ClassStudent[];
+  questions: ClassQuestion[];
+  checkIns: ClassCheckIn[];
+};
+
+export type ProgressClass = CalibrationStats & {
+  sessionId: string;
+  title: string;
+  date: string;
+};
+
+export type ProgressTopic = {
+  topic: string;
+  answered: number;
+  accuracy: number | null;
+  blindspots: number;
+};
+
+// GET /me/progress (student).
+export type StudentProgress = {
+  overall: CalibrationStats;
+  classes: ProgressClass[]; // oldest first: the calibration-over-time line
+  topics: ProgressTopic[];
 };

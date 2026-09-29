@@ -1,14 +1,35 @@
+import { Link } from "react-router-dom";
 import { usePreferences } from "../../../context/PreferencesContext";
+import { useAuth } from "../../../auth/AuthContext.tsx";
 import "./SiteControls.css";
 
 export default function SiteControls() {
-  const { language, theme, toggleLanguage, toggleTheme } = usePreferences();
+  const { language, theme, toggleLanguage, toggleTheme, t } = usePreferences();
+  const { accountsEnabled, profile } = useAuth();
 
   return (
     <aside
       className="site-controls"
       aria-label={language === "ar" ? "إعدادات الموقع" : "Site settings"}
     >
+      {profile ? (
+        <Link
+          to="/me"
+          className="site-control site-control--account"
+          aria-label={t("myAccount")}
+          title={profile.displayName}
+        >
+          <span className="site-control__avatar" aria-hidden="true">
+            {profile.displayName.trim().charAt(0).toUpperCase() || "?"}
+          </span>
+        </Link>
+      ) : (
+        accountsEnabled && (
+          <Link to="/login" className="site-control site-control--account">
+            <strong>{t("signIn")}</strong>
+          </Link>
+        )
+      )}
       <button
         type="button"
         className="site-control"

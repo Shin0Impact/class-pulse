@@ -13,6 +13,7 @@ import {
   recordClarityRating,
 } from '../services/questionService.ts';
 import { studentState } from '../services/views.ts';
+import { verifyToken } from '../services/authService.ts';
 import {
   handle,
   teacherRoom,
@@ -40,20 +41,29 @@ export function registerStudentHandlers(io: Server, socket: Socket): void {
   socket.on(
     EVENTS.STUDENT_JOIN,
     handle(
-      ({
+      async ({
         code,
         name,
         studentId,
+        rejoinKey,
+        accessToken,
       }: {
         code?: unknown;
         name?: unknown;
-        studentId?: string;
+        studentId?: unknown;
+        rejoinKey?: unknown;
+        accessToken?: unknown;
       }) => {
         const session = requireSession(code);
+        // Signing in is optional for students: a signed-in student's answers go to their
+        // progress history, a guest just plays. A teacher account joining is treated as a guest.
+        const account = await verifyToken(accessToken);
         const student = joinStudent(session, {
           name,
           studentId,
+          rejoinKey,
           socketId: socket.id,
+          userId: account?.role === 'student' ? account.id : null,
         });
 
         socket.join(studentRoom(session.code));

@@ -19,6 +19,11 @@ export type Student = {
   status: Status;
   reason: string | null;
   focus: number;
+  // The student's account (profiles.id) when they joined signed in; null for a guest join.
+  userId: string | null;
+  // Private proof that a reconnect comes from this student's own device. The studentId alone is
+  // not enough: classmates see it (a pair:assigned partner carries it).
+  rejoinKey: string;
 };
 
 // The answer key and rubric stay on the server.
@@ -56,6 +61,8 @@ export type Session = {
   id: string;
   code: string;
   title: string;
+  // The teacher's account (profiles.id). null only when accounts are off (no database configured).
+  teacherId: string | null;
   createdAt: number;
   students: Map<string, Student>;
   checkIns: Summary[];

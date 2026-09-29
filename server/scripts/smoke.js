@@ -57,6 +57,7 @@ try {
     const s = await connect();
     const r = await ask(s, EVENTS.STUDENT_JOIN, { code, name });
     s.studentId = r.studentId;
+    s.rejoinKey = r.rejoinKey;
     students.push(s);
   }
   await new Promise((r) => setTimeout(r, 200));
@@ -213,8 +214,12 @@ try {
   ok(rj.state.history.length === 1 && rj.state.history[0].pct === 67 && rj.state.history[0].topic === 'Common denominators', 'history keeps the finished check-in (67%)');
   ok(rj.state.timeline.length >= 4, `timeline has samples for the "where we lost them" chart (${rj.state.timeline.length})`);
   const sBack = await connect();
-  const back = await ask(sBack, EVENTS.STUDENT_JOIN, { code, name: 'ignored', studentId: students[5].studentId });
+  const back = await ask(sBack, EVENTS.STUDENT_JOIN, { code, name: 'ignored', studentId: students[5].studentId, rejoinKey: students[5].rejoinKey });
   ok(back.ok && back.studentId === students[5].studentId && back.status === 'yellow' && back.topic === '  common   DENOMINATORS '.trim().replace(/\s+/g, ' '), 'a student reconnects with the same identity, color and topic');
+  // A classmate knows Amal's studentId (pair:assigned carries it) but not her rejoinKey.
+  const sImpostor = await connect();
+  const impostor = await ask(sImpostor, EVENTS.STUDENT_JOIN, { code, name: 'Mallory', studentId: students[0].studentId });
+  ok(impostor.ok && impostor.studentId !== students[0].studentId, "a studentId without its rejoinKey can't take over that student");
 
   // ---- end
   const ended = waitFor(students[2], EVENTS.SESSION_ENDED);

@@ -19,6 +19,12 @@ import {
 } from "../services/questionService.ts";
 
 import { teacherSnapshot } from "../services/views.ts";
+import {
+  authEnabled,
+  requireAccount,
+  verifyToken,
+  AuthError,
+} from "../services/authService.ts";
 import { handle, teacherRoom, studentRoom, emitPulse } from "./helpers.ts";
 
 import type { Server, Socket } from "socket.io";
@@ -51,16 +57,28 @@ export function registerTeacherHandlers(io: Server, socket: Socket): void {
 
   socket.on(
     EVENTS.TEACHER_CREATE,
-    handle(({ title }: { title?: unknown }) => {
-      const session = createSession(title);
+    handle(
+      async ({
+        title,
+        accessToken,
+      }: {
+        title?: unknown;
+        accessToken?: unknown;
+      }) => {
+        // With accounts on, every class belongs to a signed-in teacher (their history needs it).
+        const teacher = authEnabled
+          ? await requireAccount(accessToken, "teacher")
+          : null;
+        const session = createSession(title, teacher?.id ?? null);
 
-      attach(session);
+        attach(session);
 
-      return {
-        code: session.code,
-        state: teacherSnapshot(session),
-      };
-    }),
+        return {
+          code: session.code,
+          state: teacherSnapshot(session),
+        };
+      },
+    ),
   );
 
   // -------------------------------------------------------
@@ -69,16 +87,33 @@ export function registerTeacherHandlers(io: Server, socket: Socket): void {
 
   socket.on(
     EVENTS.TEACHER_REJOIN,
-    handle(({ code }: { code?: unknown }) => {
-      const session = requireSession(code);
+    handle(
+      async ({
+        code,
+        accessToken,
+      }: {
+        code?: unknown;
+        accessToken?: unknown;
+      }) => {
+        const session = requireSession(code);
 
-      attach(session);
+        // Only the teacher who owns the class can reopen its dashboard.
+        if (session.teacherId) {
+          const teacher = await verifyToken(accessToken);
+          if (!teacher) throw new AuthError("Please sign in to open this class");
+          if (teacher.id !== session.teacherId) {
+            throw new AuthError("This class belongs to another teacher");
+          }
+        }
 
-      return {
-        code: session.code,
-        state: teacherSnapshot(session),
-      };
-    }),
+        attach(session);
+
+        return {
+          code: session.code,
+          state: teacherSnapshot(session),
+        };
+      },
+    ),
   );
 
   // -------------------------------------------------------

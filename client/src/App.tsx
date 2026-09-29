@@ -8,23 +8,33 @@ import DemoIndex from "./pages/DemoIndex.tsx";
 import BlindspotDemo from "./pages/BlindspotDemo.tsx";
 import SiteControls from "./components/global/SiteControls/SiteControls.tsx";
 import { PreferencesProvider } from "./context/PreferencesContext.tsx";
+import { AuthProvider } from "./auth/AuthContext.tsx";
+import AuthPage from "./pages/auth/AuthPage.tsx";
+import Account from "./pages/account/Account.tsx";
+import ClassSummary from "./pages/account/ClassSummary.tsx";
 import AIAssistant from "./components/global/AIAssistant/AIAssistant.tsx";
 
 export default function App() {
   return (
     <PreferencesProvider>
-      <SiteControls />
-      <AIAssistant />
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/teacher" element={<CreateSession />} />
-        <Route path="/teacher/:code" element={<Dashboard />} />
-        <Route path="/join" element={<Join />} />
-        <Route path="/play/:code" element={<Play />} />
-        <Route path="/demo" element={<DemoIndex />} />
-        <Route path="/demo/blindspot" element={<BlindspotDemo />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <AuthProvider>
+        <SiteControls />
+        <AIAssistant />
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/teacher" element={<CreateSession />} />
+          <Route path="/teacher/:code" element={<Dashboard />} />
+          <Route path="/join" element={<Join />} />
+          <Route path="/play/:code" element={<Play />} />
+          <Route path="/demo" element={<DemoIndex />} />
+          <Route path="/demo/blindspot" element={<BlindspotDemo />} />
+          <Route path="/login" element={<AuthPage mode="login" />} />
+          <Route path="/signup" element={<AuthPage mode="signup" />} />
+          <Route path="/me" element={<Account />} />
+          <Route path="/me/classes/:id" element={<ClassSummary />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
     </PreferencesProvider>
   );
 }
