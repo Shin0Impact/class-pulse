@@ -51,6 +51,17 @@ Without it, the server keeps everything in memory (fine for development). With i
 
 Rules: the service key lives **only** in `server/.env` (git-ignored) and on the hosting dashboard. Never put it in the client, never commit it. The browser never talks to Supabase. Live state stays in server memory for speed and the database is a history log; if Supabase is down the classroom keeps working.
 
+### Accounts (teachers and students)
+
+Accounts switch on automatically when the server has Supabase keys (`/health` reports `accounts: true`). With accounts on:
+
+- **Teachers must sign in** to start a class. Each class belongs to its teacher; only they can reopen its dashboard.
+- **Students can sign in or join as guests.** A signed-in student's answers feed their progress page; a guest just plays.
+- `/me` is the account home: teachers see every class they ran and a summary per class (students, first-try accuracy, confidently-wrong answers, how each question moved after the re-check, check-ins). Students see confidence vs accuracy over time, accuracy by topic, and past classes.
+- Sign-up and sign-in go through this server (`/auth/signup`, `/auth/login`, `/auth/refresh`), which uses Supabase Auth with the service key. The client needs **no** Supabase keys and there is no confirmation email.
+
+Setup: if your database was created from an older `schema.sql`, run `server/src/db/migrations/001_accounts.sql` once in the SQL Editor (it only adds; safe to re-run). Without the database (local dev with no keys, CI, the smoke test) accounts are off and everything works as before.
+
 ## Project layout
 
 ```

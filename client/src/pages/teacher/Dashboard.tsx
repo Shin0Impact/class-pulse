@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { EVENTS } from "@shared/events.ts";
 import { FEATURES } from "@shared/features.ts";
 import { socket, emitAck, SERVER_URL } from "../../socket/socket.ts";
+import { getAccessToken } from "../../auth/tokens.ts";
 import { useSocketEvents } from "../../socket/useSocketEvents.ts";
 import BlindspotHeadline from "../../components/BlindspotHeadline.tsx";
 import Button from "../../components/ui/Button.tsx";
@@ -147,7 +148,7 @@ export default function Dashboard() {
     try {
       const { state } = await emitAck<{ state: TeacherState }>(
         EVENTS.TEACHER_REJOIN,
-        { code },
+        { code, accessToken: await getAccessToken() },
       );
       setTitle(state.title);
       setPulse(state.pulse);

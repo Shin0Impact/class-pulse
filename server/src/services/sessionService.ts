@@ -19,7 +19,7 @@ setInterval(() => {
 const clean = (text: unknown, max: number) => String(text ?? '').trim().replace(/\s+/g, ' ').slice(0, max);
 const newCheckIn = (topic: string): CheckIn => ({ id: randomUUID(), topic, startedAt: Date.now() });
 
-export function createSession(title: unknown): Session {
+export function createSession(title: unknown, teacherId: string | null = null): Session {
   let code;
   do code = String(Math.floor(1000 + Math.random() * 9000));
   while (sessions.has(code));
@@ -27,6 +27,7 @@ export function createSession(title: unknown): Session {
     id: randomUUID(),
     code,
     title: clean(title, 60),
+    teacherId,
     createdAt: Date.now(),
     students: new Map<string, Student>(),   // studentId -> { id, name, socketId, connected, status, reason, focus }
     checkIns: [],          // finished check-ins that had at least one mark (history)
@@ -61,17 +62,37 @@ function uniqueName(session: Session, raw: unknown): string {
   return name;
 }
 
-// Reconnecting phones send their old studentId so they keep their color.
-export function joinStudent(session: Session, { name, studentId, socketId }: { name: unknown; studentId?: string; socketId: string }): Student {
-  let student: Student | null | undefined = studentId ? session.students.get(studentId) : null;
+// Reconnecting phones send their old studentId + rejoinKey so they keep their color (the key proves
+// it's the same device: classmates can learn a studentId, never the key). A signed-in student is
+// also recognised by their account, so opening the class on a second device doesn't create a twin.
+export function joinStudent(
+  session: Session,
+  {
+    name,
+    studentId,
+    rejoinKey,
+    socketId,
+    userId = null,
+  }: { name: unknown; studentId?: unknown; rejoinKey?: unknown; socketId: string; userId?: string | null },
+): Student {
+  let student: Student | null | undefined = typeof studentId === 'string' ? session.students.get(studentId) : null;
+  if (student && (typeof rejoinKey !== 'string' || rejoinKey !== student.rejoinKey)) student = null;
+  if (!student && userId) student = [...session.students.values()].find((s) => s.userId === userId) ?? null;
   // the same connection joining twice (double emit) is still the same student
   if (!student) student = [...session.students.values()].find((s) => s.socketId === socketId) ?? null;
   if (student) {
     student.socketId = socketId;
     student.connected = true;
+    if (userId && !student.userId) {
+      student.userId = userId; // joined as a guest, then signed in: link this class to the account
+      store.linkStudent(student);
+    }
     return student;
   }
-  student = { id: randomUUID(), name: uniqueName(session, name), socketId, connected: true, status: 'waiting', reason: null, focus: 0 };
+  student = {
+    id: randomUUID(), name: uniqueName(session, name), socketId, connected: true, status: 'waiting', reason: null, focus: 0,
+    userId, rejoinKey: randomUUID(),
+  };
   session.students.set(student.id, student);
   store.saveStudent(session, student);
   return student;

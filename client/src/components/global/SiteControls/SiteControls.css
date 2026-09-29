@@ -43,3 +43,18 @@
     inset-inline-end: 18px;
   }
 }
+.site-control--account {
+  color: var(--text);
+  text-decoration: none;
+}
+.site-control__avatar {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.8rem !important;
+  font-weight: 900;
+}

@@ -18,6 +18,7 @@ import { useSocketEvents } from "../../socket/useSocketEvents.ts";
 import { useFocusMode } from "../../hooks/useFocusMode.ts";
 
 import { savedKey } from "./Join.tsx";
+import { getAccessToken } from "../../auth/tokens.ts";
 
 import ColorPicker from "./ColorPicker.tsx";
 
@@ -35,6 +36,7 @@ import "./Play.css";
 type Saved = {
   name?: string;
   studentId?: string;
+  rejoinKey?: string;
 };
 
 function readSaved(code: string): Saved {
@@ -151,11 +153,14 @@ export default function Play() {
         code,
         name: saved.name,
         studentId: saved.studentId,
+        rejoinKey: saved.rejoinKey,
+        accessToken: await getAccessToken(),
       });
 
       writeSaved(code, {
         name: res.name,
         studentId: res.studentId,
+        rejoinKey: res.rejoinKey,
       });
 
       setName(res.name);

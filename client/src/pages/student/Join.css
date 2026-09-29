@@ -390,3 +390,17 @@ html[data-theme="dark"] .student-join-page__pulse strong {
     font-size: 1.45rem;
   }
 }
+.student-join-page__form-col {
+  min-width: 0;
+}
+.student-join-page__account {
+  width: min(100%, 470px);
+  margin: 22px 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+.student-join-page__account a {
+  color: var(--primary);
+  font-weight: 800;
+}

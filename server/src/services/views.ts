@@ -15,6 +15,7 @@ export const teacherSnapshot = (session: Session): TeacherState => ({
 // What a student needs to draw their screen (also used after a reconnect).
 export const studentState = (session: Session, student: Student): StudentState => ({
   studentId: student.id,
+  rejoinKey: student.rejoinKey,
   name: student.name,
   title: session.title,
   topic: session.current.topic,

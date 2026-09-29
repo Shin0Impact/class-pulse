@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { fetchSession } from "../../api/http";
 import { usePreferences } from "../../context/PreferencesContext";
+import { useAuth } from "../../auth/AuthContext.tsx";
 
 import JoinForm from "../../components/student/JoinForm/JoinForm";
 
@@ -20,6 +21,15 @@ export default function Join() {
   const [code, setCode] = useState(params.get("code") ?? "");
 
   const [name, setName] = useState("");
+  const { accountsEnabled, profile } = useAuth();
+  const signedInStudent = profile?.role === "student" ? profile : null;
+
+  // A signed-in student starts with their account name (they can still change it for this class).
+  useEffect(() => {
+    if (signedInStudent) setName((current) => current || signedInStudent.displayName.slice(0, 24));
+  }, [signedInStudent]);
+
+  const loginNext = encodeURIComponent(`/join${code ? `?code=${code}` : ""}`);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -67,15 +77,33 @@ export default function Join() {
       </header>
 
       <section className="student-join-page__content">
-        <JoinForm
-          name={name}
-          code={code}
-          busy={busy}
-          error={error}
-          onNameChange={setName}
-          onCodeChange={setCode}
-          onSubmit={handleJoin}
-        />
+        <div className="student-join-page__form-col">
+          <JoinForm
+            name={name}
+            code={code}
+            busy={busy}
+            error={error}
+            onNameChange={setName}
+            onCodeChange={setCode}
+            onSubmit={handleJoin}
+          />
+
+          {accountsEnabled && (
+            <p className="student-join-page__account">
+              {signedInStudent ? (
+                <>
+                  {t("signedInAs")} <strong dir="auto">{signedInStudent.displayName}</strong>.{" "}
+                  {t("progressSaved")}
+                </>
+              ) : (
+                <>
+                  {t("guestJoinNote")}{" "}
+                  <Link to={`/login?role=student&next=${loginNext}`}>{t("signInToSave")}</Link>
+                </>
+              )}
+            </p>
+          )}
+        </div>
 
         <aside className="student-join-page__visual" aria-label="Class Pulse">
           <div className="student-join-page__visual-label">

@@ -6,10 +6,15 @@ import type { QuestionRound, Session, Student } from '../services/types.ts';
 // Persistence layer. Live state stays in memory (see sessionService); this only records history.
 // Writes are queued so they hit the database in order (a check-in row exists before its status events),
 // and a database problem is logged but NEVER breaks the live classroom.
+//
+// Every row is built when the write is QUEUED, not when it runs: the live objects keep changing
+// (a re-check bumps round.round, a check-in resets every student's color), and a write that read
+// them late would record the wrong round or color -- or overwrite a first attempt with the re-check.
 
 let queue: Promise<void> = Promise.resolve();
 
 function enqueue(label: string, fn: (db: NonNullable<typeof supabase>) => PromiseLike<{ error: { message: string } | null }>): void {
+  // Callers pass a closure over rows they already built (see note above); keep it that way.
   const db = supabase;
   if (!db) return;
   queue = queue
@@ -21,44 +26,56 @@ function enqueue(label: string, fn: (db: NonNullable<typeof supabase>) => Promis
 }
 
 export const store = {
-  saveSession: (s: Session) =>
-    enqueue('insert session', (db) => db.from('sessions').insert({ id: s.id, code: s.code, title: s.title })),
+  saveSession: (s: Session) => {
+    const row = { id: s.id, code: s.code, title: s.title, teacher_id: s.teacherId };
+    enqueue('insert session', (db) => db.from('sessions').insert(row));
+  },
 
   endSession: (s: Session) =>
     enqueue('end session', (db) =>
       db.from('sessions').update({ status: 'ended', ended_at: new Date().toISOString() }).eq('id', s.id)),
 
-  saveStudent: (session: Session, student: Student) =>
-    enqueue('insert student', (db) =>
-      db.from('students').insert({ id: student.id, session_id: session.id, name: student.name })),
+  saveStudent: (session: Session, student: Student) => {
+    const row = { id: student.id, session_id: session.id, name: student.name, user_id: student.userId };
+    enqueue('insert student', (db) => db.from('students').insert(row));
+  },
 
-  startCheckIn: (session: Session, checkIn: CheckIn) =>
-    enqueue('insert check-in', (db) =>
-      db.from('checkins').insert({ id: checkIn.id, session_id: session.id, topic: checkIn.topic })),
+  linkStudent: (student: Student) => {
+    const { id, userId } = student;
+    enqueue('link student to account', (db) => db.from('students').update({ user_id: userId }).eq('id', id));
+  },
 
-  finishCheckIn: (summary: Summary) =>
-    enqueue('finish check-in', (db) =>
-      db.from('checkins').update({
-        ended_at: new Date().toISOString(),
-        green: summary.counts.green, yellow: summary.counts.yellow, red: summary.counts.red,
-        unmarked: summary.counts.waiting, pct: summary.pct,
-      }).eq('id', summary.id)),
+  startCheckIn: (session: Session, checkIn: CheckIn) => {
+    const row = { id: checkIn.id, session_id: session.id, topic: checkIn.topic };
+    enqueue('insert check-in', (db) => db.from('checkins').insert(row));
+  },
+
+  finishCheckIn: (summary: Summary) => {
+    const update = {
+      ended_at: new Date().toISOString(),
+      green: summary.counts.green, yellow: summary.counts.yellow, red: summary.counts.red,
+      unmarked: summary.counts.waiting, pct: summary.pct,
+    };
+    enqueue('finish check-in', (db) => db.from('checkins').update(update).eq('id', summary.id));
+  },
 
   // every color change, so the timeline can be rebuilt later
-  saveStatus: (checkIn: CheckIn, student: Student) =>
-    enqueue('insert status', (db) =>
-      db.from('status_events').insert({
-        id: randomUUID(), checkin_id: checkIn.id, student_id: student.id, status: student.status, reason: student.reason,
-      })),
+  saveStatus: (checkIn: CheckIn, student: Student) => {
+    const row = {
+      id: randomUUID(), checkin_id: checkIn.id, student_id: student.id, status: student.status, reason: student.reason,
+    };
+    enqueue('insert status', (db) => db.from('status_events').insert(row));
+  },
 
   // ---- Blindspot ---- one blindspot_questions row per teacher:launchQuestion (round.dbId), never
   // per recheck -- a recheck just bumps round.round for the child rows below.
-  saveQuestion: (session: Session, round: QuestionRound) =>
-    enqueue('insert blindspot question', (db) =>
-      db.from('blindspot_questions').insert({
-        id: round.dbId, session_id: session.id, question_id: round.id, topic: round.topic,
-        prompt: round.prompt, correct_option_id: round.correctOptionId, options: round.options,
-      })),
+  saveQuestion: (session: Session, round: QuestionRound) => {
+    const row = {
+      id: round.dbId, session_id: session.id, question_id: round.id, topic: round.topic,
+      prompt: round.prompt, correct_option_id: round.correctOptionId, options: round.options,
+    };
+    enqueue('insert blindspot question', (db) => db.from('blindspot_questions').insert(row));
+  },
 
   // Upserted on (question_id, student_id, round): a student can change their mind before the
   // round closes, and this keeps that as one row per round instead of piling up duplicates.
@@ -67,30 +84,27 @@ export const store = {
     studentId: string,
     answer: { optionId: string; confidence: Confidence; explanation?: string },
     correct: boolean,
-  ) =>
+  ) => {
+    const row = {
+      id: randomUUID(), question_id: round.dbId, student_id: studentId, round: round.round,
+      option_id: answer.optionId, confidence: answer.confidence, correct, explanation: answer.explanation ?? null,
+    };
     enqueue('save blindspot answer', (db) =>
-      db.from('blindspot_answers').upsert(
-        {
-          id: randomUUID(), question_id: round.dbId, student_id: studentId, round: round.round,
-          option_id: answer.optionId, confidence: answer.confidence, correct, explanation: answer.explanation ?? null,
-        },
-        { onConflict: 'question_id,student_id,round' },
-      )),
+      db.from('blindspot_answers').upsert(row, { onConflict: 'question_id,student_id,round' }));
+  },
 
-  savePairs: (round: QuestionRound, pairs: Pair[]) =>
-    enqueue('insert blindspot pairs', (db) =>
-      db.from('blindspot_pairs').insert(
-        pairs.map((pair) => ({
-          id: randomUUID(), question_id: round.dbId, round: round.round, pair_key: pair.pairId,
-          explainer_student_id: pair.explainer.id, listener_student_id: pair.listener.id,
-        })),
-      )),
+  savePairs: (round: QuestionRound, pairs: Pair[]) => {
+    const rows = pairs.map((pair) => ({
+      id: randomUUID(), question_id: round.dbId, round: round.round, pair_key: pair.pairId,
+      explainer_student_id: pair.explainer.id, listener_student_id: pair.listener.id,
+    }));
+    enqueue('insert blindspot pairs', (db) => db.from('blindspot_pairs').insert(rows));
+  },
 
   // Upserted on (pair_key, student_id): the listener can change their rating before moving on.
-  saveClarityRating: (round: QuestionRound, pairKey: string, studentId: string, rating: number) =>
+  saveClarityRating: (round: QuestionRound, pairKey: string, studentId: string, rating: number) => {
+    const row = { id: randomUUID(), question_id: round.dbId, round: round.round, pair_key: pairKey, student_id: studentId, rating };
     enqueue('save clarity rating', (db) =>
-      db.from('blindspot_clarity_ratings').upsert(
-        { id: randomUUID(), question_id: round.dbId, round: round.round, pair_key: pairKey, student_id: studentId, rating },
-        { onConflict: 'pair_key,student_id' },
-      )),
+      db.from('blindspot_clarity_ratings').upsert(row, { onConflict: 'pair_key,student_id' }));
+  },
 };

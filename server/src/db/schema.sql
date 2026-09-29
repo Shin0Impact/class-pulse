@@ -2,14 +2,26 @@
 -- Run this once: Supabase dashboard > SQL Editor > New query > paste > Run.
 -- The server generates the UUIDs itself, so inserts never need a read-back.
 -- If you ran an OLDER version of this file (with a "checks" / "answers" table), run the DROP block first.
+-- Already ran an older version and just need the newer tables/columns? Run the files in migrations/ instead.
 
--- drop table if exists blindspot_clarity_ratings, blindspot_pairs, blindspot_answers, blindspot_questions, teachback_sessions, answers, checks, status_events, checkins, students, sessions cascade;
+-- drop table if exists blindspot_clarity_ratings, blindspot_pairs, blindspot_answers, blindspot_questions, teachback_sessions, answers, checks, status_events, checkins, students, sessions, profiles cascade;
+
+-- ---- Accounts ----
+-- One row per account. The login itself (email + password) lives in Supabase Auth (auth.users);
+-- the server creates this row right after creating the login, on sign-up.
+create table if not exists profiles (
+  id            uuid primary key references auth.users(id) on delete cascade,
+  role          text not null check (role in ('teacher', 'student')),
+  display_name  text not null,
+  created_at    timestamptz not null default now()
+);
 
 create table if not exists sessions (
   id          uuid primary key,
   code        text not null,
   title       text not null default '',
   status      text not null default 'active',
+  teacher_id  uuid references profiles(id) on delete set null,  -- null only for classes run without accounts
   created_at  timestamptz not null default now(),
   ended_at    timestamptz
 );
@@ -18,6 +30,7 @@ create table if not exists students (
   id          uuid primary key,
   session_id  uuid not null references sessions(id) on delete cascade,
   name        text not null,
+  user_id     uuid references profiles(id) on delete set null,  -- the student's account; null for a guest join
   joined_at   timestamptz not null default now()
 );
 
@@ -99,6 +112,8 @@ create table if not exists blindspot_clarity_ratings (
 );
 
 create index if not exists idx_sessions_code on sessions(code);
+create index if not exists idx_sessions_teacher on sessions(teacher_id);
+create index if not exists idx_students_user on students(user_id);
 create index if not exists idx_checkins_session on checkins(session_id);
 create index if not exists idx_status_checkin on status_events(checkin_id);
 create index if not exists idx_blindspot_questions_session on blindspot_questions(session_id);
@@ -108,6 +123,7 @@ create index if not exists idx_blindspot_clarity_question on blindspot_clarity_r
 
 -- Lock the tables down: only the server (service_role key, which bypasses RLS) can read or write.
 -- The browser never talks to Supabase directly, so no policies are needed.
+alter table profiles                  enable row level security;
 alter table sessions                  enable row level security;
 alter table students                  enable row level security;
 alter table checkins                  enable row level security;
