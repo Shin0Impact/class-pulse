@@ -32,9 +32,15 @@ export default function Navbar() {
           <li>
             <a href="#how">{ar ? "كيف يعمل؟" : "How it works"}</a>
           </li>
+
           <li>
             <a href="#features">{ar ? "المميزات" : "Features"}</a>
           </li>
+
+          <li>
+            <Link to="/pricing">{ar ? "الخطط" : "Pricing"}</Link>
+          </li>
+
           <li>
             <a href="#pulse">{ar ? "نبض مباشر" : "Live pulse"}</a>
           </li>
