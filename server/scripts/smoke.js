@@ -19,8 +19,8 @@ const ok = (cond, msg) => {
   if (!cond) failures++;
 };
 
-const server = spawn('npx', ['tsx', 'src/index.ts'], {  cwd: root,
-  env: { ...process.env, PORT: String(PORT), SUPABASE_URL: '', SUPABASE_SERVICE_KEY: '' },
+const server = spawn('npx', ['tsx', 'src/index.ts'], { shell: process.platform === 'win32', cwd: root,
+  env: { ...process.env, PORT: String(PORT), SUPABASE_URL: '', SUPABASE_SERVICE_KEY: '', GEMINI_API_KEY: '', ANTHROPIC_API_KEY: '' }, // no database, no AI: the test must not depend on your .env
   stdio: ['ignore', 'pipe', 'inherit'],
 });
 await new Promise((resolve, reject) => {
