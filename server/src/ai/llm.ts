@@ -25,8 +25,8 @@ export function extractJson(text: string): unknown {
   return JSON.parse(text.slice(start, end + 1));
 }
 
-// A provider that said "rate limited" (429) or "quota" is skipped for a minute instead of costing
-// every request a failed round trip first. Free tiers hit this.
+// A provider that said "rate limited" (429), "quota" or "overloaded / high demand" (503) is
+// skipped for a minute instead of costing every request a failed round trip first.
 const COOLDOWN_MS = 60_000;
 const coolingUntil = new Map<string, number>();
 
@@ -53,7 +53,9 @@ export async function generateJson<T>(
     } catch (e) {
       const reason = controller.signal.aborted ? `timed out after ${timeoutMs / 1000}s` : e instanceof Error ? e.message : String(e);
       failures.push(`${provider.name}: ${reason}`);
-      if (/\b429\b|RESOURCE_EXHAUSTED|quota|rate.?limit/i.test(reason)) coolingUntil.set(provider.name, Date.now() + COOLDOWN_MS);
+      if (/\b(429|503|529)\b|RESOURCE_EXHAUSTED|UNAVAILABLE|overloaded|high demand|quota|rate.?limit/i.test(reason)) {
+        coolingUntil.set(provider.name, Date.now() + COOLDOWN_MS);
+      }
       console.warn(`[ai] ${provider.name} failed: ${reason}`);
     } finally {
       clearTimeout(timer);

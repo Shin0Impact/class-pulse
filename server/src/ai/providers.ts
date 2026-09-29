@@ -84,7 +84,8 @@ export function claudeProvider(apiKey: string, model: string, baseUrl = 'https:/
 //   GEMINI_API_KEY + GEMINI_MODELS (comma-separated, first = preferred)
 //   ANTHROPIC_API_KEY + CLAUDE_MODEL (the backup)
 //   GEMINI_BASE_URL / ANTHROPIC_BASE_URL: only to point at a proxy or a local test stand-in
-export const DEFAULT_GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-3.5-flash-lite'];
+// Stable Flash first (the newest one is often "high demand" = 503), newest Flash, then Flash-Lite.
+export const DEFAULT_GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite'];
 export const DEFAULT_CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 
 export function providersFromEnv(env: NodeJS.ProcessEnv = process.env): Provider[] {

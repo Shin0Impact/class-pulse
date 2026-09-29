@@ -143,3 +143,15 @@ test('a rate-limited provider is skipped on the next request', async () => {
   assert.equal((await run()).provider, 'backup');
   assert.equal(limitedCalls, 1);
 });
+
+test('an overloaded provider (503 high demand) is skipped the same way', async () => {
+  let calls = 0;
+  const providers = [
+    fake('busy', async () => { calls++; throw new Error('503 This model is currently experiencing high demand'); }),
+    fake('backup2', async () => '{"ok": true}'),
+  ];
+  const run = () => generateJson({ system: 's', prompt: 'p', maxTokens: 10 }, (r) => r, { providers, timeoutMs: 50 });
+  await run();
+  await run();
+  assert.equal(calls, 1);
+});

@@ -48,9 +48,11 @@ if (key) {
     const flash = (data.models ?? [])
       .filter((m) => m.supportedGenerationMethods?.includes('generateContent') && /flash/i.test(m.name))
       .map((m) => m.name.replace('models/', ''));
-    console.log(`\nGemini "flash" models your key can use:\n  ${flash.join('\n  ') || '(none listed)'}`);
-    console.log(`\nDefaults are ${DEFAULT_GEMINI_MODELS.join(', ')}. To change them, set in server/.env e.g.`);
-    console.log(`  GEMINI_MODELS=${flash.slice(0, 2).join(',') || 'model-a,model-b'}`);
+    // Text models only: tts / image / omni variants don't write questions.
+    const usable = flash.filter((m) => !/tts|image|omni|live|audio/i.test(m));
+    console.log(`\nGemini text models your key can use:\n  ${usable.join('\n  ') || '(none listed)'}`);
+    console.log(`\nDefaults are ${DEFAULT_GEMINI_MODELS.join(', ')}. To change the order, set in server/.env e.g.`);
+    console.log(`  GEMINI_MODELS=${DEFAULT_GEMINI_MODELS.join(',')}`);
   } catch (e) {
     console.log(`\nCould not list Gemini models: ${e instanceof Error ? e.message : e}`);
   }
