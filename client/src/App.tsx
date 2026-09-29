@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Landing from "./pages/Landing.tsx";
 import CreateSession from "./pages/teacher/CreateSession.tsx";
@@ -14,6 +15,9 @@ import Account from "./pages/account/Account.tsx";
 import ClassSummary from "./pages/account/ClassSummary.tsx";
 import AIAssistant from "./components/global/AIAssistant/AIAssistant.tsx";
 
+// The Present page carries the PDF renderer: only load it when a teacher opens it.
+const Present = lazy(() => import("./pages/teacher/present/Present.tsx"));
+
 export default function App() {
   return (
     <PreferencesProvider>
@@ -24,6 +28,14 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/teacher" element={<CreateSession />} />
           <Route path="/teacher/:code" element={<Dashboard />} />
+          <Route
+            path="/teacher/:code/present"
+            element={
+              <Suspense fallback={null}>
+                <Present />
+              </Suspense>
+            }
+          />
           <Route path="/join" element={<Join />} />
           <Route path="/play/:code" element={<Play />} />
           <Route path="/demo" element={<DemoIndex />} />

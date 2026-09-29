@@ -230,3 +230,18 @@ html[data-theme="dark"] .student-play:before {
     font-size: clamp(2.4rem, 13vw, 4rem);
   }
 }
+.student-play__open {
+  border-top: 0;
+  padding-top: 0;
+}
+.student-play__open textarea {
+  min-height: 120px;
+}
+.student-play__closed {
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--student-paper, var(--surface-alt));
+  color: var(--muted);
+  font-size: 0.9rem;
+}

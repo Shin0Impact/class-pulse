@@ -1,4 +1,5 @@
 import { computePulse } from './pulseService.ts';
+import { computeBlindspotUpdate, publicQuestion } from './questionService.ts';
 import type { TeacherState, StudentState } from '../../../shared/types.ts';
 import type { Session, Student } from './types.ts';
 
@@ -10,6 +11,15 @@ export const teacherSnapshot = (session: Session): TeacherState => ({
   pulse: computePulse(session),
   history: session.checkIns,
   timeline: session.timeline,
+  question: session.currentQuestion
+    ? {
+        ...publicQuestion(session.currentQuestion, session.currentQuestion.round > 1),
+        closed: session.currentQuestion.closed,
+        correctOptionId: session.currentQuestion.correctOptionId,
+      }
+    : null,
+  blindspot: session.currentQuestion ? computeBlindspotUpdate(session) : null,
+  summary: session.currentQuestion?.summary ?? null,
 });
 
 // What a student needs to draw their screen (also used after a reconnect).
@@ -23,4 +33,9 @@ export const studentState = (session: Session, student: Student): StudentState =
   status: student.status,
   reason: student.reason,
   focusMode: session.focusMode,
+  question:
+    session.currentQuestion && !session.currentQuestion.closed
+      ? publicQuestion(session.currentQuestion, session.currentQuestion.round > 1)
+      : null,
+  answered: session.answers.has(student.id),
 });

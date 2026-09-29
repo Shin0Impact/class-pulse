@@ -1,7 +1,10 @@
 import type {
   CheckIn,
+  ClassConfusionSummary,
   Confidence,
+  LessonContext,
   Pair,
+  QuestionKind,
   Status,
   Summary,
   TimelineSample,
@@ -39,14 +42,23 @@ export type QuestionRound = {
   round: number;
   topic: string;
   prompt: string;
+  // "open": a free-text question. It has no options and no right answer (correctOptionId ""), so
+  // it skips the quadrant, pairing and calibration and feeds the AI confusion summary instead.
+  kind: QuestionKind;
   correctOptionId: string;
   options: QuestionOption[];
   rubric?: ExplanationRubric;
+  source: 'deck' | 'ai' | 'teacher';
+  context?: LessonContext; // the page it was asked about (teacher/AI only, never sent to students)
+  modelAnswer?: string; // open questions: what a good answer says (teacher/AI only)
+  closed: boolean; // teacher pressed Close: no more answers this round
+  summary?: ClassConfusionSummary; // the latest AI summary of this question
   startedAt: number;
 };
 
 export type StudentAnswer = {
-  optionId: string;
+  optionId: string; // "" for an open question
+  text?: string; // an open question's answer
   confidence: Confidence;
   explanation?: string;
   explanationScore?: ExplanationScore;

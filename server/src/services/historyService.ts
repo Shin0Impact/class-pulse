@@ -4,6 +4,7 @@ import { quadrantFor } from './quadrant.ts';
 import { UserError } from './sessionService.ts';
 import type {
   CalibrationStats,
+  ClassConfusionSummary,
   ClassDetail,
   ClassListItem,
   ClassQuestion,
@@ -33,6 +34,8 @@ export type StudentRow = { id: string; session_id: string; name: string; user_id
 export type QuestionRow = {
   id: string;
   session_id: string;
+  kind?: string | null; // "open" or mcq (null/undefined on rows from before open questions)
+  source?: string | null;
   topic: string;
   prompt: string;
   options: PublicQuestionOption[];
@@ -46,7 +49,9 @@ export type AnswerRow = {
   option_id: string;
   confidence: Confidence;
   correct: boolean;
+  answer_text?: string | null;
 };
+export type SummaryRow = { question_id: string; summary: ClassConfusionSummary; created_at: string };
 export type CheckInRow = {
   topic: string;
   started_at: string;
@@ -63,6 +68,13 @@ export type CheckInRow = {
 const pct = (part: number, whole: number) => (whole === 0 ? null : Math.round((part / whole) * 100));
 
 const isBlindspot = (a: AnswerRow) => quadrantFor(a.correct, a.confidence) === 'blindspot';
+const isOpen = (q: QuestionRow) => q.kind === 'open';
+
+// Open questions have no right answer: their answers never count toward accuracy or calibration.
+function gradedOnly(answers: AnswerRow[], questions: QuestionRow[]): AnswerRow[] {
+  const open = new Set(questions.filter(isOpen).map((q) => q.id));
+  return open.size === 0 ? answers : answers.filter((a) => !open.has(a.question_id));
+}
 
 export function statsFor(answers: AnswerRow[]): CalibrationStats {
   return { answered: answers.length, ...calibrationFor(answers) };
@@ -93,7 +105,7 @@ export function summarizeClassList(
   const questionsBySession = groupBy(questions, (q) => q.session_id);
   const sessionOfQuestion = new Map(questions.map((q) => [q.id, q.session_id]));
   const answersBySession = groupBy(
-    firstAnswers.filter((a) => a.round === 1),
+    gradedOnly(firstAnswers, questions).filter((a) => a.round === 1),
     (a) => sessionOfQuestion.get(a.question_id),
   );
 
@@ -120,8 +132,14 @@ export function summarizeClass(
   questions: QuestionRow[],
   answers: AnswerRow[],
   checkIns: CheckInRow[],
+  summaries: SummaryRow[] = [],
 ): ClassDetail {
-  const firstAnswers = answers.filter((a) => a.round === 1);
+  const firstAnswers = gradedOnly(answers, questions).filter((a) => a.round === 1);
+  const nameById = new Map(students.map((s) => [s.id, s.name]));
+  const newestSummary = new Map<string, ClassConfusionSummary>();
+  for (const row of [...summaries].sort((a, b) => a.created_at.localeCompare(b.created_at))) {
+    newestSummary.set(row.question_id, row.summary);
+  }
   const firstByStudent = groupBy(firstAnswers, (a) => a.student_id);
   const answersByQuestion = groupBy(answers, (a) => a.question_id);
 
@@ -147,6 +165,25 @@ export function summarizeClass(
       const optionCounts: Record<string, number> = Object.fromEntries(q.options.map((o) => [o.id, 0]));
       for (const a of byRound.get(1) ?? []) optionCounts[a.option_id] = (optionCounts[a.option_id] ?? 0) + 1;
 
+      if (isOpen(q)) {
+        return {
+          id: q.id,
+          kind: 'open' as const,
+          source: q.source ?? 'deck',
+          topic: q.topic,
+          prompt: q.prompt,
+          startedAt: q.started_at,
+          options: [],
+          correctOptionId: '',
+          optionCounts: {},
+          rounds: [],
+          openAnswers: (byRound.get(1) ?? [])
+            .filter((a) => a.answer_text)
+            .map((a) => ({ name: nameById.get(a.student_id) ?? '?', text: a.answer_text as string, confidence: a.confidence })),
+          summary: newestSummary.get(q.id) ?? null,
+        };
+      }
+
       const rounds = [...byRound.keys()]
         .sort((a, b) => a - b)
         .map((round) => {
@@ -163,6 +200,8 @@ export function summarizeClass(
 
       return {
         id: q.id,
+        kind: 'mcq' as const,
+        source: q.source ?? 'deck',
         topic: q.topic,
         prompt: q.prompt,
         startedAt: q.started_at,
@@ -170,6 +209,8 @@ export function summarizeClass(
         correctOptionId: q.correct_option_id,
         optionCounts,
         rounds,
+        openAnswers: [],
+        summary: newestSummary.get(q.id) ?? null,
       };
     });
 
@@ -214,7 +255,7 @@ export function summarizeProgress(
   questions: QuestionRow[],
   answers: AnswerRow[],
 ): StudentProgress {
-  const first = answers.filter((a) => a.round === 1);
+  const first = gradedOnly(answers, questions).filter((a) => a.round === 1);
   const sessionOfStudent = new Map(myStudents.map((s) => [s.id, s.session_id]));
   const questionById = new Map(questions.map((q) => [q.id, q]));
   const bySession = groupBy(first, (a) => sessionOfStudent.get(a.student_id));
@@ -283,8 +324,8 @@ async function rowsIn<T>(label: string, ids: string[], build: (chunk: string[]) 
 
 const SESSION_COLS = 'id, code, title, status, created_at, ended_at';
 const STUDENT_COLS = 'id, session_id, name, user_id';
-const QUESTION_COLS = 'id, session_id, topic, prompt, options, correct_option_id, started_at';
-const ANSWER_COLS = 'question_id, student_id, round, option_id, confidence, correct';
+const QUESTION_COLS = 'id, session_id, kind, source, topic, prompt, options, correct_option_id, started_at';
+const ANSWER_COLS = 'question_id, student_id, round, option_id, confidence, correct, answer_text';
 
 export async function teacherClasses(teacherId: string): Promise<ClassListItem[]> {
   const sessions = await rows<SessionRow>(
@@ -326,11 +367,17 @@ export async function teacherClass(teacherId: string, sessionId: string): Promis
       db().from('checkins').select('topic, started_at, ended_at, green, yellow, red, unmarked, pct').in('session_id', c).order('id'),
     ),
   ]);
-  const answers = await rowsIn<AnswerRow>('answers', questions.map((q) => q.id), (c) =>
-    db().from('blindspot_answers').select(ANSWER_COLS).in('question_id', c).order('id'),
-  );
+  const questionIds = questions.map((q) => q.id);
+  const [answers, summaries] = await Promise.all([
+    rowsIn<AnswerRow>('answers', questionIds, (c) =>
+      db().from('blindspot_answers').select(ANSWER_COLS).in('question_id', c).order('id'),
+    ),
+    rowsIn<SummaryRow>('summaries', questionIds, (c) =>
+      db().from('ai_summaries').select('question_id, summary, created_at').in('question_id', c).order('id'),
+    ),
+  ]);
 
-  return summarizeClass(session as SessionRow, students, questions, answers, checkIns);
+  return summarizeClass(session as SessionRow, students, questions, answers, checkIns, summaries);
 }
 
 export async function studentProgress(userId: string): Promise<StudentProgress> {

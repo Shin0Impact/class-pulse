@@ -12,7 +12,17 @@ import type {
   AnswerReveal,
   BlindspotUpdate,
   CalibrationCard,
+  ClassConfusionSummary,
 } from "@shared/types.ts";
+
+// SUMMARY_UPDATE: the AI class-confusion summary for a question is being written / ready / failed.
+export type SummaryState = {
+  questionId: string;
+  launchKey?: string; // which launch + round it describes (matches BlindspotUpdate.launchKey)
+  status: "working" | "ready" | "failed";
+  summary?: ClassConfusionSummary;
+  error?: string;
+};
 
 type Handlers = {
   [EVENTS.PULSE_UPDATE]?: (data: Pulse) => void;
@@ -39,6 +49,10 @@ type Handlers = {
   [EVENTS.BLINDSPOT_UPDATE]?: (data: BlindspotUpdate) => void;
   
   [EVENTS.CALIBRATION_CARD]?: (data: CalibrationCard) => void;
+
+  [EVENTS.QUESTION_CLOSED]?: (data: { questionId: string }) => void;
+
+  [EVENTS.SUMMARY_UPDATE]?: (data: SummaryState) => void;
 };
 
 // useSocketEvents({

@@ -11,12 +11,15 @@ import {
 
 import {
   launchQuestion,
+  closeQuestion,
   computeBlindspotUpdate,
   pairStudents,
   calibrationCardsForCurrentRound,
   answerRevealsForCurrentRound,
   recheckQuestion,
 } from "../services/questionService.ts";
+import { aiEnabled } from "../ai/llm.ts";
+import { startSummary } from "../ai/summaryRunner.ts";
 
 import { teacherSnapshot } from "../services/views.ts";
 import {
@@ -187,6 +190,50 @@ export function registerTeacherHandlers(io: Server, socket: Socket): void {
         computeBlindspotUpdate(session),
       );
 
+      return {};
+    }),
+  );
+
+  // -------------------------------------------------------
+  // CLOSE QUESTION: stop answers, then (with AI) summarize
+  // -------------------------------------------------------
+
+  socket.on(
+    EVENTS.TEACHER_CLOSE_QUESTION,
+    handle(({ language }: { language?: unknown }) => {
+      const session = requireTeacher();
+      const round = closeQuestion(session);
+
+      io.to(studentRoom(session.code)).emit(EVENTS.QUESTION_CLOSED, {
+        questionId: round.id,
+      });
+      io.to(teacherRoom(session.code)).emit(
+        EVENTS.BLINDSPOT_UPDATE,
+        computeBlindspotUpdate(session),
+      );
+
+      let summarizing = false;
+      if (aiEnabled() && session.answers.size > 0) {
+        try {
+          startSummary(io, session, language === "ar" ? "ar" : "en");
+          summarizing = true;
+        } catch {
+          // e.g. hourly limit: closing still worked; the teacher can press Summarize later.
+        }
+      }
+      return { summarizing };
+    }),
+  );
+
+  // -------------------------------------------------------
+  // SUMMARIZE (AI) the live question's answers so far
+  // -------------------------------------------------------
+
+  socket.on(
+    EVENTS.TEACHER_SUMMARIZE,
+    handle(({ language }: { language?: unknown }) => {
+      const session = requireTeacher();
+      startSummary(io, session, language === "ar" ? "ar" : "en");
       return {};
     }),
   );

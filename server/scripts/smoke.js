@@ -221,6 +221,30 @@ try {
   const impostor = await ask(sImpostor, EVENTS.STUDENT_JOIN, { code, name: 'Mallory', studentId: students[0].studentId });
   ok(impostor.ok && impostor.studentId !== students[0].studentId, "a studentId without its rejoinKey can't take over that student");
 
+  // ---- open question (answered in words) + Close. CI has no AI keys, so no summary here.
+  const openStarted = waitFor(students[1], EVENTS.QUESTION_STARTED, (q) => q.questionId === 'open-1');
+  const launchedOpen = await ask(teacher2, EVENTS.TEACHER_LAUNCH_QUESTION, {
+    question: { id: 'open-1', kind: 'open', prompt: 'Why do we need a common denominator to add fractions?' },
+  });
+  const openQ = await openStarted;
+  ok(launchedOpen.ok && openQ.kind === 'open' && openQ.options.length === 0, 'an open question reaches students with no options');
+  const openUpdate = waitFor(teacher2, EVENTS.BLINDSPOT_UPDATE, (u) => u.questionId === 'open-1' && u.responses === 1);
+  const wrote = await ask(students[1], EVENTS.STUDENT_ANSWER, { questionId: 'open-1', text: 'so the pieces are the same size', confidence: 'fairly-sure' });
+  const openSeen = await openUpdate;
+  ok(wrote.ok && openSeen.openAnswers[0].text === 'so the pieces are the same size', 'the teacher sees the written answer live');
+  const pairOpen = await ask(teacher2, EVENTS.TEACHER_PAIR_UP);
+  ok(!pairOpen.ok, 'pair up is refused for an open question');
+  const closedForStudents = waitFor(students[2], EVENTS.QUESTION_CLOSED, (c) => c.questionId === 'open-1');
+  const closed = await ask(teacher2, EVENTS.TEACHER_CLOSE_QUESTION, { language: 'en' });
+  await closedForStudents;
+  ok(closed.ok && closed.summarizing === false, 'close works without AI (and says no summary is coming)');
+  const late = await ask(students[2], EVENTS.STUDENT_ANSWER, { questionId: 'open-1', text: 'too late', confidence: 'guess' });
+  ok(!late.ok && /closed/.test(late.error), 'answers after Close are refused');
+  const summarize = await ask(teacher2, EVENTS.TEACHER_SUMMARIZE, { language: 'en' });
+  ok(!summarize.ok && /not set up/.test(summarize.error), 'summarize explains that AI is not set up');
+  const refreshed = await ask(teacher2, EVENTS.TEACHER_REJOIN, { code });
+  ok(refreshed.ok && refreshed.state.question?.questionId === 'open-1' && refreshed.state.question.closed, 'a refreshed dashboard gets the live (closed) question back');
+
   // ---- end
   const ended = waitFor(students[2], EVENTS.SESSION_ENDED);
   await ask(teacher2, EVENTS.TEACHER_END_SESSION);

@@ -6,6 +6,7 @@ export const mockTeacherRecheckRequest = { questionId: 'plant-mass-1' };
 
 export const mockQuestionRecheckStarted: PublicQuestion = {
   questionId: 'plant-mass-1',
+  kind: 'mcq',
   topic: 'Photosynthesis',
   prompt: "Where does most of a growing tree's mass come from?",
   options: [

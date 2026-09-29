@@ -98,6 +98,7 @@ export function registerStudentHandlers(io: Server, socket: Socket): void {
         optionId?: unknown;
         confidence?: unknown;
         explanation?: unknown;
+        text?: unknown;
       }) => {
         const { session, student } = requireStudent();
         recordAnswer(session, student, payload);

@@ -277,26 +277,30 @@ html[data-theme="dark"] .cal--underconfident {
 }
 
 /* Questions in the class summary */
-.question-card {
+.cs-question {
   padding: 18px 0;
   border-top: 1px solid var(--border-soft);
 }
-.question-card:first-of-type {
+.cs-question:first-of-type {
   border-top: 0;
   padding-top: 0;
 }
-.question-card__meta {
+.cs-question__meta {
   margin: 0 0 4px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   color: var(--muted);
   font-size: 0.76rem;
   font-weight: 800;
 }
-.question-card h3 {
+.cs-question h3 {
   margin: 0 0 14px;
   font-size: 1rem;
   line-height: 1.45;
 }
-.question-card__rounds {
+.cs-question__rounds {
   margin: 14px 0 8px;
   color: var(--text-soft);
   font-size: 0.86rem;
@@ -355,4 +359,29 @@ html[data-theme="dark"] .cal--underconfident {
   .class-row__go {
     display: none;
   }
+}
+.cs-question__meta .badge {
+  margin: 0;
+}
+.cs-question__summary {
+  margin-top: 14px;
+}
+.cs-open-answers {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  list-style: none;
+}
+.cs-open-answers li {
+  padding: 8px 12px;
+  display: grid;
+  gap: 2px;
+  border-radius: 12px;
+  background: var(--surface-alt);
+  font-size: 0.88rem;
+}
+.cs-open-answers strong {
+  font-size: 0.76rem;
+  color: var(--muted);
 }

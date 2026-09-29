@@ -53,44 +53,46 @@ export default function QuestionCard({
         {prompt}
       </h1>
 
-      <div
-        className="question-card__options"
-        role="radiogroup"
-        aria-label={t("question")}
-      >
-        {options.map((option, index) => {
-          const selected = selectedOptionId === option.id;
+      {options.length > 0 && (
+        <div
+          className="question-card__options"
+          role="radiogroup"
+          aria-label={t("question")}
+        >
+          {options.map((option, index) => {
+            const selected = selectedOptionId === option.id;
 
-          return (
-            <button
-              key={option.id}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              disabled={disabled}
-              className={`question-card__option ${
-                selected ? "question-card__option--selected" : ""
-              }`}
-              onClick={() => onSelect(option.id)}
-            >
-              <span className="question-card__option-letter" aria-hidden="true">
-                {OPTION_LETTERS[index] ?? index + 1}
-              </span>
-
-              <span className="question-card__option-text" dir="auto">
-                {option.text}
-              </span>
-
-              <span
-                className="question-card__option-indicator"
-                aria-hidden="true"
+            return (
+              <button
+                key={option.id}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                disabled={disabled}
+                className={`question-card__option ${
+                  selected ? "question-card__option--selected" : ""
+                }`}
+                onClick={() => onSelect(option.id)}
               >
-                <span />
-              </span>
-            </button>
-          );
-        })}
-      </div>
+                <span className="question-card__option-letter" aria-hidden="true">
+                  {OPTION_LETTERS[index] ?? index + 1}
+                </span>
+
+                <span className="question-card__option-text" dir="auto">
+                  {option.text}
+                </span>
+
+                <span
+                  className="question-card__option-indicator"
+                  aria-hidden="true"
+                >
+                  <span />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }

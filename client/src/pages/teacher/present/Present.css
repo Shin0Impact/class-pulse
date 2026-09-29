@@ -1,0 +1,407 @@
+/* Present page: the lesson file on the projector + the "ask the class" panel. Prefixed "present-". */
+.present {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: #0f1210;
+  color: var(--text);
+  overflow: hidden;
+}
+.present-bar {
+  min-height: 60px;
+  padding: 10px 16px;
+  padding-inline-end: 200px; /* clear the fixed language/theme/account controls */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.present-bar__back {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.present-bar__doc {
+  flex: 1;
+  min-width: 120px;
+  overflow: hidden;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.present-bar__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.present-btn {
+  min-height: 40px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.present-btn:hover:not(:disabled) {
+  background: var(--surface-alt);
+}
+.present-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.present-btn--accent {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+.present-btn--accent:hover:not(:disabled) {
+  background: var(--primary);
+  filter: brightness(1.08);
+}
+.present-btn--wide {
+  width: 100%;
+  min-height: 48px;
+}
+.present-link {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--primary);
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.present-pager {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+.present-pager .present-btn {
+  width: 40px;
+  padding: 0;
+  font-size: 1.2rem;
+}
+.present-recent {
+  position: relative;
+}
+.present-recent__menu {
+  position: absolute;
+  z-index: 20;
+  inset-inline-start: 0;
+  top: calc(100% + 6px);
+  width: 280px;
+  max-height: 60vh;
+  margin: 0;
+  padding: 6px;
+  overflow: auto;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+.present-recent__menu button {
+  width: 100%;
+  padding: 9px 10px;
+  display: grid;
+  gap: 2px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--text);
+  font-weight: 700;
+  text-align: start;
+  cursor: pointer;
+}
+.present-recent__menu button:hover {
+  background: var(--surface-alt);
+}
+.present-recent__menu small {
+  color: var(--muted);
+  font-weight: 500;
+}
+.present-notice {
+  margin: 0;
+  padding: 8px 16px;
+  background: var(--surface-alt);
+  color: var(--text-soft);
+  font-size: 0.86rem;
+}
+.present-notice--error {
+  background: rgba(228, 95, 102, 0.1);
+  color: #c84b54;
+}
+.present-panel .present-notice {
+  border-radius: 12px;
+}
+.present-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+.present-body--panel {
+  grid-template-columns: 1fr minmax(320px, 380px);
+}
+.present-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  padding: 16px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.present-stage__page {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  background: #fff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+.present-stage__image {
+  object-fit: contain;
+}
+.present-stage__error {
+  position: absolute;
+  bottom: 16px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(228, 95, 102, 0.9);
+  color: #fff;
+}
+.present-empty {
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  padding: 24px;
+  color: #e8ece8;
+  text-align: center;
+}
+.present-empty h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+}
+.present-empty p {
+  max-width: 460px;
+  margin: 0 auto 8px;
+  color: #aab3ab;
+  line-height: 1.6;
+}
+.present-empty .present-btn {
+  justify-self: center;
+}
+.present-panel {
+  min-height: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  background: var(--surface);
+  border-inline-start: 1px solid var(--border);
+}
+.present-panel h2 {
+  margin: 0 0 10px;
+  font-size: 1.02rem;
+  line-height: 1.4;
+}
+.present-join {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-radius: 14px;
+  background: var(--primary);
+  color: #fff;
+}
+.present-join span {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  overflow-wrap: anywhere;
+}
+.present-join strong {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 2rem;
+  letter-spacing: 0.12em;
+}
+.present-kind {
+  margin-bottom: 12px;
+  padding: 4px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  border-radius: 12px;
+  background: var(--surface-alt);
+}
+.present-kind button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-soft);
+  font-weight: 800;
+  cursor: pointer;
+}
+.present-kind button[aria-checked="true"] {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+.present-field {
+  display: block;
+  margin-bottom: 12px;
+}
+.present-field span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 850;
+}
+.present-field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-alt);
+  color: var(--text);
+}
+.present-hint {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.present-or {
+  margin: 14px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+.present-or::before,
+.present-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.present-live {
+  display: grid;
+  gap: 10px;
+}
+.present-live__label {
+  margin: 0;
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.present-live h2 {
+  margin: 0;
+}
+.present-live__count {
+  margin: 0;
+  color: var(--muted);
+}
+.present-live__count strong {
+  color: var(--text);
+  font-size: 1.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.present-quadrants {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  list-style: none;
+  font-size: 0.8rem;
+}
+.present-quadrants li {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-soft);
+}
+.present-quadrants b {
+  color: var(--text);
+}
+.present-quadrants__alarm {
+  border-color: rgba(228, 95, 102, 0.45) !important;
+}
+.present-answers ul {
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  list-style: none;
+}
+.present-answers li {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--surface-alt);
+  font-size: 0.86rem;
+}
+.present-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.present-draft .present-actions {
+  margin-top: 14px;
+}
+@media (max-width: 900px) {
+  .present {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+  .present-bar {
+    padding-inline-end: 16px;
+  }
+  .present-body--panel {
+    grid-template-columns: 1fr;
+  }
+  .present-stage {
+    height: 60vh;
+  }
+  .present-panel {
+    border-inline-start: 0;
+    border-top: 1px solid var(--border);
+  }
+}
+
+/* While presenting (body.present-mode, set by Present.tsx) */
+body.present-mode .site-controls {
+  inset-block-start: 8px;
+  inset-inline-end: 12px;
+}
+body.present-mode .ai-assistant {
+  display: none;
+}
+@media (max-width: 700px) {
+  body.present-mode .site-controls {
+    inset-block-start: auto;
+  }
+}

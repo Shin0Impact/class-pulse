@@ -87,12 +87,21 @@ export default function Play() {
   -------------------------------- */
 
   const [question, setQuestion] = useState<PublicQuestion | null>(null);
+  // For join(), which is a stable callback and would otherwise see a stale question.
+  const questionRef = useRef<PublicQuestion | null>(null);
+  questionRef.current = question;
 
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
 
   const [confidence, setConfidence] = useState<Confidence | null>(null);
 
   const [explanation, setExplanation] = useState("");
+
+  // Open questions: the student's written answer.
+  const [openText, setOpenText] = useState("");
+
+  // The teacher closed the question before this student answered.
+  const [closedNotice, setClosedNotice] = useState(false);
 
   const [answerSent, setAnswerSent] = useState(false);
   const [answerReveal, setAnswerReveal] = useState<AnswerRevealData | null>(
@@ -190,6 +199,27 @@ export default function Play() {
 
       checkInId.current = res.checkInId;
 
+      // A question already live (joined late, or the phone refreshed): show it.
+      if (res.question) {
+        const current = questionRef.current;
+        if (
+          current?.questionId !== res.question.questionId ||
+          current.isRecheck !== res.question.isRecheck
+        ) {
+          // Slept through a new launch: an old pairing/reveal screen would hide the new question.
+          setPairAssignment(null);
+          setAnswerReveal(null);
+          setSelectedOptionId(null);
+          setConfidence(null);
+          setExplanation("");
+          setOpenText("");
+        }
+        setQuestion(res.question);
+        setAnswerSent(res.answered);
+      } else {
+        setQuestion(null);
+      }
+
       setPhase("live");
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -260,7 +290,9 @@ export default function Play() {
       setSelectedOptionId(null);
       setConfidence(null);
       setExplanation("");
+      setOpenText("");
       setAnswerSent(false);
+      setClosedNotice(false);
       setPairAssignment(null);
       setClarityRated(false);
       setError("");
@@ -268,6 +300,12 @@ export default function Play() {
       if (navigator.vibrate) {
         navigator.vibrate(20);
       }
+    },
+
+    [EVENTS.QUESTION_CLOSED]: ({ questionId }) => {
+      if (question?.questionId !== questionId) return;
+      setClosedNotice(!answerSent);
+      setQuestion(null);
     },
   });
 
@@ -323,9 +361,9 @@ export default function Play() {
   }
 
   async function chooseConfidence(nextConfidence: Confidence) {
-    if (!question || !selectedOptionId || answerSent) {
-      return;
-    }
+    if (!question || answerSent) return;
+    const isOpen = question.kind === "open";
+    if (isOpen ? !openText.trim() : !selectedOptionId) return;
 
     setConfidence(nextConfidence);
     setError("");
@@ -335,15 +373,21 @@ export default function Play() {
     }
 
     try {
-      await emitAck(EVENTS.STUDENT_ANSWER, {
-        questionId: question.questionId,
-
-        optionId: selectedOptionId,
-
-        confidence: nextConfidence,
-
-        explanation: explanation.trim() || undefined,
-      });
+      await emitAck(
+        EVENTS.STUDENT_ANSWER,
+        isOpen
+          ? {
+              questionId: question.questionId,
+              text: openText.trim(),
+              confidence: nextConfidence,
+            }
+          : {
+              questionId: question.questionId,
+              optionId: selectedOptionId,
+              confidence: nextConfidence,
+              explanation: explanation.trim() || undefined,
+            },
+      );
 
       setAnswerSent(true);
     } catch (e) {
@@ -426,7 +470,52 @@ export default function Play() {
 
               {/* ACTIVE QUESTION */}
 
-              {!answerReveal && !pairAssignment && question && !answerSent && (
+              {!answerReveal &&
+                !pairAssignment &&
+                question?.kind === "open" &&
+                !answerSent && (
+                  <div className="student-play__question">
+                    <QuestionCard
+                      topic={question.topic}
+                      prompt={question.prompt}
+                      options={[]}
+                      selectedOptionId={null}
+                      onSelect={() => {}}
+                    />
+
+                    <div className="student-play__explanation student-play__open">
+                      <label htmlFor="student-open-answer">
+                        {t("yourAnswer")}
+                      </label>
+                      <textarea
+                        id="student-open-answer"
+                        dir="auto"
+                        maxLength={1000}
+                        placeholder={t("openAnswerPlaceholder")}
+                        value={openText}
+                        onChange={(e) => {
+                          setOpenText(e.target.value);
+                          setConfidence(null);
+                        }}
+                      />
+                    </div>
+
+                    {openText.trim() && (
+                      <div className="student-play__confidence">
+                        <ConfidencePicker
+                          value={confidence}
+                          onSelect={chooseConfidence}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              {!answerReveal &&
+                !pairAssignment &&
+                question &&
+                question.kind !== "open" &&
+                !answerSent && (
                 <div className="student-play__question">
                   <QuestionCard
                     topic={question.topic}
@@ -485,6 +574,12 @@ export default function Play() {
 
               {!answerReveal && !pairAssignment && !question && (
                 <>
+                  {closedNotice && (
+                    <p className="student-play__closed" role="status">
+                      {t("teacherClosedQuestion")}
+                    </p>
+                  )}
+
                   {topic && (
                     <p
                       dir="auto"
