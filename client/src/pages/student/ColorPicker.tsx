@@ -1,5 +1,13 @@
-import { REASONS } from "@shared/events.ts";
+import { useEffect, useState } from "react";
+import {
+  REASONS,
+  CUSTOM_REASON_PREFIX,
+  CUSTOM_REASON_MAX,
+  isCustomReason,
+  customReasonText,
+} from "@shared/events.ts";
 import { usePreferences } from "../../context/PreferencesContext.tsx";
+import { reasonLabel } from "../../components/reasonLabel.ts";
 import type { Mark } from "@shared/types.ts";
 export default function ColorPicker({
   status,
@@ -13,6 +21,20 @@ export default function ColorPicker({
   onReason: (r: string) => void;
 }) {
   const { t } = usePreferences();
+
+  // "Other": the student writes their own reason. The box is open while their current reason is
+  // custom, or after they tap the chip. It resets when they change color.
+  const [otherOpen, setOtherOpen] = useState(isCustomReason(reason));
+  const [otherText, setOtherText] = useState(
+    isCustomReason(reason) ? customReasonText(reason) : "",
+  );
+  useEffect(() => {
+    setOtherOpen(isCustomReason(reason));
+    setOtherText(isCustomReason(reason) ? customReasonText(reason) : "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+  const sentOther = isCustomReason(reason) ? customReasonText(reason) : null;
+  const canSend = otherText.trim().length > 0 && otherText.trim() !== sentOther;
   const O = [
     {
       id: "green" as Mark,
@@ -79,14 +101,65 @@ export default function ColorPicker({
             {REASONS.map((r) => (
               <li key={r.id}>
                 <button
-                  onClick={() => onReason(r.id)}
+                  onClick={() => {
+                    setOtherOpen(false);
+                    onReason(r.id);
+                  }}
                   className={`rounded-full border-2 px-4 py-2 text-sm ${reason === r.id ? "border-indigo-600 bg-indigo-50" : "border-slate-200 bg-white"}`}
                 >
-                  {r.label}
+                  {reasonLabel(r.id, t) ?? r.label}
                 </button>
               </li>
             ))}
+            <li>
+              <button
+                onClick={() => setOtherOpen(true)}
+                aria-expanded={otherOpen}
+                className={`rounded-full border-2 px-4 py-2 text-sm ${otherOpen || sentOther ? "border-indigo-600 bg-indigo-50" : "border-slate-200 bg-white"}`}
+              >
+                {t("reasonOther")}
+              </button>
+            </li>
           </ul>
+
+          {otherOpen && (
+            <div className="mt-4">
+              <label
+                htmlFor="custom-reason"
+                className="mb-2 block text-sm font-medium text-slate-600"
+              >
+                {t("reasonOtherLabel")}
+              </label>
+              <textarea
+                id="custom-reason"
+                dir="auto"
+                rows={3}
+                maxLength={CUSTOM_REASON_MAX}
+                value={otherText}
+                onChange={(e) => setOtherText(e.target.value)}
+                placeholder={t("reasonOtherPlaceholder")}
+                className="w-full resize-none rounded-2xl border-2 border-slate-200 bg-white p-4 text-base outline-none focus:border-indigo-500"
+              />
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <span className="text-xs text-slate-400">
+                  {otherText.length}/{CUSTOM_REASON_MAX}
+                </span>
+                {sentOther && !canSend ? (
+                  <span className="text-sm font-medium text-emerald-700" role="status">
+                    ✓ {t("reasonSent")}
+                  </span>
+                ) : (
+                  <button
+                    disabled={!canSend}
+                    onClick={() => onReason(CUSTOM_REASON_PREFIX + otherText.trim())}
+                    className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+                  >
+                    {t("reasonSend")}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </section>
       )}
     </section>

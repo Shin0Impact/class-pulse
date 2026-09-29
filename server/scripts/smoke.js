@@ -98,6 +98,17 @@ try {
   ok(g.ok && pulse().perStudent.find((s) => s.id === students[0].studentId).reason === null, 'green never keeps a reason');
   ok(!(await ask(students[0], EVENTS.TEACHER_CHECK_IN, { topic: 'hack' })).ok, 'a student cannot use teacher controls');
 
+  // ---- "Other": a student writes their own reason
+  ok(!(await ask(students[3], EVENTS.STUDENT_SET_STATUS, { status: 'yellow', reason: 'other:   ' })).ok, 'an empty custom reason is rejected');
+  const own = await ask(students[3], EVENTS.STUDENT_SET_STATUS, { status: 'yellow', reason: 'other:  I did not get   why we divided ' });
+  await new Promise((r) => setTimeout(r, 100));
+  p = pulse();
+  ok(own.ok && p.otherNotes.includes('I did not get why we divided'), 'a custom reason is cleaned and shown to the teacher in the students\' words');
+  ok(p.reasons.find((r) => r.id === 'other')?.count === 1, 'custom reasons are counted as one "Other" bar');
+  await ask(students[3], EVENTS.STUDENT_SET_STATUS, { status: 'yellow', reason: 'need-example' }); // back to the earlier state
+  await new Promise((r) => setTimeout(r, 100));
+  ok(pulse().otherNotes.length === 0, 'the note disappears when the student picks a preset reason again');
+
   // ---- a student changes their mind mid-lesson (red -> yellow): (300 + 50 + 50) / 6 = 67
   await ask(students[5], EVENTS.STUDENT_SET_STATUS, { status: 'yellow', reason: 'need-example' });
   await new Promise((r) => setTimeout(r, 150));

@@ -547,7 +547,7 @@ export default function Dashboard() {
           </Card>
 
           <Card title={t("whatHelp")}>
-            <ReasonBars reasons={pulse?.reasons} />
+            <ReasonBars reasons={pulse?.reasons} notes={pulse?.otherNotes} />
           </Card>
         </div>
 

@@ -111,6 +111,17 @@ export const REASONS = [
   { id: "missing-basics", label: "Missing basics" },
 ];
 
+// "Other": the student types their own reason (up to CUSTOM_REASON_MAX characters).
+// It travels in the same `reason` string as "other:<text>", so join / rejoin / the database, which
+// already carry a reason, need no changes. Always go through these helpers, never parse it by hand.
+export const CUSTOM_REASON_PREFIX = "other:";
+export const CUSTOM_REASON_MAX = 160;
+export const OTHER_REASON_ID = "other"; // the id of the single aggregated "Other" bar
+export const isCustomReason = (r: string | null | undefined): r is string =>
+  typeof r === "string" && r.startsWith(CUSTOM_REASON_PREFIX);
+export const customReasonText = (r: string): string =>
+  r.slice(CUSTOM_REASON_PREFIX.length).trim();
+
 // Class understanding % = (green x 100 + yellow x 50 + red x 0) / students who marked
 export const WEIGHTS = { green: 100, yellow: 50, red: 0 };
 

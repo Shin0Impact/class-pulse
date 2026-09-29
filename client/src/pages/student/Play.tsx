@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import { EVENTS } from "@shared/events.ts";
+import { EVENTS, isCustomReason } from "@shared/events.ts";
 import { FEATURES } from "@shared/features.ts";
 
 import type {
@@ -328,7 +328,9 @@ export default function Play() {
   }
 
   function chooseReason(r: string) {
-    const next = reason === r ? null : r;
+    // Tapping the selected preset again un-selects it. A custom reason is sent as typed, so
+    // re-sending the same words must not clear it.
+    const next = !isCustomReason(r) && reason === r ? null : r;
 
     setReason(next);
 

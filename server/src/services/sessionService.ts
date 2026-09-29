@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { REASONS } from '../../../shared/events.ts';
+import { REASONS, CUSTOM_REASON_PREFIX, CUSTOM_REASON_MAX, isCustomReason, customReasonText } from '../../../shared/events.ts';
 import { store } from '../db/store.ts';
 import { tally, summarizeCurrent } from './pulseService.ts';
 import type { Mark, CheckIn } from '../../../shared/types.ts';
@@ -113,8 +113,15 @@ export function setStatus(session: Session, student: Student, { status, reason }
   if (typeof status !== 'string' || !['green', 'yellow', 'red'].includes(status)) throw new UserError('Invalid choice');
   let r: string | null = null;
   if (status !== 'green' && reason) {
-    if (!REASONS.some((x) => x.id === reason)) throw new UserError('Invalid reason');
-    r = reason as string;
+    if (typeof reason === 'string' && isCustomReason(reason)) {
+      // "Other": the student's own words. Same cleanup as names/topics, and never stored empty.
+      const text = clean(customReasonText(reason), CUSTOM_REASON_MAX);
+      if (!text) throw new UserError('Please write a reason');
+      r = CUSTOM_REASON_PREFIX + text;
+    } else {
+      if (!REASONS.some((x) => x.id === reason)) throw new UserError('Invalid reason');
+      r = reason as string;
+    }
   }
   student.status = status as Mark;
   student.reason = r;

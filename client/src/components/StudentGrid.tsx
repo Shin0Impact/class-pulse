@@ -1,10 +1,7 @@
-import { REASONS } from "@shared/events.ts";
+import { reasonLabel } from "./reasonLabel.ts";
 import { STATUS_UI } from "./status.ts";
 import { usePreferences } from "../context/PreferencesContext.tsx";
 import type { StudentView } from "@shared/types.ts";
-
-const reasonLabel = (id: string | null) =>
-  REASONS.find((r) => r.id === id)?.label;
 
 // hideNames: for a projector, show only colored dots so nobody is singled out in front of the class.
 export default function StudentGrid({
@@ -38,7 +35,7 @@ export default function StudentGrid({
     <ul className="flex flex-wrap gap-2">
       {students.map((s) => {
         const ui = STATUS_UI[s.status];
-        const why = reasonLabel(s.reason);
+        const why = reasonLabel(s.reason, t);
         return (
           <li
             key={s.id}
@@ -48,11 +45,13 @@ export default function StudentGrid({
             <span aria-hidden>{ui.symbol}</span>
             <span dir="auto">{s.name}</span>
             {why && (
-              <span className="text-xs font-normal opacity-75">· {why}</span>
+              <span dir="auto" className="text-xs font-normal opacity-75">
+                · {why}
+              </span>
             )}
             {s.focusFlags > 0 && (
               <span
-                title="Left the page"
+                title={t("left")}
                 className="rounded bg-slate-800 px-1 text-xs text-white"
               >
                 🔒 {s.focusFlags}
