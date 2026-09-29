@@ -23,6 +23,8 @@ type AuthValue = {
   ready: boolean;
   // the server has a database, so sign-in exists (and teachers must use it)
   accountsEnabled: boolean;
+  // the server has an AI key, so Generate / Summarize are offered
+  aiEnabled: boolean;
   profile: AccountProfile | null;
   signIn: (email: string, password: string) => Promise<AccountProfile>;
   signUp: (input: SignUpInput) => Promise<AccountProfile>;
@@ -36,6 +38,7 @@ const AuthContext = createContext<AuthValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [accountsEnabled, setAccountsEnabled] = useState(false);
+  const [aiEnabled, setAiEnabled] = useState(false);
   const [profile, setProfile] = useState<AccountProfile | null>(null);
 
   const signOut = useCallback(() => {
@@ -50,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const health = await fetchHealth();
         if (cancelled) return;
         setAccountsEnabled(Boolean(health.accounts));
+        setAiEnabled(Boolean(health.ai));
         if (health.accounts && hasTokens()) {
           const token = await getAccessToken();
           if (token) {
@@ -130,8 +134,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ ready, accountsEnabled, profile, signIn, signUp, signOut, authedRequest }),
-    [ready, accountsEnabled, profile, signIn, signUp, signOut, authedRequest],
+    () => ({ ready, accountsEnabled, aiEnabled, profile, signIn, signUp, signOut, authedRequest }),
+    [ready, accountsEnabled, aiEnabled, profile, signIn, signUp, signOut, authedRequest],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

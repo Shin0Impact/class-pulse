@@ -3,15 +3,18 @@ import type { Request, Response, NextFunction } from 'express';
 import { authEnabled, signIn, signUp, refresh, verifyToken, AuthError } from '../services/authService.ts';
 import { UserError } from '../services/sessionService.ts';
 import { NotFoundError } from '../services/historyService.ts';
+import { AiUnavailableError } from '../ai/llm.ts';
 import type { Profile, Role } from '../services/authService.ts';
 
-// Turns a thrown error into the right HTTP response: 401 for auth problems, 400 for anything the
-// user can fix, 500 (logged, message hidden) for bugs.
+// Turns a thrown error into the right HTTP response: 401 for auth problems, 404 for missing,
+// 503 when the AI can't answer, 400 for anything the user can fix, 500 (logged, message hidden) for bugs.
 export function sendError(res: Response, e: unknown): void {
   if (e instanceof AuthError) {
     res.status(401).json({ error: e.message });
   } else if (e instanceof NotFoundError) {
     res.status(404).json({ error: e.message });
+  } else if (e instanceof AiUnavailableError) {
+    res.status(503).json({ error: e.message });
   } else if (e instanceof UserError) {
     res.status(400).json({ error: e.message });
   } else {

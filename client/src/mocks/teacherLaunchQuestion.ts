@@ -20,6 +20,7 @@ export const mockTeacherLaunchQuestionRequest = {
 // misconception fields, so the answer is never leaked to the browser.
 export const mockQuestionStarted: PublicQuestion = {
   questionId: 'plant-mass-1',
+  kind: 'mcq',
   topic: 'Photosynthesis',
   prompt: "Where does most of a growing tree's mass come from?",
   options: [

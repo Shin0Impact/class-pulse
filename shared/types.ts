@@ -49,6 +49,10 @@ export type TeacherState = {
   pulse: Pulse;
   history: Summary[];
   timeline: TimelineSample[];
+  // The live question and its latest AI summary, so a refreshed dashboard/present page picks up where it was.
+  question: (PublicQuestion & { closed: boolean; correctOptionId: string }) | null;
+  blindspot: BlindspotUpdate | null;
+  summary: ClassConfusionSummary | null;
 };
 
 export type StudentState = {
@@ -61,6 +65,10 @@ export type StudentState = {
   status: Status;
   reason: string | null;
   focusMode: boolean;
+  // The live question if it's still open (so a late joiner or a refreshed phone sees it), and
+  // whether this student already answered it this round.
+  question: PublicQuestion | null;
+  answered: boolean;
 };
 
 export type FocusAlert = { studentId: string; name: string; count: number };
@@ -76,6 +84,7 @@ export type PublicQuestionOption = { id: string; text: string };
 // What TEACHER_LAUNCH_QUESTION/TEACHER_RECHECK broadcast to students as QUESTION_STARTED.
 export type PublicQuestion = {
   questionId: string;
+  kind: "mcq" | "open"; // open: answer in words, no options
   topic: string;
   prompt: string;
   options: PublicQuestionOption[];
@@ -120,6 +129,12 @@ export type QuadrantCounts = {
 
 export type BlindspotUpdate = {
   questionId: string;
+  launchKey?: string; // this launch + round; matches SUMMARY_UPDATE.launchKey
+  kind?: "mcq" | "open";
+  closed?: boolean; // the teacher closed the question: no more answers
+  responses?: number; // how many students answered this round
+  // Open questions have no quadrant: the teacher sees the answers themselves.
+  openAnswers?: Array<{ id: string; name: string; text: string; confidence: Confidence }>;
   groups: QuadrantGroups;
   counts: QuadrantCounts;
   illusionGap: number | null; // felt-confident % minus actually-correct %
@@ -225,13 +240,17 @@ export type ClassQuestionRound = {
 
 export type ClassQuestion = {
   id: string;
+  kind: "mcq" | "open";
+  source: string; // deck | ai | teacher
   topic: string;
   prompt: string;
   startedAt: string;
   options: PublicQuestionOption[];
   correctOptionId: string;
   optionCounts: Record<string, number>; // first attempts per option
-  rounds: ClassQuestionRound[]; // round 1, then each re-check
+  rounds: ClassQuestionRound[]; // round 1, then each re-check (multiple choice only)
+  openAnswers: Array<{ name: string; text: string; confidence: Confidence }>; // open questions
+  summary: ClassConfusionSummary | null; // the newest AI summary of this question
 };
 
 export type ClassCheckIn = {
@@ -283,4 +302,55 @@ export type StudentProgress = {
   overall: CalibrationStats;
   classes: ProgressClass[]; // oldest first: the calibration-over-time line
   topics: ProgressTopic[];
+};
+
+// ---- AI: generated questions & class-confusion summaries ----
+
+export type QuestionKind = "mcq" | "open";
+
+// What the teacher reviews (and can edit) before launching. Never sent to students as-is.
+export type QuestionDraft = {
+  id: string;
+  kind: QuestionKind;
+  topic: string;
+  prompt: string;
+  options: PublicQuestionOption[]; // [] for an open question
+  correctOptionId: string; // "" for an open question
+  // For the teacher: the mistake each wrong option stands for (by option id).
+  optionNotes: Record<string, string>;
+  modelAnswer: string; // open questions: what a good answer says ("" otherwise)
+  rubric?: {
+    keyIdeas: string[];
+    misconceptions: Array<{ label: string; phrases: string[] }>;
+  };
+  source: "ai" | "teacher" | "deck";
+  provider?: string; // which AI model wrote it
+};
+
+// Where a question came from in the lesson, kept with it so the summary can point back there.
+export type LessonContext = {
+  documentName?: string;
+  page?: number;
+  excerpt?: string; // the page's text (trimmed)
+};
+
+export type ClassConfusionSummary = {
+  questionId: string;
+  answered: number;
+  headline: string; // one sentence: how the class did
+  confusions: Array<{ issue: string; detail: string }>; // up to 3, most common first
+  reteach: boolean; // worth going over this part again?
+  suggestion: string; // what to repeat / how
+  provider: string;
+  createdAt: number;
+};
+
+// A teacher's uploaded lesson file (GET /documents).
+export type DocumentInfo = {
+  id: string;
+  name: string;
+  mime: string;
+  size: number;
+  createdAt: string;
+  lastUsedAt: string;
 };

@@ -33,6 +33,15 @@ export const EVENTS = {
   TEACHER_PAIR_UP: "teacher:pairUp",
   // { questionId } -> { pairs: Pair[] }   pairs a confident-wrong student with a confident-right student (pairing.ts)
 
+  // Stops answers for the live question (students go back to waiting). With AI configured it also
+  // starts a class-confusion summary, delivered later as SUMMARY_UPDATE.
+  TEACHER_CLOSE_QUESTION: "teacher:closeQuestion",
+  // { language?: 'ar'|'en' } -> { summarizing: boolean }
+
+  // Asks the AI for a class-confusion summary of the live question's answers so far.
+  TEACHER_SUMMARIZE: "teacher:summarize",
+  // { language?: 'ar'|'en' } -> {}   result arrives as SUMMARY_UPDATE
+
   // Re-opens the same question after pairing/discussion, to see if minds changed.
   TEACHER_RECHECK: "teacher:recheck",
   // { questionId } -> {}   clears answers for that question and re-broadcasts QUESTION_STARTED (isRecheck: true)
@@ -40,7 +49,8 @@ export const EVENTS = {
   // ---- Blindspot: student -> server ----
   // A student's answer to the launched question, plus a confidence rating.
   STUDENT_ANSWER: "student:answer",
-  // { questionId, optionId, confidence: 'guess'|'fairly-sure'|'certain' } -> {}
+  // { questionId, optionId, confidence: 'guess'|'fairly-sure'|'certain', explanation? } -> {}
+  // open questions: { questionId, text, confidence } -> {}
 
   // After being paired, the listener rates how clearly their partner explained their reasoning.
   STUDENT_RATE_CLARITY: "student:rateClarity",
@@ -62,6 +72,14 @@ export const EVENTS = {
   //   correct
   // }
   // { questionId, topic, prompt, options: [{ id, text }], isRecheck?: boolean }
+
+  // To students: the teacher closed the question; no more answers.
+  QUESTION_CLOSED: "question:closed",
+  // { questionId }
+
+  // To the teacher: an AI class-confusion summary is being written / is ready / failed.
+  SUMMARY_UPDATE: "summary:update",
+  // { questionId, status: 'working'|'ready'|'failed', summary?: ClassConfusionSummary, error?: string }
 
   // To the teacher: the live 2x2 quadrant breakdown for the current question (quadrant.ts).
   BLINDSPOT_UPDATE: "blindspot:update",

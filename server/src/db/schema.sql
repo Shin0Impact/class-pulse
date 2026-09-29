@@ -4,7 +4,7 @@
 -- If you ran an OLDER version of this file (with a "checks" / "answers" table), run the DROP block first.
 -- Already ran an older version and just need the newer tables/columns? Run the files in migrations/ instead.
 
--- drop table if exists blindspot_clarity_ratings, blindspot_pairs, blindspot_answers, blindspot_questions, teachback_sessions, answers, checks, status_events, checkins, students, sessions, profiles cascade;
+-- drop table if exists documents, ai_summaries, blindspot_clarity_ratings, blindspot_pairs, blindspot_answers, blindspot_questions, teachback_sessions, answers, checks, status_events, checkins, students, sessions, profiles cascade;
 
 -- ---- Accounts ----
 -- One row per account. The login itself (email + password) lives in Supabase Auth (auth.users);
@@ -66,6 +66,9 @@ create table if not exists blindspot_questions (
   id                 uuid primary key,
   session_id         uuid not null references sessions(id) on delete cascade,
   question_id        text not null,   -- the deck's own question id (not unique across sessions)
+  kind               text not null default 'mcq',   -- mcq | open (open: no options, correct_option_id '')
+  source             text not null default 'deck',  -- deck | ai | teacher
+  context            jsonb,           -- { documentName, page, excerpt }: the lesson page it was about
   topic              text not null default '',
   prompt             text not null,
   correct_option_id  text not null,
@@ -84,6 +87,7 @@ create table if not exists blindspot_answers (
   confidence   text not null,   -- guess | fairly-sure | certain
   correct      boolean not null,
   explanation  text,
+  answer_text  text,             -- an open question's written answer
   created_at   timestamptz not null default now(),
   unique (question_id, student_id, round)
 );
@@ -111,7 +115,34 @@ create table if not exists blindspot_clarity_ratings (
   unique (pair_key, student_id)
 );
 
+-- ---- AI ----
+-- One row per AI summary of a question's answers (the teacher can ask again; newest wins).
+create table if not exists ai_summaries (
+  id           uuid primary key,
+  question_id  uuid not null references blindspot_questions(id) on delete cascade,
+  round        int not null default 1,
+  answered     int not null,
+  summary      jsonb not null,   -- ClassConfusionSummary: headline, confusions[], reteach, suggestion
+  provider     text not null,    -- which AI model wrote it
+  created_at   timestamptz not null default now()
+);
+
+-- A teacher's uploaded lesson files. The bytes live in the private Storage bucket "documents"
+-- (the server creates it on first upload).
+create table if not exists documents (
+  id            uuid primary key,
+  teacher_id    uuid not null references profiles(id) on delete cascade,
+  name          text not null,
+  mime          text not null,
+  size          int not null,
+  storage_path  text not null,
+  created_at    timestamptz not null default now(),
+  last_used_at  timestamptz not null default now()
+);
+
 create index if not exists idx_sessions_code on sessions(code);
+create index if not exists idx_ai_summaries_question on ai_summaries(question_id);
+create index if not exists idx_documents_teacher on documents(teacher_id, last_used_at desc);
 create index if not exists idx_sessions_teacher on sessions(teacher_id);
 create index if not exists idx_students_user on students(user_id);
 create index if not exists idx_checkins_session on checkins(session_id);
@@ -132,3 +163,5 @@ alter table blindspot_questions       enable row level security;
 alter table blindspot_answers         enable row level security;
 alter table blindspot_pairs           enable row level security;
 alter table blindspot_clarity_ratings enable row level security;
+alter table ai_summaries              enable row level security;
+alter table documents                 enable row level security;

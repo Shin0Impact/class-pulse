@@ -33,4 +33,4 @@ export async function request<T>(
 
 export const fetchSession = (code: string) => request(`/sessions/${encodeURIComponent(code)}`);
 
-export const fetchHealth = () => request<{ ok: boolean; db: string; accounts?: boolean }>('/health');
+export const fetchHealth = () => request<{ ok: boolean; db: string; accounts?: boolean; ai?: boolean }>('/health');

@@ -12,6 +12,7 @@ import type {
   BlindspotUpdate,
   CalibrationCard as CalibrationCardPayload,
   Confidence,
+  LessonContext,
   Pair,
   PublicQuestion,
 } from "../../../shared/types.ts";
@@ -77,10 +78,37 @@ function toRubric(value: unknown): ExplanationRubric | undefined {
   return value as ExplanationRubric;
 }
 
+const clip = (v: unknown, max: number) =>
+  typeof v === "string" ? v.trim().replace(/\s+/g, " ").slice(0, max) : "";
+
+function toContext(value: unknown): LessonContext | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const c = value as Record<string, unknown>;
+  const context: LessonContext = {
+    documentName: clip(c.documentName, 120) || undefined,
+    page: Number.isInteger(c.page) && (c.page as number) > 0 ? (c.page as number) : undefined,
+    // keep line breaks in the excerpt: they help the AI read slides
+    excerpt: typeof c.excerpt === "string" ? c.excerpt.slice(0, 4000) : undefined,
+  };
+  return context.documentName || context.page || context.excerpt ? context : undefined;
+}
+
+const SOURCES = ["deck", "ai", "teacher"] as const;
+
+export const publicQuestion = (round: QuestionRound, isRecheck = false): PublicQuestion => ({
+  questionId: round.id,
+  kind: round.kind,
+  topic: round.topic,
+  prompt: round.prompt,
+  options: round.options,
+  ...(isRecheck ? { isRecheck: true } : {}),
+});
+
 // Banks the current round's final answers into each student's calibration history.
+// Open questions have no right answer, so they never count toward calibration.
 function foldCurrentRoundIntoHistory(session: Session): void {
   const round = session.currentQuestion;
-  if (!round) return;
+  if (!round || round.kind === "open") return;
 
   for (const [studentId, answer] of session.answers) {
     const correct = answer.optionId === round.correctOptionId;
@@ -99,26 +127,44 @@ export function launchQuestion(
     throw new UserError("A question is required");
   }
 
-  const { id, topic, prompt, correctOptionId, options, rubric } = q as Record<
-    string,
-    unknown
-  >;
+  const {
+    id,
+    kind,
+    topic,
+    prompt,
+    correctOptionId,
+    options,
+    rubric,
+    source,
+    context,
+    modelAnswer,
+  } = q as Record<string, unknown>;
+  const isOpen = kind === "open";
 
-  if (typeof id !== "string" || !id) {
+  if (typeof id !== "string" || !id || id.length > 100) {
     throw new UserError("Question id is required");
   }
   if (typeof prompt !== "string" || !prompt.trim()) {
     throw new UserError("Question prompt is required");
   }
-  if (typeof correctOptionId !== "string" || !correctOptionId) {
-    throw new UserError("correctOptionId is required");
-  }
+  if (prompt.length > 500) throw new UserError("The question is too long");
 
-  const publicOptions = toPublicOptions(options);
-  if (!publicOptions.some((o) => o.id === correctOptionId)) {
-    throw new UserError("correctOptionId must match an option id");
+  let publicOptions: QuestionOption[] = [];
+  if (!isOpen) {
+    if (typeof correctOptionId !== "string" || !correctOptionId) {
+      throw new UserError("correctOptionId is required");
+    }
+    publicOptions = toPublicOptions(options);
+    if (publicOptions.length > 6) throw new UserError("At most 6 options");
+    if (publicOptions.some((o) => o.text.length > 200)) throw new UserError("An option is too long");
+    if (new Set(publicOptions.map((o) => o.id)).size !== publicOptions.length) {
+      throw new UserError("Option ids must be different");
+    }
+    if (!publicOptions.some((o) => o.id === correctOptionId)) {
+      throw new UserError("correctOptionId must match an option id");
+    }
   }
-  const privateRubric = toRubric(rubric);
+  const privateRubric = isOpen ? undefined : toRubric(rubric);
 
   foldCurrentRoundIntoHistory(session);
 
@@ -126,11 +172,18 @@ export function launchQuestion(
     id,
     dbId: randomUUID(),
     round: 1,
-    topic: typeof topic === "string" ? topic.trim() : "",
+    kind: isOpen ? "open" : "mcq",
+    topic: clip(topic, 80),
     prompt: prompt.trim(),
-    correctOptionId,
+    correctOptionId: isOpen ? "" : (correctOptionId as string),
     options: publicOptions,
     rubric: privateRubric,
+    source: SOURCES.includes(source as (typeof SOURCES)[number])
+      ? (source as QuestionRound["source"])
+      : "deck",
+    context: toContext(context),
+    modelAnswer: isOpen ? clip(modelAnswer, 600) || undefined : undefined,
+    closed: false,
     startedAt: Date.now(),
   };
 
@@ -139,12 +192,15 @@ export function launchQuestion(
   session.pairs = [];
   store.saveQuestion(session, round);
 
-  return {
-    questionId: round.id,
-    topic: round.topic,
-    prompt: round.prompt,
-    options: round.options,
-  };
+  return publicQuestion(round);
+}
+
+// Teacher: "Close". No more answers this round; students go back to waiting.
+export function closeQuestion(session: Session): QuestionRound {
+  const round = session.currentQuestion;
+  if (!round) throw new UserError("No question is live");
+  round.closed = true;
+  return round;
 }
 
 const CONFIDENCES = ["guess", "fairly-sure", "certain"];
@@ -157,6 +213,7 @@ export function recordAnswer(
     optionId?: unknown;
     confidence?: unknown;
     explanation?: unknown;
+    text?: unknown;
   },
 ): void {
   const round = session.currentQuestion;
@@ -164,17 +221,29 @@ export function recordAnswer(
   if (payload.questionId !== round.id) {
     throw new UserError("That question is no longer live");
   }
-  if (
-    typeof payload.optionId !== "string" ||
-    !round.options.some((o) => o.id === payload.optionId)
-  ) {
-    throw new UserError("Invalid choice");
-  }
+  if (round.closed) throw new UserError("This question is closed");
   if (
     typeof payload.confidence !== "string" ||
     !CONFIDENCES.includes(payload.confidence)
   ) {
     throw new UserError("Invalid confidence");
+  }
+
+  if (round.kind === "open") {
+    const text = typeof payload.text === "string" ? payload.text.trim() : "";
+    if (!text) throw new UserError("Write your answer first");
+    if (text.length > 1000) throw new UserError("Answer must be at most 1000 characters");
+    const answer = { optionId: "", text, confidence: payload.confidence as Confidence };
+    session.answers.set(student.id, answer);
+    store.saveAnswer(round, student.id, answer, false);
+    return;
+  }
+
+  if (
+    typeof payload.optionId !== "string" ||
+    !round.options.some((o) => o.id === payload.optionId)
+  ) {
+    throw new UserError("Invalid choice");
   }
   if (
     payload.explanation !== undefined &&
@@ -213,6 +282,27 @@ export function computeBlindspotUpdate(session: Session): BlindspotUpdate {
   const round = session.currentQuestion;
   if (!round) throw new UserError("No question is live");
 
+  if (round.kind === "open") {
+    const openAnswers = [...session.answers.entries()].map(([id, a]) => ({
+      id,
+      name: session.students.get(id)?.name ?? "Student",
+      text: a.text ?? "",
+      confidence: a.confidence,
+    }));
+    return {
+      questionId: round.id,
+      launchKey: `${round.dbId}:${round.round}`,
+      kind: "open",
+      closed: round.closed,
+      responses: openAnswers.length,
+      openAnswers,
+      groups: { mastered: [], fragile: [], blindspot: [], aware: [] },
+      counts: { mastered: 0, fragile: 0, blindspot: 0, aware: 0 },
+      illusionGap: null,
+      headline: "",
+    };
+  }
+
   const answers: Answer[] = [...session.answers.entries()].map(
     ([studentId, answer]) => ({
       studentId,
@@ -248,7 +338,13 @@ export function computeBlindspotUpdate(session: Session): BlindspotUpdate {
 
   // illusionGap/headline come straight from computeQuadrants: confident% minus correct% on THIS
   // question, not the general classroom pulse -- a tighter signal than mixing in unrelated taps.
-  return update;
+  return {
+    ...update,
+    launchKey: `${round.dbId}:${round.round}`,
+    kind: "mcq",
+    closed: round.closed,
+    responses: answers.length,
+  };
 }
 
 export function pairStudents(session: Session): {
@@ -257,6 +353,9 @@ export function pairStudents(session: Session): {
 } {
   const round = session.currentQuestion;
   if (!round) throw new UserError("No question is live");
+  if (round.kind === "open") {
+    throw new UserError("Pair up works with multiple-choice questions");
+  }
 
   const update = computeBlindspotUpdate(session);
   const pairs = pairUp(update.groups.blindspot, update.groups.mastered);
@@ -298,6 +397,9 @@ export function answerRevealsForCurrentRound(
 
   if (!round) {
     throw new UserError("No question is live");
+  }
+  if (round.kind === "open") {
+    throw new UserError("Re-check works with multiple-choice questions");
   }
 
   return [...session.answers.entries()].map(([studentId, answer]) => {
@@ -346,15 +448,15 @@ export function recheckQuestion(session: Session): PublicQuestion {
   const round = session.currentQuestion;
   if (!round) throw new UserError("No question is live");
 
+  if (round.kind === "open") {
+    throw new UserError("Re-check works with multiple-choice questions");
+  }
+
   round.round += 1; // same blindspot_questions row (dbId), a new round of child rows under it
+  round.closed = false; // a re-check re-opens a closed question
+  round.summary = undefined; // the old summary describes the previous round
   session.answers = new Map();
   session.pairs = [];
 
-  return {
-    questionId: round.id,
-    topic: round.topic,
-    prompt: round.prompt,
-    options: round.options,
-    isRecheck: true,
-  };
+  return publicQuestion(round, true);
 }

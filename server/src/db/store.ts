@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { supabase } from './supabase.ts';
-import type { CheckIn, Confidence, Pair, Summary } from '../../../shared/types.ts';
+import type { CheckIn, ClassConfusionSummary, Confidence, Pair, Summary } from '../../../shared/types.ts';
 import type { QuestionRound, Session, Student } from '../services/types.ts';
 
 // Persistence layer. Live state stays in memory (see sessionService); this only records history.
@@ -73,6 +73,7 @@ export const store = {
     const row = {
       id: round.dbId, session_id: session.id, question_id: round.id, topic: round.topic,
       prompt: round.prompt, correct_option_id: round.correctOptionId, options: round.options,
+      kind: round.kind, source: round.source, context: round.context ?? null,
     };
     enqueue('insert blindspot question', (db) => db.from('blindspot_questions').insert(row));
   },
@@ -82,12 +83,13 @@ export const store = {
   saveAnswer: (
     round: QuestionRound,
     studentId: string,
-    answer: { optionId: string; confidence: Confidence; explanation?: string },
+    answer: { optionId: string; confidence: Confidence; explanation?: string; text?: string },
     correct: boolean,
   ) => {
     const row = {
       id: randomUUID(), question_id: round.dbId, student_id: studentId, round: round.round,
       option_id: answer.optionId, confidence: answer.confidence, correct, explanation: answer.explanation ?? null,
+      answer_text: answer.text ?? null,
     };
     enqueue('save blindspot answer', (db) =>
       db.from('blindspot_answers').upsert(row, { onConflict: 'question_id,student_id,round' }));
@@ -99,6 +101,15 @@ export const store = {
       explainer_student_id: pair.explainer.id, listener_student_id: pair.listener.id,
     }));
     enqueue('insert blindspot pairs', (db) => db.from('blindspot_pairs').insert(rows));
+  },
+
+  // One row per AI summary (a teacher can ask again as more answers come in; the newest wins).
+  saveSummary: (questionDbId: string, round: number, summary: ClassConfusionSummary) => {
+    const row = {
+      id: randomUUID(), question_id: questionDbId, round, answered: summary.answered,
+      summary, provider: summary.provider,
+    };
+    enqueue('insert ai summary', (db) => db.from('ai_summaries').insert(row));
   },
 
   // Upserted on (pair_key, student_id): the listener can change their rating before moving on.

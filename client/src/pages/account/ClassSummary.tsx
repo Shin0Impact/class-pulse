@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext.tsx";
 import { usePreferences } from "../../context/PreferencesContext.tsx";
 import BarList from "../../components/charts/BarList.tsx";
+import SummaryCard from "../../components/ai/SummaryCard.tsx";
 import AccountShell, { LoadState, StatTile } from "./AccountShell.tsx";
 import { CALIBRATION_KEY, dateTime, pctText } from "./format.ts";
 import type { ClassDetail, ClassQuestion } from "@shared/types.ts";
@@ -110,11 +111,27 @@ export default function ClassSummary() {
               const later = q.rounds.filter((r) => r.round > 1).at(-1);
               const total = Object.values(q.optionCounts).reduce((a, b) => a + b, 0);
               return (
-                <article key={q.id} className="question-card">
-                  <p className="question-card__meta">
+                <article key={q.id} className="cs-question">
+                  <p className="cs-question__meta">
                     {i + 1} · {q.topic || t("noTopic")}
+                    {q.source === "ai" && <span className="ai-badge">✦ AI</span>}
+                    {q.kind === "open" && <span className="badge">{t("openQuestion")}</span>}
                   </p>
                   <h3 dir="auto">{q.prompt}</h3>
+                  {q.kind === "open" ? (
+                    q.openAnswers.length === 0 ? (
+                      <p className="account__muted">{t("noAnswersYet")}</p>
+                    ) : (
+                      <ul className="cs-open-answers">
+                        {q.openAnswers.map((a, j) => (
+                          <li key={j}>
+                            <strong dir="auto">{a.name}</strong>
+                            <span dir="auto">{a.text}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )
+                  ) : (
                   <BarList
                     label={q.prompt}
                     max={Math.max(1, ...Object.values(q.optionCounts))}
@@ -131,8 +148,9 @@ export default function ClassSummary() {
                       };
                     })}
                   />
-                  {first && (
-                    <p className="question-card__rounds">
+                  )}
+                  {first && q.kind !== "open" && (
+                    <p className="cs-question__rounds">
                       {t("firstTry")}: <strong>{pctText(first.correctPct)}</strong> {t("correctWord")}
                       {later && (
                         <>
@@ -142,7 +160,7 @@ export default function ClassSummary() {
                       )}
                     </p>
                   )}
-                  {first && (
+                  {first && q.kind !== "open" && (
                     <ul className="quadrant-chips">
                       {QUADRANT_KEYS.map(([key, label]) => (
                         <li key={key} className={`quadrant-chip quadrant-chip--${key}`}>
@@ -150,6 +168,11 @@ export default function ClassSummary() {
                         </li>
                       ))}
                     </ul>
+                  )}
+                  {q.summary && (
+                    <div className="cs-question__summary">
+                      <SummaryCard summary={q.summary} />
+                    </div>
                   )}
                 </article>
               );

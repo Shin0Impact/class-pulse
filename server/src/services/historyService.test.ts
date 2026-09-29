@@ -90,3 +90,26 @@ test('progress with no classes is empty, not an error', () => {
   assert.equal(progress.overall.calibration, 'no-data');
   assert.deepEqual(progress.classes, []);
 });
+
+test('open questions show their answers and summary but never count toward accuracy', () => {
+  const students: StudentRow[] = [{ id: 'amal', session_id: 's1', name: 'Amal', user_id: null }];
+  const open: QuestionRow = { ...question('o1', 's1', 'Plants'), kind: 'open', options: [], correct_option_id: '' };
+  const answers: AnswerRow[] = [
+    answer('q1', 'amal', true, 'certain'),
+    { question_id: 'o1', student_id: 'amal', round: 1, option_id: '', confidence: 'certain', correct: false, answer_text: 'they eat soil' },
+  ];
+  const summary = { questionId: 'o1', answered: 1, headline: 'Mixed up.', confusions: [], reteach: true, suggestion: 'Redo.', provider: 'x', createdAt: 0 };
+  const detail = summarizeClass(session('s1', '2026-09-01T09:00:00Z'), students, [question('q1', 's1', 'Fractions'), open], answers, [], [
+    { question_id: 'o1', summary: { ...summary, headline: 'old' }, created_at: '2026-09-01T10:00:00Z' },
+    { question_id: 'o1', summary, created_at: '2026-09-01T11:00:00Z' },
+  ]);
+  assert.equal(detail.totals.firstTryAccuracy, 100);
+  assert.equal(detail.students[0].answered, 1);
+  const o = detail.questions.find((q) => q.id === 'o1')!;
+  assert.equal(o.kind, 'open');
+  assert.deepEqual(o.openAnswers.map((a) => a.text), ['they eat soil']);
+  assert.equal(o.summary?.headline, 'Mixed up.');
+
+  const progress = summarizeProgress([session('s1', '2026-09-01T09:00:00Z')], students, [question('q1', 's1', 'Fractions'), open], answers);
+  assert.deepEqual(progress.topics.map((t) => t.topic), ['Fractions']);
+});

@@ -4,7 +4,9 @@ import { EVENTS } from "@shared/events.ts";
 import { FEATURES } from "@shared/features.ts";
 import { socket, emitAck, SERVER_URL } from "../../socket/socket.ts";
 import { getAccessToken } from "../../auth/tokens.ts";
-import { useSocketEvents } from "../../socket/useSocketEvents.ts";
+import { useSocketEvents, type SummaryState } from "../../socket/useSocketEvents.ts";
+import { useAuth } from "../../auth/AuthContext.tsx";
+import SummaryCard from "../../components/ai/SummaryCard.tsx";
 import BlindspotHeadline from "../../components/BlindspotHeadline.tsx";
 import Button from "../../components/ui/Button.tsx";
 import Card from "../../components/ui/Card.tsx";
@@ -53,7 +55,8 @@ type Deck = {
 
 export default function Dashboard() {
   const { code } = useParams();
-  const { t } = usePreferences();
+  const { t, language } = usePreferences();
+  const { aiEnabled } = useAuth();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -72,6 +75,7 @@ export default function Dashboard() {
   const [selectedQuestionId, setSelectedQuestionId] = useState("");
   const [blindspotUpdate, setBlindspotUpdate] =
     useState<BlindspotUpdate | null>(null);
+  const [summary, setSummary] = useState<SummaryState | null>(null);
 
   useEffect(() => {
     async function loadDecks() {
@@ -156,6 +160,18 @@ export default function Dashboard() {
       setTimeline(state.timeline);
       setFocusMode(state.focusMode);
       setTopic((t) => t || state.pulse.checkIn.topic);
+      // the live question (maybe launched from the Present page) and its AI summary
+      setBlindspotUpdate(state.blindspot);
+      setSummary(
+        state.summary
+          ? {
+              questionId: state.summary.questionId,
+              launchKey: state.blindspot?.launchKey,
+              status: "ready",
+              summary: state.summary,
+            }
+          : null,
+      );
       setError("");
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -190,6 +206,8 @@ export default function Dashboard() {
       setBlindspotUpdate(update);
     },
 
+    [EVENTS.SUMMARY_UPDATE]: (s) => setSummary(s),
+
     [EVENTS.SESSION_ENDED]: () => navigate("/"),
   });
 
@@ -216,10 +234,29 @@ export default function Dashboard() {
     if (!selectedQuestion) return;
 
     setBlindspotUpdate(null);
+    setSummary(null);
 
     await run(EVENTS.TEACHER_LAUNCH_QUESTION, {
-      question: selectedQuestion,
+      question: { ...selectedQuestion, kind: "mcq", source: "deck" },
     });
+  }
+
+  async function closeQuestion() {
+    const res = await run<{ summarizing: boolean }>(
+      EVENTS.TEACHER_CLOSE_QUESTION,
+      { language },
+    );
+    if (res?.summarizing && blindspotUpdate) {
+      setSummary({
+        questionId: blindspotUpdate.questionId,
+        launchKey: blindspotUpdate.launchKey,
+        status: "working",
+      });
+    }
+  }
+
+  async function summarize() {
+    await run(EVENTS.TEACHER_SUMMARIZE, { language });
   }
 
   async function pairUp() {
@@ -249,6 +286,13 @@ export default function Dashboard() {
     await run(EVENTS.TEACHER_END_SESSION, {});
   }
 
+  const isOpenQuestion = blindspotUpdate?.kind === "open";
+  // Only the summary of THIS launch and round (a deck question's id repeats; a re-check is a new round).
+  const currentSummary =
+    summary && blindspotUpdate && summary.launchKey === blindspotUpdate.launchKey
+      ? summary
+      : null;
+
   const joinUrl = `${window.location.origin}/join?code=${code}`;
   const topics: Record<string, string> = Object.fromEntries([
     ...history.map((h) => [h.id, h.topic]),
@@ -276,9 +320,17 @@ export default function Dashboard() {
             {t("studentsOpen")} <span className="font-semibold">{joinUrl}</span>
           </div>
         </div>
-        <Button variant="secondary" onClick={endClass}>
-          {t("endClass")}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="secondary"
+            onClick={() => navigate(`/teacher/${code}/present`)}
+          >
+            ✦ {t("presentButton")}
+          </Button>
+          <Button variant="secondary" onClick={endClass}>
+            {t("endClass")}
+          </Button>
+        </div>
       </header>
 
       {error && (
@@ -349,8 +401,8 @@ export default function Dashboard() {
                 <Button
                   type="button"
                   variant="secondary"
-                  disabled
-                  title="Close question event is not available yet"
+                  onClick={closeQuestion}
+                  disabled={!blindspotUpdate || blindspotUpdate.closed || busy}
                 >
                   {t("closeQuestion")}
                 </Button>
@@ -359,7 +411,7 @@ export default function Dashboard() {
                   type="button"
                   variant="secondary"
                   onClick={pairUp}
-                  disabled={!blindspotUpdate || busy}
+                  disabled={!blindspotUpdate || isOpenQuestion || busy}
                 >
                   {t("pairUp")}
                 </Button>
@@ -368,15 +420,63 @@ export default function Dashboard() {
                   type="button"
                   variant="secondary"
                   onClick={recheckQuestion}
-                  disabled={!blindspotUpdate || busy}
+                  disabled={!blindspotUpdate || isOpenQuestion || busy}
                 >
                   {t("recheckQuestion")}
                 </Button>
+
+                {aiEnabled && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={summarize}
+                    disabled={
+                      !blindspotUpdate?.responses ||
+                      summary?.status === "working" ||
+                      busy
+                    }
+                  >
+                    ✦ {t("summarize")}
+                  </Button>
+                )}
               </div>
             </div>
           </Card>
 
-          {blindspotUpdate && (
+          {currentSummary && (
+            <SummaryCard
+              status={currentSummary.status}
+              summary={currentSummary.summary}
+              error={currentSummary.error}
+            />
+          )}
+
+          {blindspotUpdate && isOpenQuestion && (
+            <Card
+              title={`${t("openAnswers")} (${blindspotUpdate.responses ?? 0})`}
+            >
+              {(blindspotUpdate.openAnswers?.length ?? 0) === 0 ? (
+                <p className="text-sm text-slate-500">{t("noAnswersYet")}</p>
+              ) : (
+                <ul className="space-y-2">
+                  {blindspotUpdate.openAnswers!.map((a) => (
+                    <li
+                      key={a.id}
+                      className="rounded-xl bg-slate-50 px-3 py-2 text-sm"
+                      dir="auto"
+                    >
+                      {!hideNames && (
+                        <span className="me-2 font-semibold">{a.name}:</span>
+                      )}
+                      {a.text}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          )}
+
+          {blindspotUpdate && !isOpenQuestion && (
             <>
               <BlindspotHeadline
                 studentCount={blindspotUpdate.counts.blindspot}
