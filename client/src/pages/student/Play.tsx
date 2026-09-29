@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-
 import { useNavigate, useParams } from "react-router-dom";
 
 import { EVENTS } from "@shared/events.ts";
@@ -12,7 +11,9 @@ import type {
   StudentState,
   PairAssigned,
   AnswerReveal as AnswerRevealData,
+  CalibrationCard,
 } from "@shared/types.ts";
+
 import { socket, emitAck } from "../../socket/socket.ts";
 import { useSocketEvents } from "../../socket/useSocketEvents.ts";
 import { useFocusMode } from "../../hooks/useFocusMode.ts";
@@ -57,7 +58,6 @@ export default function Play() {
   const code = useParams().code ?? "";
 
   const { t } = usePreferences();
-
   const navigate = useNavigate();
 
   /* --------------------------------
@@ -73,11 +73,9 @@ export default function Play() {
   const [topic, setTopic] = useState("");
 
   const [status, setStatus] = useState<Mark | null>(null);
-
   const [reason, setReason] = useState<string | null>(null);
 
   const [focusOn, setFocusOn] = useState(false);
-
   const [error, setError] = useState("");
 
   /* --------------------------------
@@ -91,13 +89,23 @@ export default function Play() {
   const [confidence, setConfidence] = useState<Confidence | null>(null);
 
   const [answerSent, setAnswerSent] = useState(false);
+
   const [answerReveal, setAnswerReveal] = useState<AnswerRevealData | null>(
     null,
   );
 
+  /*
+    S5:
+    This is no longer mock calibration data.
+    It is populated by EVENTS.CALIBRATION_CARD.
+  */
+  const [calibrationCard, setCalibrationCard] =
+    useState<CalibrationCard | null>(null);
+
   const [pairAssignment, setPairAssignment] = useState<PairAssigned | null>(
     null,
   );
+
   const [clarityRated, setClarityRated] = useState(false);
 
   /* --------------------------------
@@ -129,6 +137,11 @@ export default function Play() {
 
   /* --------------------------------
      Join / reconnect
+
+     IMPORTANT:
+     Keep this logic. Phones may sleep,
+     sockets reconnect, and the student
+     must restore their existing identity.
   -------------------------------- */
 
   const join = useCallback(async () => {
@@ -137,7 +150,9 @@ export default function Play() {
     const saved = readSaved(code);
 
     if (!saved.name) {
-      navigate(`/join?code=${code}`, { replace: true });
+      navigate(`/join?code=${code}`, {
+        replace: true,
+      });
 
       return;
     }
@@ -166,6 +181,11 @@ export default function Play() {
 
       const local = mine.current;
 
+      /*
+        If the phone temporarily disconnected
+        during the same check-in and the local
+        status is newer, restore it to the server.
+      */
       if (
         sameCheckIn &&
         local.status &&
@@ -204,7 +224,7 @@ export default function Play() {
   }, [join]);
 
   /* --------------------------------
-     Socket events
+     REAL SOCKET EVENTS — S5
   -------------------------------- */
 
   useSocketEvents({
@@ -227,12 +247,24 @@ export default function Play() {
       setPhase("ended");
     },
 
+    /*
+      S3:
+      Real pair assignment from server.
+    */
     [EVENTS.PAIR_ASSIGNED]: (data) => {
       setPairAssignment(data);
       setClarityRated(false);
       setError("");
-      if (navigator.vibrate) navigator.vibrate([18, 40, 18]);
+
+      if (navigator.vibrate) {
+        navigator.vibrate([18, 40, 18]);
+      }
     },
+
+    /*
+      S4:
+      Real answer result from server.
+    */
     [EVENTS.ANSWER_REVEAL]: (data) => {
       setAnswerReveal(data);
       setPairAssignment(null);
@@ -245,16 +277,38 @@ export default function Play() {
       }
     },
 
-    [EVENTS.QUESTION_STARTED]: (data) => {
-      const nextQuestion = data;
+    /*
+      S5:
+      Replace calibration mock with the
+      real server CALIBRATION_CARD event.
+    */
+    [EVENTS.CALIBRATION_CARD]: (data) => {
+      setCalibrationCard(data);
+      setError("");
+    },
 
-      setQuestion(nextQuestion);
+    /*
+      S1:
+      Real question from the teacher/server.
+    */
+    [EVENTS.QUESTION_STARTED]: (data) => {
+      setQuestion(data);
 
       setSelectedOptionId(null);
       setConfidence(null);
       setAnswerSent(false);
+
       setPairAssignment(null);
       setClarityRated(false);
+
+      /*
+        A new question/recheck starts a new
+        visible round, so old result/calibration
+        must not leak into it.
+      */
+      setAnswerReveal(null);
+      setCalibrationCard(null);
+
       setError("");
 
       if (navigator.vibrate) {
@@ -276,8 +330,10 @@ export default function Play() {
       navigator.vibrate(15);
     }
 
-    emitAck(EVENTS.STUDENT_SET_STATUS, { status: s }).catch((e) => {
-      setError(e.message);
+    emitAck(EVENTS.STUDENT_SET_STATUS, {
+      status: s,
+    }).catch((e) => {
+      setError(e instanceof Error ? e.message : String(e));
     });
   }
 
@@ -290,7 +346,7 @@ export default function Play() {
       status,
       reason: next,
     }).catch((e) => {
-      setError(e.message);
+      setError(e instanceof Error ? e.message : String(e));
     });
   }
 
@@ -327,11 +383,14 @@ export default function Play() {
     }
 
     try {
+      /*
+        S5:
+        Real student answer sent to server.
+        No mock payload is used here.
+      */
       await emitAck(EVENTS.STUDENT_ANSWER, {
         questionId: question.questionId,
-
         optionId: selectedOptionId,
-
         confidence: nextConfidence,
       });
 
@@ -342,18 +401,39 @@ export default function Play() {
   }
 
   async function rateClarity(rating: 1 | 3 | 5) {
-    if (!pairAssignment || pairAssignment.role !== "listener") return;
+    if (!pairAssignment || pairAssignment.role !== "listener") {
+      return;
+    }
+
     setError("");
+
     try {
+      /*
+        S5:
+        Real clarity rating sent to server.
+      */
       await emitAck(EVENTS.STUDENT_RATE_CLARITY, {
         pairId: pairAssignment.pairId,
         rating,
       });
+
       setClarityRated(true);
-      if (navigator.vibrate) navigator.vibrate(16);
+
+      if (navigator.vibrate) {
+        navigator.vibrate(16);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
+  }
+
+  /* --------------------------------
+     Result continue
+  -------------------------------- */
+
+  function continueAfterReveal() {
+    setAnswerReveal(null);
+    setCalibrationCard(null);
   }
 
   /* --------------------------------
@@ -390,20 +470,22 @@ export default function Play() {
           )}
 
           {/* LIVE */}
-          {/* LIVE */}
 
           {phase === "live" && (
             <div className="student-play__stage">
-              {/* S4 — ANSWER REVEAL */}
+              {/* S4 + S5:
+                  REAL ANSWER REVEAL +
+                  REAL CALIBRATION CARD */}
 
               {answerReveal && (
                 <AnswerReveal
                   result={answerReveal}
-                  onContinue={() => setAnswerReveal(null)}
+                  calibrationCard={calibrationCard}
+                  onContinue={continueAfterReveal}
                 />
               )}
 
-              {/* PEER EXPLANATION */}
+              {/* S3 — REAL PEER ASSIGNMENT */}
 
               {!answerReveal && pairAssignment && (
                 <PeerExplanation
@@ -414,7 +496,7 @@ export default function Play() {
                 />
               )}
 
-              {/* ACTIVE QUESTION */}
+              {/* S1 — REAL ACTIVE QUESTION */}
 
               {!answerReveal && !pairAssignment && question && !answerSent && (
                 <div className="student-play__question">
@@ -452,7 +534,8 @@ export default function Play() {
               )}
 
               {/* NO QUESTION:
-        keep existing pulse interaction */}
+                  keep original Class Pulse
+                  interaction available */}
 
               {!answerReveal && !pairAssignment && !question && (
                 <>

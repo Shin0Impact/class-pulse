@@ -159,6 +159,26 @@ const D = {
   selected: ["تم الاختيار", "Selected"],
 
   helpOptional: ["شو ممكن يساعدك؟ (اختياري)", "What would help? (optional)"],
+  // ---- Student feedback reasons ----
+
+  reasonTooFast: ["الشرح سريع جدًا", "Too fast"],
+
+  reasonUnclearSteps: ["الخطوات غير واضحة", "Steps unclear"],
+
+  reasonNeedExample: ["أحتاج مثالًا", "Need an example"],
+
+  reasonMissingBasics: ["أحتاج مراجعة الأساسيات", "Missing basics"],
+
+  reasonOther: ["سبب آخر", "Other reason"],
+
+  reasonOtherLabel: ["اكتب السبب بطريقتك", "Tell us in your own words"],
+
+  reasonOtherPlaceholder: [
+    "مثال: ما فهمت المصطلح الذي استخدمه المعلم...",
+    "For example: I didn't understand a term the teacher used...",
+  ],
+
+  reasonSend: ["إرسال السبب", "Send reason"],
 
   joinCode: ["رمز الانضمام", "Join code"],
 

@@ -1,20 +1,37 @@
-import type { AnswerReveal as AnswerRevealData } from "@shared/types.ts";
+import type {
+  AnswerReveal as AnswerRevealData,
+  CalibrationCard,
+} from "@shared/types.ts";
+
 import { usePreferences } from "../../../context/PreferencesContext.tsx";
 
 import "./AnswerReveal.css";
 
 type Props = {
   result: AnswerRevealData;
+  calibrationCard?: CalibrationCard | null;
   onContinue: () => void;
 };
 
-export default function AnswerReveal({ result, onContinue }: Props) {
+export default function AnswerReveal({
+  result,
+  calibrationCard,
+  onContinue,
+}: Props) {
   const { t } = usePreferences();
 
-  // S4's special moment:
-  // the student felt certain, but their answer was wrong.
+  /*
+    S4 / S5 special moment:
+    Student was certain, but the answer was wrong.
+  */
   const isSurprise = !result.correct && result.confidence === "certain";
 
+  /*
+    Fallback calibration message.
+
+    This keeps S4 working even if CALIBRATION_CARD
+    has not arrived yet.
+  */
   function getCalibrationMessage() {
     if (result.correct) {
       if (result.confidence === "certain") {
@@ -39,7 +56,37 @@ export default function AnswerReveal({ result, onContinue }: Props) {
     return t("calibrationWrongGuess");
   }
 
-  const calibrationMessage = getCalibrationMessage();
+  /*
+    When the real CALIBRATION_CARD event arrives,
+    prefer the server's calibration classification.
+
+    If it has not arrived yet, use the original
+    S4 result + confidence logic.
+  */
+  function getServerCalibrationMessage() {
+    if (!calibrationCard) {
+      return getCalibrationMessage();
+    }
+
+    switch (calibrationCard.calibration) {
+      case "overconfident":
+        return t("calibrationWrongCertain");
+
+      case "underconfident":
+        return t("calibrationCorrectFairly");
+
+      case "well-calibrated":
+        return result.correct
+          ? t("calibrationCorrectCertain")
+          : getCalibrationMessage();
+
+      case "no-data":
+      default:
+        return getCalibrationMessage();
+    }
+  }
+
+  const calibrationMessage = getServerCalibrationMessage();
 
   return (
     <section
@@ -52,7 +99,7 @@ export default function AnswerReveal({ result, onContinue }: Props) {
         .join(" ")}
       aria-live="polite"
     >
-      {/* Result header */}
+      {/* RESULT HEADER */}
 
       <header className="answer-reveal__hero">
         <span className="answer-reveal__eyebrow">
@@ -76,7 +123,7 @@ export default function AnswerReveal({ result, onContinue }: Props) {
         )}
       </header>
 
-      {/* Student answer vs correct answer */}
+      {/* ANSWER COMPARISON */}
 
       <div className="answer-reveal__answers">
         <article className="answer-reveal__answer">
@@ -98,7 +145,7 @@ export default function AnswerReveal({ result, onContinue }: Props) {
         </article>
       </div>
 
-      {/* Plain-language calibration */}
+      {/* REAL CALIBRATION */}
 
       <section className="answer-reveal__calibration">
         <div className="answer-reveal__calibration-icon" aria-hidden="true">
@@ -113,10 +160,18 @@ export default function AnswerReveal({ result, onContinue }: Props) {
           <h2 className="answer-reveal__calibration-message">
             {calibrationMessage}
           </h2>
+
+          {calibrationCard && calibrationCard.accuracy !== null && (
+            <p className="answer-reveal__calibration-data">
+              Accuracy: {calibrationCard.accuracy}%
+              {calibrationCard.avgConfidence !== null &&
+                ` · Confidence: ${calibrationCard.avgConfidence}%`}
+            </p>
+          )}
         </div>
       </section>
 
-      {/* Extra explanation for confident-wrong answers */}
+      {/* SURPRISE EXPLANATION */}
 
       {isSurprise && (
         <aside className="answer-reveal__why">
@@ -128,7 +183,7 @@ export default function AnswerReveal({ result, onContinue }: Props) {
         </aside>
       )}
 
-      {/* Continue */}
+      {/* CONTINUE */}
 
       <button
         type="button"

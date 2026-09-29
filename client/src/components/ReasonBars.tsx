@@ -1,24 +1,57 @@
 import { usePreferences } from "../context/PreferencesContext.tsx";
 import type { ReasonCount } from "@shared/types.ts";
 
-// "What would help": the reasons students gave when they marked Not sure / Lost.
+// "What would help":
+// reasons students gave when they marked Not sure / Lost.
 export default function ReasonBars({ reasons }: { reasons?: ReasonCount[] }) {
   const { t } = usePreferences();
-  if (!reasons?.length)
+
+  if (!reasons?.length) {
     return <p className="text-sm text-slate-500">{t("noReason")}</p>;
+  }
+
   const max = Math.max(...reasons.map((r) => r.count));
+
+  function getReasonLabel(reason: ReasonCount) {
+    switch (reason.id) {
+      case "too-fast":
+        return t("reasonTooFast");
+
+      case "unclear-steps":
+        return t("reasonUnclearSteps");
+
+      case "need-example":
+        return t("reasonNeedExample");
+
+      case "missing-basics":
+        return t("reasonMissingBasics");
+
+      default:
+        // Custom reason:
+        // the server already removes "other:"
+        // and sends the student's real text as label.
+        return reason.label;
+    }
+  }
+
   return (
     <ul className="space-y-2">
       {reasons.map((r) => (
         <li key={r.id}>
-          <div className="mb-0.5 flex justify-between text-sm">
-            <span className="font-medium">{r.label}</span>
+          <div className="mb-0.5 flex justify-between gap-3 text-sm">
+            <span className="font-medium" dir="auto">
+              {getReasonLabel(r)}
+            </span>
+
             <span className="tabular-nums text-slate-500">{r.count}</span>
           </div>
+
           <div className="h-3 overflow-hidden rounded-full bg-slate-100">
             <div
               className="h-full rounded-full bg-indigo-500 transition-all duration-500"
-              style={{ width: `${(100 * r.count) / max}%` }}
+              style={{
+                width: `${(100 * r.count) / max}%`,
+              }}
             />
           </div>
         </li>
