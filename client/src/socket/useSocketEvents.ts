@@ -10,6 +10,7 @@ import type {
   PublicQuestion,
   PairAssigned,
   AnswerReveal,
+  BlindspotUpdate,
   CalibrationCard,
 } from "@shared/types.ts";
 
@@ -34,6 +35,9 @@ type Handlers = {
 
   // S4 — result reveal after the question closes.
   [EVENTS.ANSWER_REVEAL]?: (data: AnswerReveal) => void;
+
+  // Teacher dashboard — live blindspot quadrant updates.
+  [EVENTS.BLINDSPOT_UPDATE]?: (data: BlindspotUpdate) => void;
 
   // S5 — real calibration data from the server.
   [EVENTS.CALIBRATION_CARD]?: (data: CalibrationCard) => void;

@@ -56,14 +56,14 @@ export default function BlindspotDemo() {
               key={pair.pairId}
               className="rounded-lg bg-slate-50 px-3 py-2 text-sm"
             >
-              <span className="font-medium text-rose-700">
+              <span className="font-medium text-emerald-700">
                 {pair.explainer.name}
               </span>{' '}
-              (explains, was confident and wrong) &rarr;{' '}
-              <span className="font-medium text-emerald-700">
+              (explains, was confident and right) &rarr;{' '}
+              <span className="font-medium text-rose-700">
                 {pair.listener.name}
               </span>{' '}
-              (listens, was confident and right)
+              (listens, was confident and wrong)
             </li>
           ))}
         </ul>

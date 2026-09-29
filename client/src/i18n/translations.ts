@@ -36,6 +36,19 @@ const D = {
   certain: ["متأكد", "Certain"],
 
   certainHint: ["واثق من إجابتي", "I'm confident in my answer"],
+
+  explainThinking: [
+    "اشرح تفكيرك (اختياري)",
+    "Explain your thinking (optional)",
+  ],
+
+  explainThinkingHint: [
+    "اكتب باختصار كيف وصلت إلى إجابتك. هذا يساعد معلمك على معرفة أين تحتاج مراجعة.",
+    "Briefly write how you got to your answer. This helps your teacher see where the gap is.",
+  ],
+
+  explanationPlaceholder: ["اكتب هنا...", "Type here..."],
+
   peerMoment: ["لحظة تعلّم مع زميل", "PEER LEARNING MOMENT"],
   yourPartner: ["شريكك", "Your partner"],
   yourRole: ["دورك الآن", "Your role"],
@@ -331,6 +344,14 @@ const D = {
   ],
 
   continueLearning: ["متابعة", "Continue"],
+  questionLauncher: ["لوحة تشغيل الأسئلة", "Question launcher"],
+  deck: ["مجموعة الأسئلة", "Deck"],
+  chooseDeck: ["اختر مجموعة", "Choose a deck"],
+  chooseQuestion: ["اختر سؤالًا", "Choose a question"],
+  launchQuestion: ["ابدأ السؤال", "Launch"],
+  closeQuestion: ["إغلاق", "Close"],
+  pairUp: ["تكوين أزواج", "Pair up"],
+  recheckQuestion: ["إعادة الفحص", "Re-check"],
   points: ["نقطة في", "points on"],
 } as const;
 

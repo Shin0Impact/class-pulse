@@ -88,6 +88,8 @@ export default function Play() {
 
   const [confidence, setConfidence] = useState<Confidence | null>(null);
 
+  const [explanation, setExplanation] = useState("");
+
   const [answerSent, setAnswerSent] = useState(false);
 
   const [answerReveal, setAnswerReveal] = useState<AnswerRevealData | null>(
@@ -296,6 +298,7 @@ export default function Play() {
 
       setSelectedOptionId(null);
       setConfidence(null);
+      setExplanation("");
       setAnswerSent(false);
 
       setPairAssignment(null);
@@ -392,6 +395,8 @@ export default function Play() {
         questionId: question.questionId,
         optionId: selectedOptionId,
         confidence: nextConfidence,
+
+        explanation: explanation.trim() || undefined,
       });
 
       setAnswerSent(true);
@@ -507,6 +512,25 @@ export default function Play() {
                     selectedOptionId={selectedOptionId}
                     onSelect={chooseAnswer}
                   />
+
+                  {selectedOptionId && (
+                    <div className="student-play__explanation">
+                      <label htmlFor="student-explanation">
+                        {t("explainThinking")}
+                      </label>
+                      <p className="student-play__explanation-hint">
+                        {t("explainThinkingHint")}
+                      </p>
+                      <textarea
+                        id="student-explanation"
+                        dir="auto"
+                        maxLength={1000}
+                        placeholder={t("explanationPlaceholder")}
+                        value={explanation}
+                        onChange={(e) => setExplanation(e.target.value)}
+                      />
+                    </div>
+                  )}
 
                   {selectedOptionId && (
                     <div className="student-play__confidence">
