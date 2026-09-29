@@ -52,7 +52,9 @@ export type TeacherState = {
   history: Summary[];
   timeline: TimelineSample[];
   // The live question and its latest AI summary, so a refreshed dashboard/present page picks up where it was.
-  question: (PublicQuestion & { closed: boolean; correctOptionId: string }) | null;
+  question:
+    | (PublicQuestion & { closed: boolean; correctOptionId: string })
+    | null;
   blindspot: BlindspotUpdate | null;
   summary: ClassConfusionSummary | null;
 };
@@ -136,7 +138,12 @@ export type BlindspotUpdate = {
   closed?: boolean; // the teacher closed the question: no more answers
   responses?: number; // how many students answered this round
   // Open questions have no quadrant: the teacher sees the answers themselves.
-  openAnswers?: Array<{ id: string; name: string; text: string; confidence: Confidence }>;
+  openAnswers?: Array<{
+    id: string;
+    name: string;
+    text: string;
+    confidence: Confidence;
+  }>;
   groups: QuadrantGroups;
   counts: QuadrantCounts;
   illusionGap: number | null; // felt-confident % minus actually-correct %
@@ -355,4 +362,20 @@ export type DocumentInfo = {
   size: number;
   createdAt: string;
   lastUsedAt: string;
+};
+// ---- G9: Class Feedback ----
+
+export type ClassFeedback = {
+  id: string;
+  rating: 1 | 2 | 3 | 4 | 5;
+  comment: string;
+  anonymous: boolean;
+  studentName: string | null;
+  createdAt: number;
+};
+
+export type ClassFeedbackSummary = {
+  averageRating: number | null;
+  totalResponses: number;
+  feedback: ClassFeedback[];
 };
