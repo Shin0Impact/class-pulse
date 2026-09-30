@@ -16,7 +16,7 @@ const D = {
   ],
   question: ["السؤال", "QUESTION"],
 
-  oneMoreThing: ["خطوة أخيرة", "ONE MORE THING"],
+  oneMoreThing: ["خطوة أخيرة", "ONE LAST STEP"],
 
   howSure: ["ما مدى ثقتك بإجابتك؟", "How sure are you?"],
 
@@ -42,42 +42,27 @@ const D = {
     "Explain your thinking (optional)",
   ],
 
-  explainThinkingHint: [
-    "اكتب باختصار كيف وصلت إلى إجابتك. هذا يساعد معلمك على معرفة أين تحتاج مراجعة.",
-    "Briefly write how you got to your answer. This helps your teacher see where the gap is.",
-  ],
+  explainThinkingHint: ["اكتب باختصار كيف وصلت إلى إجابتك. هذا يساعد معلمك على معرفة ما يحتاج إلى مراجعة.", "Briefly say how you got your answer. It helps your teacher see what to go over again."],
 
   explanationPlaceholder: ["اكتب هنا...", "Type here..."],
 
-  peerMoment: ["لحظة تعلّم مع زميل", "PEER LEARNING MOMENT"],
+  peerMoment: ["تعلّم مع زميلك", "LEARN FROM A CLASSMATE"],
   yourPartner: ["شريكك", "Your partner"],
   yourRole: ["دورك الآن", "Your role"],
   explainRole: ["اشرح", "Explain"],
   listenRole: ["استمع", "Listen"],
-  explainPromptLabel: ["مهمتك", "Your prompt"],
-  listenPromptLabel: ["مهمتك", "Your prompt"],
-  listenInstruction: [
-    "استمع لشرح شريكك. ركّز على الفكرة والطريقة، مش بس الجواب النهائي.",
-    "Listen to your partner explain their reasoning. Focus on the idea and the path, not only the final answer.",
-  ],
-  explainTipTitle: ["فكرة تساعدك", "A useful cue"],
-  explainTip: [
-    " اشرح كيف فكرت خطوة بخطوة، واذكر أين كنت واثقًا ولماذا.",
-    " Explain your thinking step by step, including where you felt confident and why.",
-  ],
-  didItMakeSense: ["هل كان الشرح واضحًا؟", "Did it make sense?"],
-  clarityHint: [
-    "إجابتك تساعدنا نعرف إذا الشرح بين الطلاب فعلاً سدّ فجوة الفهم.",
-    "Your feedback helps reveal whether peer explanation actually closed the learning gap.",
-  ],
+  explainPromptLabel: ["مهمتك", "Your task"],
+  listenPromptLabel: ["مهمتك", "Your task"],
+  listenInstruction: ["استمع إلى شرح شريكك. ركّز على الفكرة وطريقة التفكير، وليس على الجواب النهائي فقط.", "Listen to how your partner got their answer. Focus on the steps, not just the final answer."],
+  explainTipTitle: ["نصيحة سريعة", "A quick tip"],
+  explainTip: ["اشرح كيف فكرت خطوة بخطوة، وأين كنت واثقًا ولماذا.", "Explain your thinking step by step, and say where you felt sure and why."],
+  didItMakeSense: ["هل كان الشرح واضحًا؟", "Was the explanation clear?"],
+  clarityHint: ["إجابتك تساعدنا على معرفة ما إذا كان الشرح بين الزملاء قد أوضح الفكرة فعلًا.", "Your answer shows whether explaining to a classmate really cleared things up."],
   clarityYes: ["نعم", "Yes"],
   clarityPartly: ["جزئيًا", "Partly"],
   clarityNo: ["لا", "No"],
-  clarityRecorded: ["تم تسجيل رأيك", "Feedback recorded"],
-  clarityRecordedHint: [
-    "شكرًا. هذه الإشارة تساعد المعلم يعرف إذا الفكرة وصلت.",
-    "Thanks. This signal helps the teacher see whether the idea landed.",
-  ],
+  clarityRecorded: ["تم تسجيل رأيك", "Response saved"],
+  clarityRecordedHint: ["شكرًا. هذا يساعد المعلم على معرفة ما إذا كانت الفكرة قد وصلت.", "Thanks. This helps your teacher see whether the idea got through."],
   peerFallbackPrompt: [
     "اشرح لشريكك كيف وصلت إلى إجابتك، خطوة بخطوة.",
     "Explain to your partner how you reached your answer, step by step.",
@@ -87,10 +72,7 @@ const D = {
 
   joinTitle: ["انضم إلى صفك", "Join your class"],
 
-  joinDescription: [
-    "اكتب اسمك ورمز الحصة الذي أعطاك إياه المعلم.",
-    "Enter your name and the class code your teacher gave you.",
-  ],
+  joinDescription: ["اكتب اسمك ورمز الصف الذي أعطاك إياه المعلم.", "Enter your name and the class code your teacher gave you."],
 
   classCode: ["رمز الصف", "Class code"],
 
@@ -102,7 +84,7 @@ const D = {
 
   join: ["انضم", "Join"],
 
-  joinReady: ["جاهز للاتصال بالحصة مباشرة", "Ready to join the live class"],
+  joinReady: ["جاهز للانضمام إلى الحصة المباشرة", "Ready to join the live class"],
 
   pulseWord: ["نبض", "PULSE"],
 
@@ -135,7 +117,7 @@ const D = {
 
   now: ["الآن", "Now"],
 
-  follow: ["إلى أي درجة أنت فاهم؟", "How well are you following?"],
+  follow: ["إلى أي مدى تفهم الشرح؟", "How well are you following?"],
 
   studentHint: [
     "اضغط في أي وقت أثناء شرح المعلم، ويمكنك تغيير إجابتك متى شئت.",
@@ -157,21 +139,21 @@ const D = {
 
   retry: ["حاول مرة أخرى", "Try again"],
 
-  followGreen: ["فاهم", "I follow"],
+  followGreen: ["فهمت", "Got it"],
 
-  keep: ["كمل الشرح", "Keep going"],
+  keep: ["تابع الشرح", "Keep going"],
 
-  unsure: ["مش متأكد", "Not sure"],
+  unsure: ["لست متأكدًا", "Not sure"],
 
-  bitLost: ["ضايع شوي", "I am a bit lost"],
+  bitLost: ["تهت قليلًا", "I'm a little lost"],
 
-  lost: ["مش فاهم", "I'm lost"],
+  lost: ["لا أفهم", "I'm lost"],
 
-  slow: ["بطّئ أو أعد الشرح", "Please slow down or repeat"],
+  slow: ["من فضلك أبطئ أو أعد الشرح", "Please slow down or explain again"],
 
   selected: ["تم الاختيار", "Selected"],
 
-  helpOptional: ["شو ممكن يساعدك؟ (اختياري)", "What would help? (optional)"],
+  helpOptional: ["ما الذي قد يساعدك؟ (اختياري)", "What would help? (optional)"],
 
   joinCode: ["رمز الانضمام", "Join code"],
 
@@ -274,19 +256,13 @@ const D = {
 
   correctAnswer: ["الإجابة الصحيحة", "Correct answer"],
 
-  surpriseMoment: ["لحظة تستحق الانتباه", "A SURPRISE MOMENT"],
+  surpriseMoment: ["لحظة تستحق الانتباه", "WORTH A CLOSER LOOK"],
 
-  surpriseTitle: [
-    "كنت متأكدًا… لكن الإجابة مختلفة",
-    "You were certain… but the answer was different",
-  ],
+  surpriseTitle: ["كنت متأكدًا… لكن الإجابة مختلفة", "You were sure, but the answer is different"],
 
-  surpriseLead: [
-    "هذه بالضبط الفجوة التي نريد اكتشافها: شعور قوي بالثقة مع فكرة تحتاج مراجعة.",
-    "This is exactly the gap worth catching: high confidence in an idea that needs another look.",
-  ],
+  surpriseLead: ["هذا بالضبط ما نريد اكتشافه: ثقة عالية بفكرة تحتاج إلى مراجعة.", "This is the kind of mistake worth catching: you felt very sure about an idea that needs another look."],
 
-  calibrationLabel: ["معايرة الثقة", "CONFIDENCE CHECK"],
+  calibrationLabel: ["ثقتك وإجابتك", "CONFIDENCE CHECK"],
 
   calibrationCorrectCertain: [
     "ثقتك كانت في مكانها.",
@@ -308,20 +284,14 @@ const D = {
     "Your confidence was ahead of your understanding this time.",
   ],
 
-  calibrationWrongFairly: [
-    "كان عندك جزء من الفكرة، لكن ما زالت هناك فجوة تحتاج مراجعة.",
-    "You had part of the idea, but there is still a gap to close.",
-  ],
+  calibrationWrongFairly: ["كان لديك جزء من الفكرة، لكن ما زال هناك ما يحتاج إلى مراجعة.", "You had part of the idea, but something is still missing."],
 
   calibrationWrongGuess: [
     "كنت تعرف أنك غير متأكد، والآن تعرف أين تحتاج للمراجعة.",
     "You knew you were unsure. Now you know where to focus.",
   ],
 
-  surpriseWhyItMatters: [
-    "اكتشاف الخطأ وأنت واثق منه مهم، لأنه يكشف فكرة كنت تظن أنك فهمتها.",
-    "Catching a confident mistake matters because it reveals something you thought you already understood.",
-  ],
+  surpriseWhyItMatters: ["اكتشاف خطأ كنت واثقًا منه أمر مهم، لأنه يكشف فكرة ظننت أنك فهمتها.", "Catching a mistake you felt sure about is useful, because it shows something you thought you understood."],
 
   continueLearning: ["متابعة", "Continue"],
   questionLauncher: ["لوحة تشغيل الأسئلة", "Question launcher"],
@@ -637,7 +607,7 @@ const D = {
   quizPrev: ["السابق", "Previous"],
   quizSubmit: ["تسليم", "Submit"],
   quizSubmitting: ["جارٍ التسليم…", "Submitting…"],
-  quizUnanswered: ["لم تجب عن بعض الأسئلة. سلّم على أي حال؟", "Some questions are unanswered. Submit anyway?"],
+  quizUnanswered: ["لم تجب عن بعض الأسئلة. هل تريد التسليم على أي حال؟", "Some questions are unanswered. Submit anyway?"],
   quizYourScore: ["نتيجتك", "Your score"],
   quizCorrectAnswer: ["الإجابة الصحيحة", "Correct answer"],
   quizNoAnswer: ["لم تجب", "No answer"],
@@ -761,13 +731,13 @@ const D = {
   reasonNeedExample: ["أحتاج مثالًا", "Need an example"],
   reasonMissingBasics: ["تنقصني الأساسيات", "Missing basics"],
   reasonOther: ["سبب آخر", "Other reason"],
-  reasonOtherLabel: ["اكتب السبب بطريقتك", "Tell us in your own words"],
+  reasonOtherLabel: ["اكتب السبب بكلماتك", "Say it in your own words"],
   reasonOtherPlaceholder: [
     "مثلًا: لم أفهم لماذا قسمنا هنا",
     "For example: I didn't get why we divided here",
   ],
   reasonSend: ["إرسال", "Send"],
-  reasonSent: ["وصلت رسالتك للمعلم", "Your teacher got it"],
+  reasonSent: ["تم إرسال رسالتك إلى المعلم", "Sent to your teacher"],
 } as const;
 
 export type TranslationKey = keyof typeof D;
