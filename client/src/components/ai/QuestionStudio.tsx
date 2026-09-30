@@ -9,7 +9,7 @@ import { ACCEPTED, capturePage, closeDocument, openDocument, type OpenDocument }
 import Button from "../ui/Button.tsx";
 import DraftEditor, { draftProblem, draftToQuestion, emptyDraft } from "./DraftEditor.tsx";
 import type { DocumentInfo, QuestionDraft, QuestionKind } from "@shared/types.ts";
-import FileList from "./FileList.tsx";
+import FilePicker from "./FilePicker.tsx";
 import QuizDialog from "./QuizPanel.tsx";
 import "../../pages/teacher/present/Present.css";
 
@@ -35,6 +35,7 @@ export default function QuestionStudio({ code, onLaunch }: { code: string; onLau
   const [busy, setBusy] = useState(false);
   const [launched, setLaunched] = useState(false);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   // Newest request wins: a slow generate/open that finishes after a newer action is ignored.
@@ -60,6 +61,7 @@ export default function QuestionStudio({ code, onLaunch }: { code: string; onLau
     setError("");
     if (!ACCEPTED.split(",").includes(file.type)) return setError(t("fileTypeError"));
     if (file.size > MAX_FILE) return setError(t("fileSizeError"));
+    setPickerOpen(false);
     const mine = ++opening.current;
     setStatus(t("opening"));
     try {
@@ -83,6 +85,7 @@ export default function QuestionStudio({ code, onLaunch }: { code: string; onLau
   }
 
   async function openRecent(info: DocumentInfo) {
+    setPickerOpen(false);
     const mine = ++opening.current;
     setError("");
     setStatus(t("opening"));
@@ -137,6 +140,15 @@ export default function QuestionStudio({ code, onLaunch }: { code: string; onLau
     setExcerpt(null);
   }
 
+  // Switching type while writing your own converts the draft in place (keeps the prompt and topic).
+  function switchKind(k: QuestionKind) {
+    setKind(k);
+    if (draft && draft.source === "teacher" && draft.kind !== k) {
+      const fresh = emptyDraft(k);
+      setDraft({ ...fresh, id: draft.id, prompt: draft.prompt, topic: draft.topic });
+    }
+  }
+
   function discard() {
     generation.current++;
     setGenerating(false);
@@ -172,7 +184,7 @@ export default function QuestionStudio({ code, onLaunch }: { code: string; onLau
     <div className="space-y-4">
       <div className="present-kind qs-kind" role="radiogroup" aria-label={t("questionType")}>
         {(["mcq", "open"] as const).map((k) => (
-          <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => setKind(k)}>
+          <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => switchKind(k)}>
             {k === "mcq" ? t("multipleChoice") : t("openQuestion")}
           </button>
         ))}
@@ -184,7 +196,7 @@ export default function QuestionStudio({ code, onLaunch }: { code: string; onLau
             ✎ {t("writeOwn")}
           </Button>
           {aiEnabled && (
-            <Button type="button" variant="secondary" onClick={() => fileInput.current?.click()}>
+            <Button type="button" variant="secondary" onClick={() => setPickerOpen(true)}>
               {t("aiFromFile")}
             </Button>
           )}
@@ -199,13 +211,6 @@ export default function QuestionStudio({ code, onLaunch }: { code: string; onLau
         </p>
       )}
 
-      {aiEnabled && !draft && !doc && (
-        <>
-          <p className="text-base text-slate-500">{t("aiFromFileHint")}</p>
-          <FileList files={recent} canStore={canStore} onOpen={openRecent} />
-        </>
-      )}
-
       {status && <p className="text-base text-slate-500" role="status">{status}</p>}
 
       {doc && !draft && (
@@ -214,9 +219,14 @@ export default function QuestionStudio({ code, onLaunch }: { code: string; onLau
             <span className="min-w-0 truncate text-base font-semibold" dir="auto">
               {doc.name}
             </span>
-            <button type="button" className="text-base font-semibold text-slate-500 underline" onClick={closeFile}>
-              {t("closeFile")}
-            </button>
+            <span className="flex gap-4">
+              <button type="button" className="text-base font-semibold text-slate-500 underline" onClick={() => setPickerOpen(true)}>
+                {t("changeFile")}
+              </button>
+              <button type="button" className="text-base font-semibold text-slate-500 underline" onClick={closeFile}>
+                {t("closeFile")}
+              </button>
+            </span>
           </div>
           <div className="qs-preview">
             <DocumentViewer doc={doc} page={page} />
@@ -296,6 +306,16 @@ export default function QuestionStudio({ code, onLaunch }: { code: string; onLau
         <p className="rounded-xl bg-emerald-50 p-3 text-base text-emerald-800" role="status">
           ✓ {t("quizLaunched")}
         </p>
+      )}
+
+      {pickerOpen && (
+        <FilePicker
+          files={recent}
+          canStore={canStore}
+          onPick={openRecent}
+          onUpload={() => fileInput.current?.click()}
+          onClose={() => setPickerOpen(false)}
+        />
       )}
 
       {quizOpen && doc && (

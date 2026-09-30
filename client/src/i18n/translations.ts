@@ -563,6 +563,11 @@ const D = {
     "Show every page at full width and scroll down continuously. The screen window follows.",
   ],
   myFiles: ["ملفاتي", "My files"],
+  pickFileTitle: ["اختر ملفًا", "Choose a file"],
+  uploadNew: ["ارفع ملفًا جديدًا", "Upload a new file"],
+  searchFiles: ["ابحث في ملفاتك", "Search your files"],
+  noMatchingFiles: ["لا توجد ملفات مطابقة", "No matching files"],
+  changeFile: ["تغيير الملف", "Change file"],
   noFilesYet: [
     "الملفات التي ترفعها تُحفظ هنا لتستخدمها لاحقًا.",
     "Files you upload are saved here so you can reuse them.",

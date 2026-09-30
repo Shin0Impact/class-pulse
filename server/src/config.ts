@@ -14,7 +14,9 @@ export const config = {
   supabaseKey: process.env.SUPABASE_SERVICE_KEY || '',
 };
 
-const LAN = /^https?:\/\/(localhost|127\.0\.0\.1|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/;
+// Dev-only: localhost, private LAN ranges, and Tailscale (100.64.0.0/10 and *.ts.net).
+const LAN =
+  /^https?:\/\/(localhost|127\.0\.0\.1|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.|[^/:]+\.ts\.net)/;
 
 export function isAllowedOrigin(origin: string | undefined): boolean {
   if (!origin) return true; // curl, server-to-server, same-origin

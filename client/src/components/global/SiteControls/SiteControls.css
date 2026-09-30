@@ -49,3 +49,19 @@
   font-size: 0.8rem !important;
   font-weight: 900;
 }
+
+.site-control--signup {
+  background: var(--primary);
+  color: #fff;
+  text-decoration: none;
+}
+.site-control--signup:hover {
+  background: var(--primary);
+  filter: brightness(1.1);
+}
+@media (max-width: 420px) {
+  /* the sign-in page links to registration too; keep the phone bar short */
+  .site-control--signup {
+    display: none;
+  }
+}

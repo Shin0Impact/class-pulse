@@ -26,9 +26,14 @@ export default function SiteControls() {
         </Link>
       ) : (
         accountsEnabled && (
-          <Link to="/login" className="site-control site-control--account">
-            <strong>{t("signIn")}</strong>
-          </Link>
+          <>
+            <Link to="/login" className="site-control site-control--account">
+              <strong>{t("signIn")}</strong>
+            </Link>
+            <Link to="/signup" className="site-control site-control--signup">
+              <strong>{t("createAccount")}</strong>
+            </Link>
+          </>
         )
       )}
       <button

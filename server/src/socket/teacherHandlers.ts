@@ -20,6 +20,7 @@ import {
   recheckQuestion,
 } from "../services/questionService.ts";
 import { startQuiz, closeQuiz, quizForStudent, quizResults } from "../services/quizService.ts";
+import { dropScreen } from "../services/screenRelay.ts";
 import { store } from "../db/store.ts";
 import { aiEnabled } from "../ai/llm.ts";
 import { startSummary } from "../ai/summaryRunner.ts";
@@ -382,6 +383,7 @@ export function registerTeacherHandlers(io: Server, socket: Socket): void {
       io.to(studentRoom(session.code)).emit(EVENTS.SESSION_ENDED, {});
 
       endSession(session);
+      dropScreen(session.code);
 
       // The teacher lands on this class's recap, so let the last writes reach the database first
       // (never wait more than a few seconds).

@@ -68,6 +68,16 @@ export default function Present() {
   const [fit, setFit] = useState<Fit>("scroll");
   const phone = useMedia("(max-width: 700px)");
   const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenuOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+  // leaving the phone layout (rotate / resize) must not leave the menu flagged open
+  useEffect(() => {
+    if (!phone) setMenuOpen(false);
+  }, [phone]);
   const [draftScope, setDraftScope] = useState<"page" | "so_far">("page");
   const [fullscreen, setFullscreen] = useState(false);
   const [docStatus, setDocStatus] = useState("");
@@ -76,6 +86,9 @@ export default function Present() {
   const [recentOpen, setRecentOpen] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const sourceRef = useRef<{ blob: Blob; name: string } | null>(null);
+  // The saved copy of the open file (in the teacher's account). A Screen window on another device
+  // of the same account downloads this itself, so no file passes through the server relay.
+  const [savedDoc, setSavedDoc] = useState<{ id: string; name: string } | null>(null);
 
   const [panelOpen, setPanelOpen] = useState(() => !window.matchMedia("(max-width: 700px)").matches); // phones start on the slide
   const [kind, setKind] = useState<QuestionKind>("mcq");
@@ -152,6 +165,7 @@ export default function Present() {
   // ---- documents ----
   const show = useCallback((next: OpenDocument, startPage = 1, blob?: Blob) => {
     sourceRef.current = blob ? { blob, name: next.name } : null; // what the Screen window is sent
+    setSavedDoc(null); // until it is known to be saved (below)
     setDoc(next); // the effect below closes the previous one
     setPage(Math.min(Math.max(1, startPage), next.pages));
     setDraft(null);
@@ -168,6 +182,7 @@ export default function Present() {
         const next = await openDocument(blob, info.name);
         if (mine !== opening.current) return closeDocument(next); // a newer file was picked meanwhile
         show(next, startPage, blob);
+        setSavedDoc({ id: info.id, name: info.name });
         remember(code, { docId: info.id, page: startPage });
       } catch (e) {
         setDocError(e instanceof Error ? e.message : String(e));
@@ -216,6 +231,7 @@ export default function Present() {
       setDocStatus(t("savingFile"));
       try {
         const info = await uploadDocument(file);
+        if (mine === opening.current) setSavedDoc({ id: info.id, name: info.name });
         remember(code, { docId: info.id, page: 1 });
         setRecent((list) => [info, ...list.filter((d) => d.id !== info.id)]);
       } catch (err) {
@@ -283,8 +299,9 @@ export default function Present() {
   const channelRef = useRef<BroadcastChannel | null>(null);
   const screenWin = useRef<Window | null>(null);
   const scrollRef = useRef(0); // the vertical scroll of this window (0..1), mirrored to the Screen window
-  const mirror = useRef({ page, screenQuestion, fit });
-  mirror.current = { page, screenQuestion, fit };
+  const mirror = useRef({ page, screenQuestion, fit, savedDoc });
+  mirror.current = { page, screenQuestion, fit, savedDoc };
+  const remoteTimer = useRef<number | null>(null);
 
   const sendDoc = useCallback(() => {
     const src = sourceRef.current;
@@ -292,7 +309,26 @@ export default function Present() {
       (src ? { type: "doc", blob: src.blob, name: src.name } : { type: "nodoc" }) satisfies ScreenMessage,
     );
   }, []);
+  // Another device (same teacher account) mirrors the same state through the server: a few small
+  // messages, at most about ten a second while scrolling.
+  const sendRemote = useCallback(() => {
+    if (remoteTimer.current !== null) return;
+    remoteTimer.current = window.setTimeout(() => {
+      remoteTimer.current = null;
+      const m = mirror.current;
+      socket.emit(EVENTS.TEACHER_SCREEN_STATE, {
+        state: { doc: m.savedDoc, page: m.page, question: m.screenQuestion, fit: m.fit, scroll: scrollRef.current },
+      });
+    }, 100);
+  }, []);
+  useEffect(
+    () => () => {
+      if (remoteTimer.current !== null) window.clearTimeout(remoteTimer.current);
+    },
+    [],
+  );
   const sendState = useCallback(() => {
+    sendRemote();
     channelRef.current?.postMessage({
       type: "state",
       page: mirror.current.page,
@@ -300,7 +336,7 @@ export default function Present() {
       fit: mirror.current.fit,
       scroll: scrollRef.current,
     } satisfies ScreenMessage);
-  }, []);
+  }, [sendRemote]);
 
   useEffect(() => {
     if (typeof BroadcastChannel === "undefined") return;
@@ -321,7 +357,15 @@ export default function Present() {
   useEffect(() => {
     scrollRef.current = 0; // a new file or mode starts at the top
   }, [doc, fit]);
-  useEffect(sendState, [page, screenQuestion, fit, sendState]);
+  useEffect(sendState, [page, screenQuestion, fit, savedDoc, sendState]);
+  useEffect(() => {
+    // after a reconnect the server has forgotten this socket is the teacher until rejoin() finishes
+    const again = () => window.setTimeout(sendRemote, 1000);
+    socket.on("connect", again);
+    return () => {
+      socket.off("connect", again);
+    };
+  }, [sendRemote]);
   // scroll mode: the teacher scrolled and a different page is now in the middle of the view
   const onScrolledToPage = useCallback(
     (p: number) => {
@@ -463,7 +507,7 @@ export default function Present() {
         </div>
         {phone && (
           <button type="button" className="present-btn present-bar__more" aria-expanded={menuOpen} aria-label={t("moreMenu")} onClick={() => setMenuOpen((o) => !o)}>
-            ⋯
+            ☰
           </button>
         )}
         <div className={`present-bar__tools${phone ? (menuOpen ? " is-open" : " is-closed") : ""}`}>
@@ -529,6 +573,8 @@ export default function Present() {
         </div>
         {!phone && <SiteControls />}
       </header>
+
+      {phone && menuOpen && <div className="present-scrim" onClick={() => setMenuOpen(false)} aria-hidden="true" />}
 
       <LiveStats className="live-stats--bar" pulse={pulse} answered={live ? responses : null} />
 
