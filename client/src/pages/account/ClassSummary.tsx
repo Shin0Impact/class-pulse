@@ -26,9 +26,25 @@ export default function ClassSummary() {
 
   useEffect(() => {
     if (profile?.role !== "teacher") return;
-    authedRequest<ClassDetail>(`/me/classes/${encodeURIComponent(id)}`)
-      .then(setDetail)
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+    let alive = true;
+    let timer: number | undefined;
+    // Right after a class ends its last saves can still be reaching the database, so a "not found" in
+    // the first seconds is retried a few times before it is shown.
+    const load = (attempt: number) => {
+      authedRequest<ClassDetail>(`/me/classes/${encodeURIComponent(id)}`)
+        .then((d) => alive && setDetail(d))
+        .catch((e) => {
+          if (!alive) return;
+          if (attempt < 4 && /not found/i.test(e instanceof Error ? e.message : "")) {
+            timer = window.setTimeout(() => load(attempt + 1), 1500);
+          } else setError(e instanceof Error ? e.message : String(e));
+        });
+    };
+    load(0);
+    return () => {
+      alive = false;
+      window.clearTimeout(timer);
+    };
   }, [authedRequest, id, profile?.role]);
 
   if (ready && !profile) return <Navigate to={`/login?next=/me/classes/${id}`} replace />;
