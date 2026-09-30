@@ -5,7 +5,9 @@ import { UserError } from './sessionService.ts';
 import type {
   CalibrationStats,
   ClassConfusionSummary,
+  ClassAnswer,
   ClassDetail,
+  ClassFeedbackEntry,
   ClassListItem,
   ClassQuestion,
   Confidence,
@@ -50,6 +52,13 @@ export type AnswerRow = {
   confidence: Confidence;
   correct: boolean;
   answer_text?: string | null;
+};
+export type FeedbackRow = {
+  student_id: string;
+  rating: number;
+  comment: string | null;
+  anonymous: boolean;
+  created_at: string;
 };
 export type SummaryRow = { question_id: string; summary: ClassConfusionSummary; created_at: string };
 export type CheckInRow = {
@@ -133,6 +142,7 @@ export function summarizeClass(
   answers: AnswerRow[],
   checkIns: CheckInRow[],
   summaries: SummaryRow[] = [],
+  feedbackRows: FeedbackRow[] = [],
 ): ClassDetail {
   const firstAnswers = gradedOnly(answers, questions).filter((a) => a.round === 1);
   const nameById = new Map(students.map((s) => [s.id, s.name]));
@@ -176,6 +186,7 @@ export function summarizeClass(
           options: [],
           correctOptionId: '',
           optionCounts: {},
+          answers: [],
           rounds: [],
           openAnswers: (byRound.get(1) ?? [])
             .filter((a) => a.answer_text)
@@ -208,6 +219,16 @@ export function summarizeClass(
         options: q.options,
         correctOptionId: q.correct_option_id,
         optionCounts,
+        answers: (byRound.get(1) ?? [])
+          .map((a): ClassAnswer => ({
+            name: nameById.get(a.student_id) ?? '?',
+            optionId: a.option_id,
+            confidence: a.confidence,
+            correct: a.correct,
+            quadrant: quadrantFor(a.correct, a.confidence),
+          }))
+          // wrong answers first (the ones to follow up), the confidently wrong at the very top
+          .sort((a, b) => Number(a.correct) - Number(b.correct) || Number(b.quadrant === 'blindspot') - Number(a.quadrant === 'blindspot') || a.name.localeCompare(b.name)),
         rounds,
         openAnswers: [],
         summary: newestSummary.get(q.id) ?? null,
@@ -215,6 +236,16 @@ export function summarizeClass(
     });
 
   const overall = calibrationFor(firstAnswers);
+
+  const feedbackItems: ClassFeedbackEntry[] = [...feedbackRows]
+    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+    .map((f) => ({
+      rating: f.rating,
+      comment: f.comment ?? '',
+      // someone who chose "anonymous" stays anonymous here too
+      name: f.anonymous ? null : (nameById.get(f.student_id) ?? null),
+      createdAt: f.created_at,
+    }));
 
   return {
     id: session.id,
@@ -246,6 +277,13 @@ export function summarizeClass(
         red: c.red ?? 0,
         unmarked: c.unmarked ?? 0,
       })),
+    feedback: {
+      responses: feedbackItems.length,
+      average: feedbackItems.length
+        ? Math.round((feedbackItems.reduce((sum, f) => sum + f.rating, 0) / feedbackItems.length) * 10) / 10
+        : null,
+      items: feedbackItems,
+    },
   };
 }
 
@@ -368,16 +406,23 @@ export async function teacherClass(teacherId: string, sessionId: string): Promis
     ),
   ]);
   const questionIds = questions.map((q) => q.id);
-  const [answers, summaries] = await Promise.all([
+  const [answers, summaries, feedback] = await Promise.all([
     rowsIn<AnswerRow>('answers', questionIds, (c) =>
       db().from('blindspot_answers').select(ANSWER_COLS).in('question_id', c).order('id'),
     ),
     rowsIn<SummaryRow>('summaries', questionIds, (c) =>
       db().from('ai_summaries').select('question_id, summary, created_at').in('question_id', c).order('id'),
     ),
+    // Feedback is optional: if the table has not been created yet (migration 003), the report just has none.
+    rowsIn<FeedbackRow>('feedback', one, (c) =>
+      db().from('class_feedback').select('student_id, rating, comment, anonymous, created_at').in('session_id', c).order('id'),
+    ).catch((e: unknown) => {
+      console.error('[db] feedback not loaded:', e instanceof Error ? e.message : e);
+      return [] as FeedbackRow[];
+    }),
   ]);
 
-  return summarizeClass(session as SessionRow, students, questions, answers, checkIns, summaries);
+  return summarizeClass(session as SessionRow, students, questions, answers, checkIns, summaries, feedback);
 }
 
 export async function studentProgress(userId: string): Promise<StudentProgress> {

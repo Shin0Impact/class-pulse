@@ -38,6 +38,10 @@ export default function Screen() {
   const joinToken = useRef<string | null>(null);
   const fromChannel = useRef(false); // a same-browser Present window handed over the file: no need to download it
   const remoteDocId = useRef<string | null>(null);
+  // When the Present window in this same browser is talking to us directly, the copy of the same state
+  // that comes round through the server is always older (it travelled to the server and back), and
+  // applying it made the page jump back and lag. The server copy is only used when the direct one is silent.
+  const lastDirect = useRef(0);
   const [remoteError, setRemoteError] = useState("");
 
   useEffect(() => {
@@ -51,6 +55,7 @@ export default function Screen() {
     channel.onmessage = async (e: MessageEvent<ScreenMessage>) => {
       const m = e.data;
       if (m?.type === "state") {
+        lastDirect.current = Date.now();
         setPage(m.page);
         setQuestion(m.question);
         setFit(m.fit);
@@ -78,6 +83,7 @@ export default function Screen() {
   useEffect(() => {
     let alive = true;
     const apply = async (s: RemoteState) => {
+      if (Date.now() - lastDirect.current < 3000) return;
       setPage(s.page);
       setQuestion(s.question);
       setFit(s.fit);

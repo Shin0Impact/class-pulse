@@ -127,8 +127,23 @@ export default function QuadrantChart({ update }: QuadrantChartProps) {
               </span>
             )}
           </div>
+
+          {/* Wrong answers: the teacher needs to know WHO, not just how many. */}
+          {(key === 'blindspot' || key === 'aware') && update.groups[key].length > 0 && (
+            <ul className="mt-3 flex flex-wrap gap-2" aria-label={`${label}: student names`}>
+              {update.groups[key].map((student) => (
+                <li
+                  key={student.id}
+                  dir="auto"
+                  className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-slate-800 shadow-sm"
+                >
+                  {student.name}
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       ))}
     </div>
   );
-}
+}

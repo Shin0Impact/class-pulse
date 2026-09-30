@@ -13,6 +13,7 @@ const CHECKS: Array<{ table: string; columns: string; migration: string }> = [
   { table: 'blindspot_answers', columns: 'answer_text', migration: '002_ai.sql' },
   { table: 'ai_summaries', columns: 'id', migration: '002_ai.sql' },
   { table: 'documents', columns: 'id', migration: '002_ai.sql' },
+  { table: 'class_feedback', columns: 'id', migration: '003_feedback.sql' },
 ];
 
 export async function checkSchema(): Promise<void> {
