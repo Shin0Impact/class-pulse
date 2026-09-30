@@ -63,6 +63,7 @@ export function createSession(
     // G9 — Class Feedback
     feedbackOpen: false,
     feedback: [],
+    quiz: null,
   };
 
   sessions.set(code, session);

@@ -55,6 +55,46 @@ function canvasToJpeg(canvas: HTMLCanvasElement): PageCapture['image'] {
   return { mimeType: 'image/jpeg', data: dataUrl.slice(dataUrl.indexOf(',') + 1) };
 }
 
+// The text of one PDF page, as plain lines.
+async function pdfPageText(pdfPage: import('pdfjs-dist/legacy/build/pdf.mjs').PDFPageProxy): Promise<string> {
+  const content = await pdfPage.getTextContent();
+  return content.items
+    .map((item) => ('str' in item ? item.str + (item.hasEOL ? '\n' : ' ') : ''))
+    .join('')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+// Everything from page 1 up to `upTo`: the text of every page (each trimmed so a long file still
+// fits the request evenly) and the picture of the page on screen.
+export async function captureSoFar(doc: OpenDocument, upTo: number): Promise<PageCapture> {
+  const current = await capturePage(doc, upTo);
+  if (doc.kind !== 'pdf' || upTo <= 1) return current;
+  const perPage = Math.max(300, Math.min(3000, Math.floor(18_000 / upTo)));
+  const parts: string[] = [];
+  for (let n = 1; n <= upTo; n++) {
+    const text = n === upTo ? current.text : await pdfPageText(await doc.pdf.getPage(n));
+    if (text) parts.push(`[Page ${n}]\n${text.slice(0, perPage)}`);
+  }
+  return { text: parts.join('\n\n'), image: current.image };
+}
+
+// Pages from..to (inclusive) as text for a quiz. A picture, or a PDF with no text layer (a scan),
+// falls back to one image of the first page.
+export async function captureRange(doc: OpenDocument, from: number, to: number): Promise<PageCapture> {
+  if (doc.kind !== 'pdf') return capturePage(doc, 1);
+  const count = to - from + 1;
+  const perPage = Math.max(300, Math.min(3000, Math.floor(24_000 / count)));
+  const parts: string[] = [];
+  for (let n = from; n <= to; n++) {
+    const text = await pdfPageText(await doc.pdf.getPage(n));
+    if (text) parts.push(`[Page ${n}]\n${text.slice(0, perPage)}`);
+  }
+  if (parts.length === 0) return { text: '', image: (await capturePage(doc, from)).image };
+  return { text: parts.join('\n\n') };
+}
+
 export async function capturePage(doc: OpenDocument, pageNumber: number): Promise<PageCapture> {
   const canvas = document.createElement('canvas');
   canvas.dir = 'ltr'; // see DocumentViewer: never inherit the Arabic UI's right-to-left
@@ -79,12 +119,6 @@ export async function capturePage(doc: OpenDocument, pageNumber: number): Promis
   ctx.direction = 'ltr'; // after resizing: a resize resets the context
   await page.render({ canvas, canvasContext: ctx, viewport }).promise;
 
-  const content = await page.getTextContent();
-  const text = content.items
-    .map((item) => ('str' in item ? item.str + (item.hasEOL ? '\n' : ' ') : ''))
-    .join('')
-    .replace(/[ \t]+/g, ' ')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  const text = await pdfPageText(page);
   return { text, image: canvasToJpeg(canvas) };
 }

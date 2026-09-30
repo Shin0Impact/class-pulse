@@ -1,20 +1,16 @@
 .site-controls {
-  position: fixed;
-  z-index: 120;
-  inset-block-start: 112px;
-  inset-inline-end: 22px;
-  padding: 5px;
+  padding: 3px;
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 2px;
   border: 1px solid var(--border);
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
-  box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(20px);
+  border-radius: 14px;
+  background: var(--surface);
 }
 .site-control {
-  height: 40px;
-  min-width: 44px;
+  height: 38px;
+  min-height: 0;
+  min-width: 42px;
   padding: 0 10px;
   border: 0;
   border-radius: 11px;
@@ -34,15 +30,10 @@
 }
 .site-control strong {
   font-size: 0.68rem;
+  white-space: nowrap;
   font-weight: 950;
 }
-@media (max-width: 700px) {
-  .site-controls {
-    inset-block-start: auto;
-    inset-block-end: 18px;
-    inset-inline-end: 18px;
-  }
-}
+
 .site-control--account {
   color: var(--text);
   text-decoration: none;
@@ -57,4 +48,20 @@
   color: #fff;
   font-size: 0.8rem !important;
   font-weight: 900;
+}
+
+.site-control--signup {
+  background: var(--primary);
+  color: #fff;
+  text-decoration: none;
+}
+.site-control--signup:hover {
+  background: var(--primary);
+  filter: brightness(1.1);
+}
+@media (max-width: 420px) {
+  /* the sign-in page links to registration too; keep the phone bar short */
+  .site-control--signup {
+    display: none;
+  }
 }

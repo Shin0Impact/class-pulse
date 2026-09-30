@@ -218,3 +218,8 @@ html[data-theme="dark"] .ai-option__correct[aria-pressed="true"] {
   font-size: 0.68rem;
   font-weight: 900;
 }
+
+/* QuestionStudio (dashboard): the multiple choice / open switch, sized for the light dashboard */
+.qs-kind {
+  width: min(100%, 360px);
+}

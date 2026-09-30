@@ -60,6 +60,8 @@ export type TeacherState = {
   // Class feedback (end of class): a refreshed dashboard must not lose the panel or the close button.
   feedbackOpen: boolean;
   feedback: ClassFeedbackSummary;
+  // The student-paced quiz, if the teacher started one (results only the teacher sees).
+  quiz: QuizResults | null;
 };
 
 export type StudentState = {
@@ -79,6 +81,8 @@ export type StudentState = {
   // Class feedback: a phone that refreshes (or joins late) still gets the form, until it has submitted.
   feedbackOpen: boolean;
   feedbackSubmitted: boolean;
+  // A quiz to go through at your own pace (null when none is running for this student).
+  quiz: StudentQuiz | null;
 };
 
 export type FocusAlert = { studentId: string; name: string; count: number };
@@ -384,4 +388,63 @@ export type ClassFeedbackSummary = {
   averageRating: number | null;
   totalResponses: number;
   feedback: ClassFeedback[];
+};
+
+// ---- Quiz: a set of questions students answer at their own pace ----
+
+export type QuizType = "mcq" | "open" | "mixed";
+
+export type QuizQuestionPublic = {
+  id: string;
+  kind: QuestionKind;
+  prompt: string;
+  options: PublicQuestionOption[]; // [] for an open question
+};
+
+// After a student submits: what was right, so they can learn from it.
+export type QuizReviewItem = {
+  questionId: string;
+  correct: boolean | null; // null for an open question (no automatic marking)
+  correctOptionId: string; // "" for an open question
+  modelAnswer: string;
+};
+
+export type StudentQuiz = {
+  id: string;
+  title: string;
+  closed: boolean; // teacher ended it: no more changes, submit to see the review
+  questions: QuizQuestionPublic[];
+  // this student's saved answers, by question id
+  answers: Record<string, { optionId?: string; text?: string }>;
+  submitted: boolean;
+  review: QuizReviewItem[] | null; // set once submitted
+};
+
+export type QuizQuestionResult = {
+  id: string;
+  kind: QuestionKind;
+  prompt: string;
+  modelAnswer: string;
+  answered: number;
+  correct: number; // mcq only
+  options: Array<{ id: string; text: string; count: number; correct: boolean }>;
+  texts: Array<{ studentId: string; name: string; text: string }>; // open answers
+};
+
+export type QuizStudentRow = {
+  id: string;
+  name: string;
+  connected: boolean;
+  answered: number;
+  submitted: boolean;
+  correct: number; // right multiple-choice answers so far
+};
+
+export type QuizResults = {
+  id: string;
+  title: string;
+  closed: boolean;
+  mcqTotal: number;
+  questions: QuizQuestionResult[];
+  students: QuizStudentRow[];
 };

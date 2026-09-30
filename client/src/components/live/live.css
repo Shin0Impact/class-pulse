@@ -1,0 +1,64 @@
+/* LiveStats: prefixed "live-stats". Works on the light dashboard and the dark Present page. */
+.live-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 28px;
+  padding: 10px 16px;
+  background: var(--surface);
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.live-stats__pct {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.live-stats__pct strong {
+  font-size: 2.6rem;
+  line-height: 1;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+.live-stats__pct span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.live-stats__pct--good strong { color: #16a34a; }
+.live-stats__pct--mid strong { color: #d97706; }
+.live-stats__pct--low strong { color: #e11d48; }
+.live-stats__pct--none strong { color: var(--muted); }
+html[data-theme="dark"] .live-stats__pct--good strong { color: #4ade80; }
+html[data-theme="dark"] .live-stats__pct--mid strong { color: #fbbf24; }
+html[data-theme="dark"] .live-stats__pct--low strong { color: #fb7185; }
+
+.live-stats__counts,
+.live-stats__facts {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  list-style: none;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+.live-stats__count b { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.live-stats__count--green { color: #16a34a; }
+.live-stats__count--yellow { color: #b45309; }
+.live-stats__count--red { color: #e11d48; }
+html[data-theme="dark"] .live-stats__count--green { color: #4ade80; }
+html[data-theme="dark"] .live-stats__count--yellow { color: #fbbf24; }
+html[data-theme="dark"] .live-stats__count--red { color: #fb7185; }
+.live-stats__facts { color: var(--muted); }
+.live-stats__facts b { color: var(--text); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.live-stats__answered b { color: var(--primary); }
+
+/* On the Present page it sits right under the bar */
+.live-stats--bar { padding-block: 6px; }
+.live-stats--card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  margin-bottom: 16px;
+}

@@ -4,6 +4,7 @@ import { takeHourly } from '../ai/limits.ts';
 import { getSession, UserError } from '../services/sessionService.ts';
 import { authEnabled, verifyToken, AuthError } from '../services/authService.ts';
 import { checkGenerateInput, generateQuestion } from '../ai/questionGen.ts';
+import { checkQuizInput, generateQuiz } from '../ai/quizGen.ts';
 import { aiEnabled } from '../ai/llm.ts';
 import type { NextFunction, Request, Response } from 'express';
 import type { Session } from '../services/types.ts';
@@ -55,6 +56,22 @@ router.post('/question', async (req, res) => {
       throw new UserError('Too many generated questions this hour. Try again later.');
     }
     res.json(await generateQuestion(input));
+  } catch (e) {
+    sendError(res, e);
+  }
+});
+
+// POST /ai/quiz: a whole quiz (N questions) from a page range. Counts as a few questions against
+// the hourly allowance because it is one big model call.
+router.post('/quiz', async (req, res) => {
+  try {
+    const session = requireClass(req);
+    const input = checkQuizInput(req.body ?? {});
+    const who = (req as Request & { caller: Caller }).caller.teacherId ?? `ip:${req.ip}`;
+    if (!takeHourly([[`quiz:class:${session.code}`, 12], [`quiz:who:${who}`, 24]])) {
+      throw new UserError('Too many generated quizzes this hour. Try again later.');
+    }
+    res.json(await generateQuiz(input));
   } catch (e) {
     sendError(res, e);
   }

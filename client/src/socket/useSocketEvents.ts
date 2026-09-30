@@ -13,6 +13,8 @@ import type {
   BlindspotUpdate,
   CalibrationCard,
   ClassConfusionSummary,
+  StudentQuiz,
+  QuizResults,
 } from "@shared/types.ts";
 
 // SUMMARY_UPDATE: the AI class-confusion summary for a question
@@ -38,7 +40,8 @@ type Handlers = {
 
   [EVENTS.FOCUS_MODE]?: (data: { enabled: boolean }) => void;
 
-  [EVENTS.SESSION_ENDED]?: () => void;
+  // The teacher's copy carries the id of the class that just ended (for its recap page).
+  [EVENTS.SESSION_ENDED]?: (data?: { classId?: string }) => void;
 
   [EVENTS.QUESTION_STARTED]?: (data: PublicQuestion) => void;
 
@@ -54,6 +57,11 @@ type Handlers = {
   [EVENTS.QUESTION_CLOSED]?: (data: { questionId: string }) => void;
 
   [EVENTS.SUMMARY_UPDATE]?: (data: SummaryState) => void;
+
+  // Quiz: students get their own view; the teacher gets live results.
+  [EVENTS.QUIZ_STARTED]?: (data: StudentQuiz) => void;
+  [EVENTS.QUIZ_CLOSED]?: (data: { quizId: string }) => void;
+  [EVENTS.QUIZ_UPDATE]?: (data: QuizResults) => void;
 
   // =====================================================
   // G9 — Class Feedback

@@ -26,6 +26,9 @@ function enqueue(label: string, fn: (db: NonNullable<typeof supabase>) => Promis
 }
 
 export const store = {
+  // Resolves once every write queued so far has been sent (used before the teacher is shown the recap).
+  flush: (): Promise<void> => queue.then(() => undefined),
+
   saveSession: (s: Session) => {
     const row = { id: s.id, code: s.code, title: s.title, teacher_id: s.teacherId };
     enqueue('insert session', (db) => db.from('sessions').insert(row));

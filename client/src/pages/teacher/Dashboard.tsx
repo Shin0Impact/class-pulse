@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EVENTS } from "@shared/events.ts";
 import { FEATURES } from "@shared/features.ts";
-import { socket, emitAck, SERVER_URL } from "../../socket/socket.ts";
+import { socket, emitAck } from "../../socket/socket.ts";
 import { getAccessToken } from "../../auth/tokens.ts";
 import {
   useSocketEvents,
@@ -10,6 +10,9 @@ import {
 } from "../../socket/useSocketEvents.ts";
 import { useAuth } from "../../auth/AuthContext.tsx";
 import SummaryCard from "../../components/ai/SummaryCard.tsx";
+import LiveStats from "../../components/live/LiveStats.tsx";
+import QuestionStudio from "../../components/ai/QuestionStudio.tsx";
+import { QuizResultsView } from "../../components/ai/QuizPanel.tsx";
 import BlindspotHeadline from "../../components/BlindspotHeadline.tsx";
 import Button from "../../components/ui/Button.tsx";
 import Card from "../../components/ui/Card.tsx";
@@ -17,9 +20,7 @@ import PulseBar from "../../components/PulseBar.tsx";
 import StudentGrid from "../../components/StudentGrid.tsx";
 import Timeline from "../../components/Timeline.tsx";
 import ReasonBars from "../../components/ReasonBars.tsx";
-import TopicHistory from "../../components/TopicHistory.tsx";
 import BeforeAfterChart from "../../components/BeforeAfterChart.tsx";
-import type { FormEvent } from "react";
 import { usePreferences } from "../../context/PreferencesContext.tsx";
 import QuadrantChart from "../../components/QuadrantChart.tsx";
 import IllusionGapChart from "../../components/IllusionGapChart.tsx";
@@ -27,6 +28,7 @@ import type {
   BlindspotUpdate,
   FocusAlert,
   Pulse,
+  QuizResults,
   Summary,
   TeacherState,
   TimelineSample,
@@ -47,34 +49,10 @@ type FeedbackSummary = {
   feedback: FeedbackItem[];
 };
 
-type DeckSummary = {
-  id: string;
-  title: string;
-  questionCount: number;
-};
-
-type DeckQuestion = {
-  id: string;
-  topic: string;
-  prompt: string;
-  correctOptionId: string;
-  options: {
-    id: string;
-    text: string;
-  }[];
-  rubric?: unknown;
-};
-
-type Deck = {
-  id: string;
-  title: string;
-  questions: DeckQuestion[];
-};
-
 export default function Dashboard() {
   const { code } = useParams();
   const { t, language } = usePreferences();
-  const { aiEnabled } = useAuth();
+  const { aiEnabled, profile } = useAuth();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -83,17 +61,13 @@ export default function Dashboard() {
   const [timeline, setTimeline] = useState<TimelineSample[]>([]);
   const [focusMode, setFocusMode] = useState(true);
   const [alerts, setAlerts] = useState<(FocusAlert & { at: number })[]>([]);
-  const [topic, setTopic] = useState("");
   const [hideNames, setHideNames] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [decks, setDecks] = useState<DeckSummary[]>([]);
-  const [selectedDeckId, setSelectedDeckId] = useState("");
-  const [questions, setQuestions] = useState<DeckQuestion[]>([]);
-  const [selectedQuestionId, setSelectedQuestionId] = useState("");
   const [blindspotUpdate, setBlindspotUpdate] =
     useState<BlindspotUpdate | null>(null);
   const [summary, setSummary] = useState<SummaryState | null>(null);
+  const [quiz, setQuiz] = useState<QuizResults | null>(null);
   // G9 — Class Feedback
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
@@ -102,52 +76,6 @@ export default function Dashboard() {
     totalResponses: 0,
     feedback: [],
   });
-
-  useEffect(() => {
-    async function loadDecks() {
-      try {
-        const res = await fetch(`${SERVER_URL}/decks`);
-
-        if (!res.ok) {
-          throw new Error("Failed to load decks");
-        }
-
-        const data: DeckSummary[] = await res.json();
-        setDecks(data);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
-      }
-    }
-
-    loadDecks();
-  }, []);
-
-  useEffect(() => {
-    if (!selectedDeckId) {
-      setQuestions([]);
-      setSelectedQuestionId("");
-      return;
-    }
-
-    async function loadDeck() {
-      try {
-        const res = await fetch(`${SERVER_URL}/decks/${selectedDeckId}`);
-
-        if (!res.ok) {
-          throw new Error("Failed to load deck");
-        }
-
-        const data: Deck = await res.json();
-
-        setQuestions(data.questions);
-        setSelectedQuestionId("");
-      } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
-      }
-    }
-
-    loadDeck();
-  }, [selectedDeckId]);
 
   // Every pulse is also a point on the timeline (skipping exact repeats).
   const addSample = useCallback((p: Pulse) => {
@@ -185,7 +113,7 @@ export default function Dashboard() {
       setFocusMode(state.focusMode);
       setFeedbackOpen(state.feedbackOpen);
       setFeedbackSummary(state.feedback);
-      setTopic((t) => t || state.pulse.checkIn.topic);
+      setQuiz(state.quiz ?? null);
       // the live question (maybe launched from the Present page) and its AI summary
       setBlindspotUpdate(state.blindspot);
       setSummary(
@@ -233,10 +161,13 @@ export default function Dashboard() {
     },
 
     [EVENTS.SUMMARY_UPDATE]: (s) => setSummary(s),
+    [EVENTS.QUIZ_UPDATE]: (q: QuizResults) => setQuiz(q),
     [EVENTS.FEEDBACK_UPDATE]: (data: FeedbackSummary) => {
       setFeedbackSummary(data);
     },
-    [EVENTS.SESSION_ENDED]: () => navigate("/"),
+    // Ending the class opens its recap (My classes); without accounts there is none, so go home.
+    [EVENTS.SESSION_ENDED]: (data) =>
+      navigate(data?.classId && profile?.role === "teacher" ? `/me/classes/${data.classId}` : "/"),
   });
 
   async function run<T extends object = Record<string, never>>(
@@ -252,21 +183,6 @@ export default function Dashboard() {
     } finally {
       setBusy(false);
     }
-  }
-
-  const selectedQuestion = questions.find(
-    (question) => question.id === selectedQuestionId,
-  );
-
-  async function launchQuestion() {
-    if (!selectedQuestion) return;
-
-    setBlindspotUpdate(null);
-    setSummary(null);
-
-    await run(EVENTS.TEACHER_LAUNCH_QUESTION, {
-      question: { ...selectedQuestion, kind: "mcq", source: "deck" },
-    });
   }
 
   async function closeQuestion() {
@@ -295,10 +211,7 @@ export default function Dashboard() {
     await run(EVENTS.TEACHER_RECHECK, {});
   }
 
-  const checkIn = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    run(EVENTS.TEACHER_CHECK_IN, { topic });
-  };
+  const newCheckIn = () => run(EVENTS.TEACHER_CHECK_IN, { topic: pulse?.checkIn.topic ?? "" });
 
   async function toggleFocus() {
     const res = await run<{ focusMode: boolean }>(
@@ -341,9 +254,9 @@ export default function Dashboard() {
   ]);
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6 text-lg text-slate-950">
+    <main className="mx-auto max-w-[110rem] px-4 py-6 text-lg text-slate-950 sm:px-8">
       {/* header: the join code is the star, it is on the projector */}
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-indigo-600 p-5 text-white">
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-2xl bg-indigo-600 p-5 text-white">
         <div>
           <div
             className="text-xl font-bold uppercase tracking-wide text-white"
@@ -453,66 +366,40 @@ export default function Dashboard() {
           </div>
         </Card>
       )}
-      <div className="grid gap-5 lg:grid-cols-3">
-        <div className="space-y-5 lg:col-span-2">
-          <Card title={t("questionLauncher")}>
-            <div className="space-y-4">
-              <label className="block">
-                <span className="mb-1 block text-base text-slate-500">
-                  {t("deck")}
-                </span>
+      {/* always in view: the % and the counts */}
+      <div className="sticky top-16 z-10 mb-5">
+        <LiveStats
+          className="live-stats--card"
+          pulse={pulse}
+          answered={blindspotUpdate ? (blindspotUpdate.responses ?? 0) : null}
+        />
+      </div>
 
-                <select
-                  className="w-full rounded-xl border border-slate-300 px-3 py-3"
-                  value={selectedDeckId}
-                  onChange={(e) => setSelectedDeckId(e.target.value)}
-                  disabled={busy}
-                >
-                  <option value="">{t("chooseDeck")}</option>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,30rem)] 2xl:grid-cols-[minmax(0,1fr)_36rem]">
+        <div className="min-w-0 space-y-5">
+          <Card title={t("writeQuestionTitle")}>
+            <QuestionStudio
+              code={code ?? ""}
+              onLaunch={() => {
+                setBlindspotUpdate(null);
+                setSummary(null);
+              }}
+            />
+          </Card>
 
-                  {decks.map((deck) => (
-                    <option key={deck.id} value={deck.id}>
-                      {deck.title} ({deck.questionCount})
-                    </option>
-                  ))}
-                </select>
-              </label>
+          {quiz && (
+            <Card title={t("quizHeading")}>
+              <QuizResultsView quiz={quiz} />
+            </Card>
+          )}
 
-              <label className="block">
-                <span className="mb-1 block text-base text-slate-500">
-                  {t("chooseQuestion")}
-                </span>
-
-                <select
-                  className="w-full rounded-xl border border-slate-300 px-3 py-3"
-                  value={selectedQuestionId}
-                  onChange={(e) => setSelectedQuestionId(e.target.value)}
-                  disabled={!selectedDeckId || busy}
-                >
-                  <option value="">{t("chooseQuestion")}</option>
-
-                  {questions.map((question) => (
-                    <option key={question.id} value={question.id}>
-                      {question.topic} — {question.prompt}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
+          {blindspotUpdate && (
+            <Card title={t("questionLive")}>
               <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
-                  onClick={launchQuestion}
-                  disabled={!selectedQuestion || busy}
-                >
-                  {t("launchQuestion")}
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="secondary"
                   onClick={closeQuestion}
-                  disabled={!blindspotUpdate || blindspotUpdate.closed || busy}
+                  disabled={blindspotUpdate.closed || busy}
                 >
                   {t("closeQuestion")}
                 </Button>
@@ -521,7 +408,7 @@ export default function Dashboard() {
                   type="button"
                   variant="secondary"
                   onClick={pairUp}
-                  disabled={!blindspotUpdate || isOpenQuestion || busy}
+                  disabled={isOpenQuestion || busy}
                 >
                   {t("pairUp")}
                 </Button>
@@ -530,7 +417,7 @@ export default function Dashboard() {
                   type="button"
                   variant="secondary"
                   onClick={recheckQuestion}
-                  disabled={!blindspotUpdate || isOpenQuestion || busy}
+                  disabled={isOpenQuestion || busy}
                 >
                   {t("recheckQuestion")}
                 </Button>
@@ -541,7 +428,7 @@ export default function Dashboard() {
                     variant="secondary"
                     onClick={summarize}
                     disabled={
-                      !blindspotUpdate?.responses ||
+                      !blindspotUpdate.responses ||
                       summary?.status === "working" ||
                       busy
                     }
@@ -550,8 +437,8 @@ export default function Dashboard() {
                   </Button>
                 )}
               </div>
-            </div>
-          </Card>
+            </Card>
+          )}
 
           {currentSummary && (
             <SummaryCard
@@ -603,43 +490,23 @@ export default function Dashboard() {
             </>
           )}
 
-          <Card title={t("teaching")}>
-            <form onSubmit={checkIn} className="flex flex-wrap items-end gap-3">
-              <label className="min-w-0 flex-1">
-                <span className="mb-1 block text-base text-slate-500">
-                  {t("topicLabel")}
-                </span>
-                <input
-                  dir="auto"
-                  className="w-full rounded-xl border border-slate-300 px-3 py-3 text-base"
-                  maxLength={80}
-                  placeholder={t("topicPlaceholder")}
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                />
-              </label>
-              <Button type="submit" disabled={busy}>
-                {t("check")}
-              </Button>
-            </form>
-            <p className="mt-2 text-base text-slate-500">{t("teacherHint")}</p>
-            {FEATURES.focusMode && (
-              <label className="mt-3 flex cursor-pointer items-center gap-2 text-base text-slate-600">
-                <input
-                  type="checkbox"
-                  checked={focusMode}
-                  onChange={toggleFocus}
-                />
-                🔒 {t("focusTeacher")}
-              </label>
-            )}
-          </Card>
-
           <Card
             title={
               pulse?.checkIn.topic
                 ? `${t("understanding")}: ${pulse.checkIn.topic}`
                 : t("understanding")
+            }
+            right={
+              <Button
+                type="button"
+                variant="secondary"
+                className="!px-3 !py-2 !text-sm"
+                onClick={newCheckIn}
+                disabled={busy}
+                title={t("newCheckInHint")}
+              >
+                ↻ {t("newCheckIn")}
+              </Button>
             }
           >
             {pulse && <PulseBar pulse={pulse} />}
@@ -650,7 +517,9 @@ export default function Dashboard() {
               <BeforeAfterChart comparison={pulse.comparison} />
             </Card>
           )}
+        </div>
 
+        <div className="min-w-0 space-y-5 lg:sticky lg:top-40 lg:max-h-[calc(100dvh-11rem)] lg:self-start lg:overflow-y-auto">
           <Card title={t("whereLost")}>
             <Timeline samples={timeline} topics={topics} />
           </Card>
@@ -658,9 +527,7 @@ export default function Dashboard() {
           <Card title={t("whatHelp")}>
             <ReasonBars reasons={pulse?.reasons} notes={pulse?.otherNotes} />
           </Card>
-        </div>
 
-        <div className="space-y-5">
           <Card
             title={`${t("students")} (${pulse?.total ?? 0})`}
             right={
@@ -675,10 +542,16 @@ export default function Dashboard() {
             }
           >
             <StudentGrid students={pulse?.perStudent} hideNames={hideNames} />
-          </Card>
-
-          <Card title={t("topics")}>
-            <TopicHistory history={history} pulse={pulse} />
+            {FEATURES.focusMode && (
+              <label className="mt-4 flex cursor-pointer items-center gap-2 border-t border-slate-100 pt-3 text-base text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={focusMode}
+                  onChange={toggleFocus}
+                />
+                🔒 {t("focusTeacher")}
+              </label>
+            )}
           </Card>
 
           {FEATURES.focusMode && alerts.length > 0 && (

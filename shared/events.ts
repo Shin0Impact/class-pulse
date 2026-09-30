@@ -9,6 +9,12 @@ export const EVENTS = {
   TEACHER_SET_FOCUS_MODE: "teacher:setFocusMode",
   TEACHER_END_SESSION: "teacher:endSession",
 
+  // ---- Screen window on another device of the same account (tiny messages only: the file itself is
+  // downloaded by the screen from the account's saved files) ----
+  TEACHER_SCREEN_STATE: "teacher:screenState", // doc id, page, live question (no answers), fit, scroll
+  SCREEN_JOIN: "screen:join", // screen -> server, { code, accessToken }; ack has the latest state
+  SCREEN_STATE: "screen:state", // server -> screen
+
   // ---- student -> server ----
   STUDENT_JOIN: "student:join",
   STUDENT_SET_STATUS: "student:setStatus",
@@ -82,6 +88,18 @@ export const EVENTS = {
 
   // Server sends updated feedback results to teacher.
   FEEDBACK_UPDATE: "feedback:update",
+
+  // =====================================================
+  // Quiz (student-paced)
+  // =====================================================
+
+  TEACHER_START_QUIZ: "teacher:startQuiz",
+  TEACHER_CLOSE_QUIZ: "teacher:closeQuiz",
+  STUDENT_QUIZ_ANSWER: "student:quizAnswer",
+  STUDENT_QUIZ_SUBMIT: "student:quizSubmit",
+  QUIZ_STARTED: "quiz:started",
+  QUIZ_CLOSED: "quiz:closed",
+  QUIZ_UPDATE: "quiz:update",
 } as const;
 
 // =====================================================

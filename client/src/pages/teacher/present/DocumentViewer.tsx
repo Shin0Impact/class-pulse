@@ -1,8 +1,32 @@
 import { useEffect, useRef, useState } from "react";
+import ScrollPages from "./ScrollPages.tsx";
 import type { OpenDocument } from "./documents.ts";
 
+// "page":   one page at a time, as large as the stage allows (slides).
+// "scroll": every page stacked at full width, scrolled continuously (handouts, long documents).
+export type Fit = "page" | "scroll";
+
+type Props = {
+  doc: OpenDocument;
+  page: number;
+  fit?: Fit;
+  // scroll mode: the page nearest the middle of the view changed because the teacher scrolled
+  onPageChange?: (page: number) => void;
+  // scroll mode: the vertical scroll as 0..1. Reported to the Present window, and given to the
+  // Screen window, which follows it.
+  onScrollRatio?: (ratio: number) => void;
+  scrollRatio?: number;
+};
+
+export default function DocumentViewer({ fit = "page", ...props }: Props) {
+  if (fit === "scroll" && props.doc.kind === "pdf") {
+    return <ScrollPages {...props} doc={props.doc} />;
+  }
+  return <PageViewer doc={props.doc} page={props.page} />;
+}
+
 // Draws one page of the open document as large as the stage allows, crisp on hi-DPI projectors.
-export default function DocumentViewer({ doc, page }: { doc: OpenDocument; page: number }) {
+function PageViewer({ doc, page }: { doc: OpenDocument; page: number }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });

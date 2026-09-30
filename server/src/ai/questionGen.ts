@@ -15,6 +15,9 @@ export type GenerateInput = {
   pageImage?: { mimeType: string; data: string };
   correctAnswer?: string; // multiple choice: the teacher's own right answer (optional)
   language: Language;
+  // "so_far": the text covers pages 1..upToPage of what the teacher has shown, not one page
+  scope?: 'page' | 'so_far';
+  upToPage?: number;
 };
 
 const LANGUAGE_NAME: Record<Language, string> = { ar: 'Arabic (Modern Standard)', en: 'English' };
@@ -24,14 +27,18 @@ const SYSTEM = `You write short check-for-understanding questions that a teacher
 
 export function buildQuestionPrompt(input: GenerateInput): string {
   const lang = LANGUAGE_NAME[input.language];
+  const soFar = input.scope === 'so_far';
   const content = input.pageText.trim()
-    ? `Text of the page (may be incomplete; the image is the full page):\n"""\n${input.pageText.trim().slice(0, 6000)}\n"""`
+    ? soFar
+      ? `Text of everything the teacher has shown so far, pages 1 to ${input.upToPage ?? '?'} (may be incomplete; the image is the last page shown):\n"""\n${input.pageText.trim().slice(0, 18_000)}\n"""`
+      : `Text of the page (may be incomplete; the image is the full page):\n"""\n${input.pageText.trim().slice(0, 6000)}\n"""`
     : 'The page has no extractable text; use the image.';
+  const target = soFar ? 'the most important idea running through everything shown so far (not a detail from a single page)' : 'the most important idea on this page';
 
   if (input.kind === 'open') {
     return `${content}
 
-Write ONE open-ended question about the most important idea on this page -- one where a student who only half-understood would give a noticeably wrong or vague answer.
+Write ONE open-ended question about ${target} -- one where a student who only half-understood would give a noticeably wrong or vague answer.
 Rules:
 - The question must stand alone: never say "the slide", "the page" or "the image" (students don't see it).
 - Answerable in 1-3 sentences. Question at most 200 characters.
@@ -47,7 +54,7 @@ Reply with exactly this JSON shape:
 
   return `${content}
 
-Write ONE multiple-choice question about the most important idea on this page.
+Write ONE multiple-choice question about ${target}.
 The goal is to catch students who are CONFIDENTLY WRONG, so:
 - Exactly 4 options, exactly one correct.${teacherAnswer}
 - Each wrong option is a specific, common misconception or mistake a real student makes about this exact content: tempting and plausible, never silly or obviously wrong.
@@ -174,7 +181,9 @@ export function checkGenerateInput(body: Record<string, unknown>): GenerateInput
   if (!pageText.trim() && !pageImage) throw new UserError('This page has nothing to ask about');
   const correctAnswer = typeof body.correctAnswer === 'string' && body.correctAnswer.trim() ? body.correctAnswer : undefined;
   const language: Language = body.language === 'ar' ? 'ar' : 'en';
-  return { kind, pageText, pageImage, correctAnswer, language };
+  const scope = body.scope === 'so_far' ? 'so_far' : 'page';
+  const upToPage = typeof body.upToPage === 'number' && Number.isInteger(body.upToPage) && body.upToPage > 0 && body.upToPage < 10_000 ? body.upToPage : undefined;
+  return { kind, pageText, pageImage, correctAnswer, language, scope, upToPage };
 }
 
 export async function generateQuestion(input: GenerateInput): Promise<QuestionDraft> {

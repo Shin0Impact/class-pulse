@@ -12,6 +12,7 @@ import type {
   Confidence,
   Mark,
   PublicQuestion,
+  StudentQuiz,
   StudentState,
   PairAssigned,
   AnswerReveal as AnswerRevealData,
@@ -28,6 +29,8 @@ import { savedKey } from "./Join.tsx";
 import { getAccessToken } from "../../auth/tokens.ts";
 
 import ColorPicker from "./ColorPicker.tsx";
+
+import QuizRunner from "../../components/student/QuizRunner/QuizRunner.tsx";
 
 import StudentHeader from "../../components/student/StudentHeader/StudentHeader.tsx";
 
@@ -152,6 +155,11 @@ export default function Play() {
 
   const [feedbackRequested, setFeedbackRequested] = useState(false);
 
+  // A quiz at the student's own pace. `quizLeft` remembers a finished quiz the student closed, so
+  // a reconnect does not throw them back into its review.
+  const [quiz, setQuiz] = useState<StudentQuiz | null>(null);
+  const [quizLeft, setQuizLeft] = useState<string | null>(null);
+
   /* --------------------------------
 
 
@@ -247,6 +255,8 @@ export default function Play() {
       setFocusOn(res.focusMode);
       // Feedback was opened before this phone (re)joined: show the form until it has submitted.
       setFeedbackRequested(res.feedbackOpen && !res.feedbackSubmitted);
+
+      setQuiz(res.quiz ?? null);
 
       setError("");
 
@@ -404,6 +414,18 @@ export default function Play() {
       if (navigator.vibrate) {
         navigator.vibrate(20);
       }
+    },
+
+    [EVENTS.QUIZ_STARTED]: (data) => {
+      setQuiz(data);
+
+      setQuizLeft(null);
+
+      if (navigator.vibrate) navigator.vibrate(20);
+    },
+
+    [EVENTS.QUIZ_CLOSED]: ({ quizId }) => {
+      setQuiz((q) => (q && q.id === quizId ? { ...q, closed: true } : q));
     },
 
     // G9 — Teacher asks students for class feedback
@@ -581,6 +603,8 @@ export default function Play() {
 
   \\-------------------------------- */
 
+  const showQuiz = !!quiz && quizLeft !== quiz.id;
+
   return (
     <main className="student-play">
       <div className="student-play__container">
@@ -618,7 +642,16 @@ export default function Play() {
 
           {/* LIVE */}
 
-          {phase === "live" && (
+          {phase === "live" && showQuiz && quiz && (
+            <QuizRunner
+              key={quiz.id}
+              quiz={quiz}
+              onChange={setQuiz}
+              onExit={() => setQuizLeft(quiz.id)}
+            />
+          )}
+
+          {phase === "live" && !showQuiz && (
             <div className="student-play__stage">
               {/* G9 — CLASS FEEDBACK */}
 

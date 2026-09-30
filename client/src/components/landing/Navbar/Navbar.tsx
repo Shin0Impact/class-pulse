@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { usePreferences } from "../../../context/PreferencesContext";
+import SiteControls from "../../global/SiteControls/SiteControls.tsx";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -46,6 +47,7 @@ export default function Navbar() {
           </li>
         </ul>
         <div className="landing-nav__actions">
+          <SiteControls />
           <Link className="button button--ghost" to="/join">
             {ar ? "دخول طالب" : "Student join"}
           </Link>
