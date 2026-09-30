@@ -178,6 +178,8 @@ const D = {
   studentsOpen: ["يفتح الطلاب", "Students open"],
 
   endClass: ["إنهاء الحصة", "End class"],
+  cancel: ["إلغاء", "Cancel"],
+  finishClass: ["إنهاء وإغلاق", "Finish and close"],
 
   endConfirm: ["إنهاء الحصة لجميع الطلاب؟", "End this class for everyone?"],
 

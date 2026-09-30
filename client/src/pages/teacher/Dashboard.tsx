@@ -14,6 +14,7 @@ import LiveStats from "../../components/live/LiveStats.tsx";
 import QuestionStudio from "../../components/ai/QuestionStudio.tsx";
 import { QuizResultsView } from "../../components/ai/QuizPanel.tsx";
 import BlindspotHeadline from "../../components/BlindspotHeadline.tsx";
+import ConfirmDialog from "../../components/ui/ConfirmDialog.tsx";
 import Button from "../../components/ui/Button.tsx";
 import Card from "../../components/ui/Card.tsx";
 import PulseBar from "../../components/PulseBar.tsx";
@@ -221,20 +222,17 @@ export default function Dashboard() {
     if (res) setFocusMode(res.focusMode);
   }
 
+  // Our own confirm pop-up (not the browser's window.confirm).
+  const [confirming, setConfirming] = useState<"end" | "finish" | null>(null);
+
   async function endClass() {
-    const confirmed = window.confirm(t("feedbackEndAskConfirm"));
-
-    if (!confirmed) return;
-
+    setConfirming(null);
     await run(EVENTS.TEACHER_REQUEST_FEEDBACK, {});
     setFeedbackOpen(true);
   }
 
   async function finishAndCloseClass() {
-    const confirmed = window.confirm(t("feedbackFinishConfirm"));
-
-    if (!confirmed) return;
-
+    setConfirming(null);
     await run(EVENTS.TEACHER_END_SESSION, {});
   }
 
@@ -283,7 +281,7 @@ export default function Dashboard() {
           >
             ✦ {t("presentButton")}
           </Button>
-          <Button variant="secondary" onClick={endClass}>
+          <Button variant="secondary" onClick={() => setConfirming("end")}>
             {t("endClass")}
           </Button>
         </div>
@@ -312,7 +310,7 @@ export default function Dashboard() {
               <p className="mt-1 text-sm opacity-70">{t("feedbackWaiting")}</p>
             </div>
 
-            <Button type="button" onClick={finishAndCloseClass} disabled={busy}>
+            <Button type="button" onClick={() => setConfirming("finish")} disabled={busy}>
               {t("feedbackFinishClose")}
             </Button>
           </div>
@@ -574,6 +572,16 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+    {confirming && (
+        <ConfirmDialog
+          message={t(confirming === "end" ? "feedbackEndAskConfirm" : "feedbackFinishConfirm")}
+          confirmLabel={t(confirming === "end" ? "endClass" : "finishClass")}
+          danger={confirming === "finish"}
+          busy={busy}
+          onConfirm={confirming === "end" ? endClass : finishAndCloseClass}
+          onCancel={() => setConfirming(null)}
+        />
+      )}
     </main>
   );
 }
