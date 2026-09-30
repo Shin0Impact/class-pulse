@@ -4,6 +4,7 @@ import { EVENTS } from "@shared/events.ts";
 import { FEATURES } from "@shared/features.ts";
 import { socket, emitAck } from "../../socket/socket.ts";
 import { getAccessToken } from "../../auth/tokens.ts";
+import { QRCodeSVG } from "qrcode.react";
 import {
   useSocketEvents,
   type SummaryState,
@@ -168,7 +169,11 @@ export default function Dashboard() {
     },
     // Ending the class opens its recap (My classes); without accounts there is none, so go home.
     [EVENTS.SESSION_ENDED]: (data) =>
-      navigate(data?.classId && profile?.role === "teacher" ? `/me/classes/${data.classId}` : "/"),
+      navigate(
+        data?.classId && profile?.role === "teacher"
+          ? `/me/classes/${data.classId}`
+          : "/",
+      ),
   });
 
   async function run<T extends object = Record<string, never>>(
@@ -212,7 +217,8 @@ export default function Dashboard() {
     await run(EVENTS.TEACHER_RECHECK, {});
   }
 
-  const newCheckIn = () => run(EVENTS.TEACHER_CHECK_IN, { topic: pulse?.checkIn.topic ?? "" });
+  const newCheckIn = () =>
+    run(EVENTS.TEACHER_CHECK_IN, { topic: pulse?.checkIn.topic ?? "" });
 
   async function toggleFocus() {
     const res = await run<{ focusMode: boolean }>(
@@ -253,27 +259,55 @@ export default function Dashboard() {
 
   return (
     <main className="mx-auto max-w-[110rem] px-4 py-6 text-lg text-slate-950 sm:px-8">
-      {/* header: the join code is the star, it is on the projector */}
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-2xl bg-indigo-600 p-5 text-white">
-        <div>
-          <div
-            className="text-xl font-bold uppercase tracking-wide text-white"
-            dir="auto"
+      {/* header: join code + QR for fast student entry */}
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-5 rounded-2xl bg-indigo-600 p-5 text-white">
+        <div className="flex flex-wrap items-center gap-5">
+          <div>
+            <div
+              className="text-xl font-bold uppercase tracking-wide text-white"
+              dir="auto"
+            >
+              {title || "Class Pulse"}
+            </div>
+
+            <div className="mt-1 flex items-baseline gap-3">
+              <span className="text-lg font-semibold text-white">
+                {t("joinCode")}
+              </span>
+
+              <span className="font-mono text-5xl font-extrabold tracking-widest">
+                {code}
+              </span>
+            </div>
+
+            <div className="mt-2 text-base text-indigo-100">
+              {language === "ar"
+                ? "امسح رمز QR أو أدخل كود الحصة"
+                : "Scan the QR code or enter the class code"}
+            </div>
+
+            <div className="mt-1 text-sm text-indigo-200">
+              {t("studentsOpen")}{" "}
+              <span className="font-semibold">{joinUrl}</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate(`/teacher/${code}/qr`)}
+            className="cursor-pointer rounded-2xl border-0 bg-white p-3 shadow-lg transition-transform duration-200 hover:scale-105"
+            title={
+              language === "ar"
+                ? "اضغط لتكبير رمز QR"
+                : "Click to enlarge QR code"
+            }
+            aria-label={
+              language === "ar" ? "فتح رمز QR بحجم كبير" : "Open large QR code"
+            }
           >
-            {title || "Class Pulse"}
-          </div>
-          <div className="mt-1 flex items-baseline gap-3">
-            <span className="text-lg font-semibold text-white">
-              {t("joinCode")}
-            </span>
-            <span className="font-mono text-5xl font-extrabold tracking-widest">
-              {code}
-            </span>
-          </div>
-          <div className="mt-1 text-base text-indigo-100">
-            {t("studentsOpen")} <span className="font-semibold">{joinUrl}</span>
-          </div>
+            <QRCodeSVG value={joinUrl} size={118} level="M" marginSize={1} />
+          </button>
         </div>
+
         <div className="flex flex-wrap gap-2">
           <Button
             variant="secondary"

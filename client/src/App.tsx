@@ -9,6 +9,7 @@ import Play from "./pages/student/Play.tsx";
 import DemoIndex from "./pages/DemoIndex.tsx";
 import Checkout from "./pages/checkout/Checkout.tsx";
 import BlindspotDemo from "./pages/BlindspotDemo.tsx";
+import QRDisplay from "./pages/teacher/qr/QRDisplay.tsx";
 import AppBar from "./components/global/AppBar/AppBar.tsx";
 import { PreferencesProvider } from "./context/PreferencesContext.tsx";
 import { AuthProvider } from "./auth/AuthContext.tsx";
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/teacher" element={<CreateSession />} />
           <Route path="/teacher/:code" element={<Dashboard />} />
+          <Route path="/teacher/:code/qr" element={<QRDisplay />} />
           <Route
             path="/teacher/:code/present"
             element={
