@@ -3,7 +3,7 @@ import { usePreferences } from "../../../context/PreferencesContext";
 import { useAuth } from "../../../auth/AuthContext.tsx";
 import "./SiteControls.css";
 
-export default function SiteControls() {
+export default function SiteControls({ hideAccount = false }: { hideAccount?: boolean }) {
   const { language, theme, toggleLanguage, toggleTheme, t } = usePreferences();
   const { accountsEnabled, profile } = useAuth();
 
@@ -13,7 +13,7 @@ export default function SiteControls() {
       role="group"
       aria-label={language === "ar" ? "إعدادات الموقع" : "Site settings"}
     >
-      {profile ? (
+      {!hideAccount && (profile ? (
         <Link
           to="/me"
           className="site-control site-control--account"
@@ -35,7 +35,7 @@ export default function SiteControls() {
             </Link>
           </>
         )
-      )}
+      ))}
       <button
         type="button"
         className="site-control"

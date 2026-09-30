@@ -385,3 +385,13 @@ html[data-theme="dark"] .cal--underconfident {
   font-size: 0.76rem;
   color: var(--muted);
 }
+
+/* Reference-inspired lilac design. */
+
+.account__nav {padding-inline-end:0;}
+.account__header h1 {line-height:1.35;}
+.account__primary {background:var(--brand-gradient);box-shadow:0 8px 20px var(--primary-soft);}
+.stat-tile {background:linear-gradient(150deg,var(--primary-soft),var(--surface));border-radius:20px;}
+.stat-tile strong {color:var(--primary);}
+.account__section {border-radius:24px;}
+

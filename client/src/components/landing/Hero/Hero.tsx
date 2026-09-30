@@ -28,15 +28,11 @@ export default function Hero() {
         </p>
         <div className="hero__actions">
           <Link className="hero__cta" to="/teacher">
-            {ar ? "ابدأ حصة الآن" : "Start a class"}{" "}
-            <span aria-hidden="true">←</span>
+            {ar ? "ابدأ كمعلم" : "Start teaching"}
           </Link>
-          <a className="hero__secondary" href="#how">
-            <span className="play" aria-hidden="true">
-              ▶
-            </span>
-            {ar ? "شاهد كيف يعمل" : "See how it works"}
-          </a>
+          <Link className="hero__secondary" to="/join">
+            {ar ? "دخول طالب" : "Student join"}
+          </Link>
         </div>
         <ul
           className="hero__proof"

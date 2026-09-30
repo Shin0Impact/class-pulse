@@ -404,3 +404,27 @@ html[data-theme="dark"] .student-join-page__pulse strong {
   color: var(--primary);
   font-weight: 800;
 }
+
+/* Class Pulse · lilac visual theme */
+
+.student-join-page,html[data-theme="dark"] .student-join-page {--join-ink:var(--text);--join-paper:var(--page);--join-line:var(--border);--join-accent:var(--primary);background:var(--page);}
+.student-join-page:before {background-image:linear-gradient(var(--primary-soft) 1px,transparent 1px),linear-gradient(90deg,var(--primary-soft) 1px,transparent 1px);opacity:.35;}
+.student-join-page__visual {border:0;background:linear-gradient(135deg,var(--primary-soft),transparent);border-radius:28px;padding:70px 36px;min-height:490px;}
+.student-join-page__visual-label {inset-inline-start:36px;}
+.student-join-page__number {inset-inline-end:28px;bottom:25px;}
+.student-join-page__pulse strong {background:var(--heading-gradient);background-clip:text;color:transparent;}
+@media(max-width:900px){.student-join-page__visual{min-height:340px;padding:80px 24px 35px}.student-join-page__visual-label{inset-inline-start:24px}}
+@media(max-width:520px){.student-join-page__pulse span{width:18px}.student-join-page__pulse strong{font-size:3.3rem;margin:0 6px}}
+
+
+/* "PULSE" is painted with a gradient clipped to the text: give the glyphs room so the bottom and the
+   right edge (tight letter-spacing) are not cut off. */
+.student-join-page__pulse strong {display:inline-block;padding:.08em .1em .16em .02em;margin-block:-.08em -.16em;line-height:.9;}
+
+/* Keep the whole PULSE row (word + the pulse lines on both sides) inside the card at any width:
+   size it from the card's own width instead of the viewport. */
+.student-join-page__visual {container-type:inline-size;}
+.student-join-page__pulse {max-width:100%;justify-content:center;}
+.student-join-page__pulse span {width:clamp(12px,5cqi,53px);}
+.student-join-page__pulse strong {font-size:clamp(2.6rem,15cqi,8rem);margin-inline:clamp(4px,2.5cqi,16px);}
+@media(max-width:520px){.student-join-page__pulse span{width:clamp(12px,5cqi,26px)}.student-join-page__pulse strong{font-size:clamp(2.6rem,15cqi,4rem);margin-inline:clamp(4px,2.5cqi,10px)}}

@@ -65,3 +65,11 @@
     display: none;
   }
 }
+
+/* Reference-inspired lilac design. */
+
+.site-controls {border-color:var(--border);background:color-mix(in srgb,var(--surface) 80%,transparent);border-radius:12px;}
+.site-control {border-radius:9px;color:var(--text-soft);}
+.site-control--signup,.site-control__avatar {background:var(--brand-gradient);color:#fff;}
+.site-control--signup:hover {background:var(--brand-gradient);}
+

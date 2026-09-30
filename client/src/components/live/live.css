@@ -62,3 +62,9 @@ html[data-theme="dark"] .live-stats__count--red { color: #fb7185; }
   border-radius: 16px;
   margin-bottom: 16px;
 }
+
+/* Reference-inspired lilac design. */
+
+.live-stats--card {border-color:var(--primary-border);border-radius:20px;box-shadow:var(--shadow-sm);padding:20px 24px;background:var(--surface);}
+.live-stats__count strong {color:var(--primary);}
+

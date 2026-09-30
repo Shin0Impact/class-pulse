@@ -683,3 +683,12 @@ body.screen-mode .site-controls {
     font-size: 1.1rem;
   }
 }
+
+/* Reference-inspired lilac design. */
+
+.present {background:#171026;}
+.present-stage,.screen {background:#171026;}
+.present-panel {background:var(--surface);border-color:var(--border);}
+.screen-question {background:rgba(29,21,44,.97);}
+.screen-question__label {color:#c4a3ff;}
+

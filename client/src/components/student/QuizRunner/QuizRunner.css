@@ -26,3 +26,6 @@
 .quiz__item p { margin: 0; }
 .quiz__label { color: var(--muted, #64748b); }
 .quiz__verdict { white-space: nowrap; }
+
+/* Lilac cards and readable Arabic typography. */
+.quiz__prompt {line-height:1.6;color:var(--text);}.quiz__option,.quiz__item {border-width:1px;border-radius:16px;box-shadow:var(--shadow-sm);}.quiz__btn--primary {background:var(--brand-gradient);border-color:transparent;}.quiz__option.is-picked {border-color:var(--primary);background:var(--primary-soft);}

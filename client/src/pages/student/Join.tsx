@@ -71,7 +71,6 @@ export default function Join() {
     <main className="student-join-page">
       <header className="student-join-page__topbar">
         <Link to="/" className="student-join-page__back" aria-label={t("back")}>
-          <span aria-hidden="true">←</span>
           <span>{t("back")}</span>
         </Link>
       </header>
