@@ -57,6 +57,9 @@ export type TeacherState = {
     | null;
   blindspot: BlindspotUpdate | null;
   summary: ClassConfusionSummary | null;
+  // Class feedback (end of class): a refreshed dashboard must not lose the panel or the close button.
+  feedbackOpen: boolean;
+  feedback: ClassFeedbackSummary;
 };
 
 export type StudentState = {
@@ -73,6 +76,9 @@ export type StudentState = {
   // whether this student already answered it this round.
   question: PublicQuestion | null;
   answered: boolean;
+  // Class feedback: a phone that refreshes (or joins late) still gets the form, until it has submitted.
+  feedbackOpen: boolean;
+  feedbackSubmitted: boolean;
 };
 
 export type FocusAlert = { studentId: string; name: string; count: number };

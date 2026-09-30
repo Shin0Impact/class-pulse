@@ -245,6 +245,8 @@ export default function Play() {
       setTopic(res.topic);
 
       setFocusOn(res.focusMode);
+      // Feedback was opened before this phone (re)joined: show the form until it has submitted.
+      setFeedbackRequested(res.feedbackOpen && !res.feedbackSubmitted);
 
       setError("");
 

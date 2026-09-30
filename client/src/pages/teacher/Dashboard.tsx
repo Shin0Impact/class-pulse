@@ -183,6 +183,8 @@ export default function Dashboard() {
       setHistory(state.history);
       setTimeline(state.timeline);
       setFocusMode(state.focusMode);
+      setFeedbackOpen(state.feedbackOpen);
+      setFeedbackSummary(state.feedback);
       setTopic((t) => t || state.pulse.checkIn.topic);
       // the live question (maybe launched from the Present page) and its AI summary
       setBlindspotUpdate(state.blindspot);
@@ -385,7 +387,7 @@ export default function Dashboard() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider">
-                G9 · {t("feedbackTeacherEyebrow")}
+                {t("feedbackTeacherEyebrow")}
               </p>
 
               <h2 className="mt-1 text-xl font-bold">
