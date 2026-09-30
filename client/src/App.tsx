@@ -16,7 +16,6 @@ import { AuthProvider } from "./auth/AuthContext.tsx";
 import AuthPage from "./pages/auth/AuthPage.tsx";
 import Account from "./pages/account/Account.tsx";
 import ClassSummary from "./pages/account/ClassSummary.tsx";
-import AIAssistant from "./components/global/AIAssistant/AIAssistant.tsx";
 
 // The Present page carries the PDF renderer: only load it when a teacher opens it.
 const Present = lazy(() => import("./pages/teacher/present/Present.tsx"));
@@ -27,7 +26,6 @@ export default function App() {
     <PreferencesProvider>
       <AuthProvider>
         <AppBar />
-        <AIAssistant />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/pricing" element={<Pricing />} />
