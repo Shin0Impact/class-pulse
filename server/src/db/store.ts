@@ -13,7 +13,47 @@ import type { QuestionRound, Session, Student } from '../services/types.ts';
 
 let queue: Promise<void> = Promise.resolve();
 
+// Busy moments (30 students tapping at once) would otherwise be 30 separate round trips, one after the
+// other, and the queue would fall minutes behind. Consecutive rows for the same table are therefore
+// sent as ONE request. Order is kept exactly: any other write first pushes the pending batch onto the
+// queue, and a short timer pushes it if nothing else comes.
+type Batch = { table: string; rows: Record<string, unknown>[]; upsertOn?: string; key?: (r: Record<string, unknown>) => string };
+let pending: Batch[] = [];
+let batchTimer: ReturnType<typeof setTimeout> | null = null;
+const BATCH_MS = 40;
+
+function pushPending(): void {
+  if (batchTimer) clearTimeout(batchTimer);
+  batchTimer = null;
+  const batches = pending;
+  pending = [];
+  for (const b of batches) {
+    let rows = b.rows;
+    if (b.key) {
+      // one statement can't touch the same row twice: keep the newest of each
+      const byKey = new Map<string, Record<string, unknown>>();
+      for (const r of rows) byKey.set(b.key(r), r);
+      rows = [...byKey.values()];
+    }
+    enqueueNow(`${b.upsertOn ? 'save' : 'insert'} ${b.table} (${rows.length})`, (db) =>
+      b.upsertOn ? db.from(b.table).upsert(rows, { onConflict: b.upsertOn }) : db.from(b.table).insert(rows));
+  }
+}
+
+function enqueueBatched(table: string, row: Record<string, unknown>, opts: { upsertOn?: string; key?: Batch['key'] } = {}): void {
+  if (!supabase) return;
+  const last = pending[pending.length - 1];
+  if (last && last.table === table && last.upsertOn === opts.upsertOn) last.rows.push(row);
+  else pending.push({ table, rows: [row], ...opts });
+  if (!batchTimer) batchTimer = setTimeout(pushPending, BATCH_MS);
+}
+
 function enqueue(label: string, fn: (db: NonNullable<typeof supabase>) => PromiseLike<{ error: { message: string } | null }>): void {
+  pushPending(); // whatever was batched before this write must reach the database before it
+  enqueueNow(label, fn);
+}
+
+function enqueueNow(label: string, fn: (db: NonNullable<typeof supabase>) => PromiseLike<{ error: { message: string } | null }>): void {
   // Callers pass a closure over rows they already built (see note above); keep it that way.
   const db = supabase;
   if (!db) return;
@@ -27,7 +67,10 @@ function enqueue(label: string, fn: (db: NonNullable<typeof supabase>) => Promis
 
 export const store = {
   // Resolves once every write queued so far has been sent (used before the teacher is shown the recap).
-  flush: (): Promise<void> => queue.then(() => undefined),
+  flush: (): Promise<void> => {
+    pushPending();
+    return queue.then(() => undefined);
+  },
 
   saveSession: (s: Session) => {
     const row = { id: s.id, code: s.code, title: s.title, teacher_id: s.teacherId };
@@ -40,7 +83,7 @@ export const store = {
 
   saveStudent: (session: Session, student: Student) => {
     const row = { id: student.id, session_id: session.id, name: student.name, user_id: student.userId };
-    enqueue('insert student', (db) => db.from('students').insert(row));
+    enqueueBatched('students', row);
   },
 
   linkStudent: (student: Student) => {
@@ -67,7 +110,7 @@ export const store = {
     const row = {
       id: randomUUID(), checkin_id: checkIn.id, student_id: student.id, status: student.status, reason: student.reason,
     };
-    enqueue('insert status', (db) => db.from('status_events').insert(row));
+    enqueueBatched('status_events', row);
   },
 
   // ---- Blindspot ---- one blindspot_questions row per teacher:launchQuestion (round.dbId), never
@@ -94,8 +137,10 @@ export const store = {
       option_id: answer.optionId, confidence: answer.confidence, correct, explanation: answer.explanation ?? null,
       answer_text: answer.text ?? null,
     };
-    enqueue('save blindspot answer', (db) =>
-      db.from('blindspot_answers').upsert(row, { onConflict: 'question_id,student_id,round' }));
+    enqueueBatched('blindspot_answers', row, {
+      upsertOn: 'question_id,student_id,round',
+      key: (r) => `${r.question_id}|${r.student_id}|${r.round}`,
+    });
   },
 
   savePairs: (round: QuestionRound, pairs: Pair[]) => {

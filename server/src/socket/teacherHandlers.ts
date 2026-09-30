@@ -386,8 +386,8 @@ export function registerTeacherHandlers(io: Server, socket: Socket): void {
       dropScreen(session.code);
 
       // The teacher lands on this class's recap, so let the last writes reach the database first
-      // (never wait more than a few seconds).
-      await Promise.race([store.flush(), new Promise((r) => setTimeout(r, 4000))]);
+      // (never wait more than 15 seconds).
+      await Promise.race([store.flush(), new Promise((r) => setTimeout(r, 15000))]);
 
       io.to(teacherRoom(session.code)).emit(EVENTS.SESSION_ENDED, {
         classId: session.id,
