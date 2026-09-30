@@ -33,4 +33,15 @@ export async function request<T>(
 
 export const fetchSession = (code: string) => request(`/sessions/${encodeURIComponent(code)}`);
 
-export const fetchHealth = () => request<{ ok: boolean; db: string; accounts?: boolean; ai?: boolean }>('/health');
+type Health = { ok: boolean; db: string; accounts?: boolean; ai?: boolean };
+
+// Read from /info, not /health: Brave's shields block "/health" as a tracker. An older server that does not
+// have /info yet (404) is asked at /health instead.
+export const fetchHealth = async (): Promise<Health> => {
+  try {
+    return await request<Health>('/info');
+  } catch (e) {
+    if (e instanceof HttpError && e.status === 404) return request<Health>('/health');
+    throw e;
+  }
+};

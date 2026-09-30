@@ -26,9 +26,12 @@ app.use(express.json());
 
 // `accounts` tells the client whether to offer sign-in (and require it for teachers); `ai` whether
 // to offer Generate / Summarize.
-app.get('/health', (_req, res) =>
-  res.json({ ok: true, db: dbEnabled ? 'supabase' : 'memory', accounts: authEnabled, ai: aiEnabled(), schema: schemaProblem ?? 'ok' }),
-);
+// /health is what Render and uptime checks use. The client reads the same thing from /info, because some
+// browser shields (Brave) block any request whose path is "/health" as a tracker.
+const health = (_req: express.Request, res: express.Response) =>
+  res.json({ ok: true, db: dbEnabled ? 'supabase' : 'memory', accounts: authEnabled, ai: aiEnabled(), schema: schemaProblem ?? 'ok' });
+app.get('/health', health);
+app.get('/info', health);
 app.use('/sessions', sessionsRouter);
 app.use('/decks', decksRouter);
 app.use('/auth', authRouter);
