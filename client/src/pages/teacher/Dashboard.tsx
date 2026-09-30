@@ -520,6 +520,14 @@ export default function Dashboard() {
         </div>
 
         <div className="min-w-0 space-y-5 lg:sticky lg:top-40 lg:max-h-[calc(100dvh-11rem)] lg:self-start lg:overflow-y-auto">
+          <Card title={t("whereLost")}>
+            <Timeline samples={timeline} topics={topics} />
+          </Card>
+
+          <Card title={t("whatHelp")}>
+            <ReasonBars reasons={pulse?.reasons} notes={pulse?.otherNotes} />
+          </Card>
+
           <Card
             title={`${t("students")} (${pulse?.total ?? 0})`}
             right={
@@ -544,14 +552,6 @@ export default function Dashboard() {
                 🔒 {t("focusTeacher")}
               </label>
             )}
-          </Card>
-
-          <Card title={t("whereLost")}>
-            <Timeline samples={timeline} topics={topics} />
-          </Card>
-
-          <Card title={t("whatHelp")}>
-            <ReasonBars reasons={pulse?.reasons} notes={pulse?.otherNotes} />
           </Card>
 
           {FEATURES.focusMode && alerts.length > 0 && (

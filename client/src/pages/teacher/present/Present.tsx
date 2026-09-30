@@ -41,6 +41,19 @@ function remember(code: string, value: { docId?: string; page?: number }) {
 // /teacher/:code/present -- the lesson file on the projector, with the "ask the class" panel beside
 // it: generate a question from the page on screen (or write one), launch it, close it, and read
 // the AI's summary of what the class is confused by.
+// True while the viewport matches the query (used for the phone layout).
+function useMedia(query: string): boolean {
+  const [match, setMatch] = useState(() => window.matchMedia(query).matches);
+  useEffect(() => {
+    const m = window.matchMedia(query);
+    const on = () => setMatch(m.matches);
+    on();
+    m.addEventListener("change", on);
+    return () => m.removeEventListener("change", on);
+  }, [query]);
+  return match;
+}
+
 export default function Present() {
   const { code = "" } = useParams();
   const navigate = useNavigate();
@@ -53,6 +66,8 @@ export default function Present() {
   const [doc, setDoc] = useState<OpenDocument | null>(null);
   const [page, setPage] = useState(1);
   const [fit, setFit] = useState<Fit>("scroll");
+  const phone = useMedia("(max-width: 700px)");
+  const [menuOpen, setMenuOpen] = useState(false);
   const [draftScope, setDraftScope] = useState<"page" | "so_far">("page");
   const [fullscreen, setFullscreen] = useState(false);
   const [docStatus, setDocStatus] = useState("");
@@ -62,7 +77,7 @@ export default function Present() {
   const fileInput = useRef<HTMLInputElement>(null);
   const sourceRef = useRef<{ blob: Blob; name: string } | null>(null);
 
-  const [panelOpen, setPanelOpen] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(() => !window.matchMedia("(max-width: 700px)").matches); // phones start on the slide
   const [kind, setKind] = useState<QuestionKind>("mcq");
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [draft, setDraft] = useState<QuestionDraft | null>(null);
@@ -440,13 +455,18 @@ export default function Present() {
   return (
     <main className="present">
       <header className="present-bar">
-        <Link to={`/teacher/${code}`} className="present-bar__back">
-          {t("backToDashboard")}
+        <Link to={`/teacher/${code}`} className="present-bar__back" aria-label={t("backToDashboard")}>
+          {phone ? "←" : t("backToDashboard")}
         </Link>
         <div className="present-bar__doc" dir="auto">
           {doc ? doc.name : title || "Class Pulse"}
         </div>
-        <div className="present-bar__tools">
+        {phone && (
+          <button type="button" className="present-btn present-bar__more" aria-expanded={menuOpen} aria-label={t("moreMenu")} onClick={() => setMenuOpen((o) => !o)}>
+            ⋯
+          </button>
+        )}
+        <div className={`present-bar__tools${phone ? (menuOpen ? " is-open" : " is-closed") : ""}`}>
           <button type="button" className="present-btn" onClick={() => fileInput.current?.click()}>
             {t("openFile")}
           </button>
@@ -500,14 +520,28 @@ export default function Present() {
           <button type="button" className="present-btn" onClick={openScreen} title={t("screenWindowHint")}>
             ⧉ {t("screenWindow")}
           </button>
-          <button type="button" className="present-btn present-btn--accent" aria-expanded={panelOpen} onClick={() => setPanelOpen((o) => !o)}>
-            ✦ {t("askTheClass")}
-          </button>
+          {!phone && (
+            <button type="button" className="present-btn present-btn--accent" aria-expanded={panelOpen} onClick={() => setPanelOpen((o) => !o)}>
+              ✦ {t("askTheClass")}
+            </button>
+          )}
+          {phone && <SiteControls />}
         </div>
-        <SiteControls />
+        {!phone && <SiteControls />}
       </header>
 
       <LiveStats className="live-stats--bar" pulse={pulse} answered={live ? responses : null} />
+
+      {phone && (
+        <div className="present-tabs" role="tablist">
+          <button type="button" role="tab" aria-selected={!panelOpen} onClick={() => setPanelOpen(false)}>
+            {t("slideTab")}
+          </button>
+          <button type="button" role="tab" aria-selected={panelOpen} onClick={() => setPanelOpen(true)}>
+            ✦ {t("askTheClass")}
+          </button>
+        </div>
+      )}
 
       {(classError || docError || docStatus) && (
         <p className={`present-notice${classError || docError ? " present-notice--error" : ""}`} role={classError || docError ? "alert" : "status"}>
@@ -681,6 +715,26 @@ export default function Present() {
           </aside>
         )}
       </div>
+
+      {phone && live && !panelOpen && (
+        <div className="present-livebar" role="status">
+          <div className="present-livebar__text">
+            <span>{live.closed ? t("questionClosed") : t("questionLive")}</span>
+            <span>
+              <b dir="ltr">{responses}</b> {t("answered")}
+            </span>
+          </div>
+          {live.closed ? (
+            <button type="button" className="present-btn" onClick={() => setPanelOpen(true)}>
+              {t("seeResults")}
+            </button>
+          ) : (
+            <button type="button" className="present-btn present-btn--accent" onClick={closeLive} disabled={busy}>
+              {t("closeQuestion")}
+            </button>
+          )}
+        </div>
+      )}
     </main>
   );
 }

@@ -504,3 +504,152 @@ body.screen-mode .site-controls {
     flex-shrink: 0;
   }
 }
+
+
+/* ---- Phone (<= 700px): slide first. One thin bar, a Slide / Ask tab switch, the stats on one line,
+   and a bottom bar for the live question. The Ask panel covers the slide (which keeps its place). ---- */
+.present-bar__more,
+.present-tabs,
+.present-livebar {
+  display: none;
+}
+@media (max-width: 700px) {
+  .present {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .present-bar {
+    position: relative;
+    min-height: 0;
+    padding: 6px 12px;
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+  .present-bar__back {
+    font-size: 1.4rem;
+    line-height: 1;
+    padding: 6px 4px;
+  }
+  .present-bar__doc {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .present-bar__more {
+    display: inline-flex;
+    min-width: 44px;
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+  .present-bar__tools.is-closed {
+    display: none;
+  }
+  .present-bar__tools.is-open {
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    z-index: 30;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.25);
+  }
+  .present-bar__tools.is-open .site-controls {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-inline-start: 0;
+  }
+  .present-btn {
+    min-height: 44px;
+  }
+  .present .live-stats--bar {
+    padding: 4px 12px;
+    gap: 2px 14px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  .present .live-stats--bar .live-stats__counts {
+    display: none;
+  }
+  .present .live-stats--bar .live-stats__pct strong {
+    font-size: 1.5rem;
+  }
+  .present .live-stats--bar .live-stats__pct span {
+    display: none;
+  }
+  .present .live-stats--bar .live-stats__facts {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    font-size: 0.8rem;
+  }
+  .present-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .present-tabs button {
+    min-height: 40px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .present-tabs button[aria-selected="true"] {
+    background: var(--primary);
+    color: #fff;
+  }
+  .present-body {
+    position: relative;
+    display: block;
+  }
+  .present-body > .present-stage,
+  .present-body > .present-empty {
+    height: 100%;
+  }
+  .present-stage {
+    height: 100%;
+    padding: 8px;
+  }
+  .present-stage--scroll {
+    padding: 8px 8px 2px;
+  }
+  .present-panel {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    overflow-y: auto;
+    border-top: 0;
+    background: var(--surface);
+  }
+  .present-livebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.18);
+  }
+  .present-livebar__text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  .present-livebar__text b {
+    color: var(--text);
+    font-size: 1.1rem;
+  }
+}
