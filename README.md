@@ -9,7 +9,7 @@ Arabic and English throughout (full right-to-left layout), light and dark mode, 
 ## What it does
 
 **1. The live pulse**
-- Students join with a 4-digit code (or by scanning a QR code) and tap 🟢 I follow / 🟡 Not sure / 🔴 I'm lost whenever they like. After 🟡 or 🔴 they can add one reason (too fast, need an example, ...).
+- Students join with a 4-digit code (or by scanning a QR code) and tap 🟢 Got it / 🟡 Not sure / 🔴 I'm lost whenever they like. After 🟡 or 🔴 they can add one reason (too fast, need an example, ...).
 - The teacher sees the class understanding % (green = 100, yellow = 50, red = 0, averaged over students who marked), each student's color, the top reasons, a timeline, and plain-language advice.
 - **Check in now** freezes the current stretch under a topic, clears the colors, and shows the before/after when the same topic is re-checked (for example 38% to 88%).
 - Focus mode flags students who leave the page. **Hide names** replaces names with dots for the projector.
