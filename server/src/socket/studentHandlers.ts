@@ -1,4 +1,5 @@
 import { EVENTS } from "../../../shared/events.ts";
+import { store } from "../db/store.ts";
 
 import {
   requireSession,
@@ -104,7 +105,9 @@ export function registerStudentHandlers(io: Server, socket: Socket): void {
       }) => {
         const { session, student } = requireStudent();
 
-        submitFeedback(session, student, payload);
+        const saved = submitFeedback(session, student, payload);
+        // kept in the database too, so it is in the class report afterwards
+        store.saveFeedback(session, saved);
 
         // Send the updated summary only to the teacher.
         // Anonymous student identity is stripped by feedbackSummary().

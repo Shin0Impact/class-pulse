@@ -257,6 +257,15 @@ export type ClassQuestionRound = {
   counts: QuadrantCounts;
 };
 
+// One student's first attempt at a multiple-choice question, for the "who answered what" table.
+export type ClassAnswer = {
+  name: string;
+  optionId: string;
+  confidence: Confidence;
+  correct: boolean;
+  quadrant: Quadrant;
+};
+
 export type ClassQuestion = {
   id: string;
   kind: "mcq" | "open";
@@ -267,6 +276,7 @@ export type ClassQuestion = {
   options: PublicQuestionOption[];
   correctOptionId: string;
   optionCounts: Record<string, number>; // first attempts per option
+  answers: ClassAnswer[]; // who answered what on the first attempt (multiple choice only)
   rounds: ClassQuestionRound[]; // round 1, then each re-check (multiple choice only)
   openAnswers: Array<{ name: string; text: string; confidence: Confidence }>; // open questions
   summary: ClassConfusionSummary | null; // the newest AI summary of this question
@@ -281,6 +291,20 @@ export type ClassCheckIn = {
   yellow: number;
   red: number;
   unmarked: number;
+};
+
+// A student's end-of-class feedback. `name` is null when they chose to stay anonymous.
+export type ClassFeedbackEntry = {
+  rating: number;
+  comment: string;
+  name: string | null;
+  createdAt: string;
+};
+
+export type ClassReportFeedback = {
+  responses: number;
+  average: number | null;
+  items: ClassFeedbackEntry[];
 };
 
 // GET /me/classes/:id (teacher): the class summary page.
@@ -301,6 +325,7 @@ export type ClassDetail = {
   students: ClassStudent[];
   questions: ClassQuestion[];
   checkIns: ClassCheckIn[];
+  feedback: ClassReportFeedback;
 };
 
 export type ProgressClass = CalibrationStats & {

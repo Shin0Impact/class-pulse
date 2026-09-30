@@ -113,3 +113,31 @@ test('open questions show their answers and summary but never count toward accur
   const progress = summarizeProgress([session('s1', '2026-09-01T09:00:00Z')], students, [question('q1', 's1', 'Fractions'), open], answers);
   assert.deepEqual(progress.topics.map((t) => t.topic), ['Fractions']);
 });
+
+test('class summary lists who answered what (wrong first) and keeps anonymous feedback anonymous', () => {
+  const students: StudentRow[] = [
+    { id: 'amal', session_id: 's1', name: 'Amal', user_id: null },
+    { id: 'bilal', session_id: 's1', name: 'Bilal', user_id: null },
+    { id: 'carmen', session_id: 's1', name: 'Carmen', user_id: null },
+  ];
+  const answers = [
+    answer('q1', 'amal', true, 'certain'),
+    answer('q1', 'bilal', false, 'certain'), // wrong and sure: the blindspot, listed first
+    answer('q1', 'carmen', false, 'guess'),
+    answer('q1', 'bilal', true, 'certain', 2), // a re-check is not a first attempt
+  ];
+  const feedback = [
+    { student_id: 'amal', rating: 5, comment: 'Great', anonymous: false, created_at: '2026-09-01T11:00:00Z' },
+    { student_id: 'bilal', rating: 3, comment: 'Too fast', anonymous: true, created_at: '2026-09-01T11:01:00Z' },
+  ];
+  const detail = summarizeClass(session('s1', '2026-09-01T09:00:00Z'), students, [question('q1', 's1', 'Fractions')], answers, [], [], feedback);
+
+  assert.deepEqual(
+    detail.questions[0].answers.map((a) => [a.name, a.correct, a.quadrant]),
+    [['Bilal', false, 'blindspot'], ['Carmen', false, 'aware'], ['Amal', true, 'mastered']],
+  );
+  assert.equal(detail.feedback.responses, 2);
+  assert.equal(detail.feedback.average, 4);
+  assert.deepEqual(detail.feedback.items.map((f) => f.name), ['Amal', null]); // Bilal asked not to be named
+  assert.equal(summarizeClass(session('s1', '2026-09-01T09:00:00Z'), [], [], [], []).feedback.responses, 0);
+});

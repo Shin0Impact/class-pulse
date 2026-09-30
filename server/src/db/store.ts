@@ -143,6 +143,18 @@ export const store = {
     });
   },
 
+  // The end-of-class feedback form. One row per student; sending it again replaces the first one.
+  saveFeedback: (session: Session, feedback: { id: string; studentId: string; rating: number; comment: string; anonymous: boolean }) => {
+    const row = {
+      id: feedback.id, session_id: session.id, student_id: feedback.studentId,
+      rating: feedback.rating, comment: feedback.comment, anonymous: feedback.anonymous,
+    };
+    enqueueBatched('class_feedback', row, {
+      upsertOn: 'session_id,student_id',
+      key: (r) => `${r.session_id}|${r.student_id}`,
+    });
+  },
+
   savePairs: (round: QuestionRound, pairs: Pair[]) => {
     const rows = pairs.map((pair) => ({
       id: randomUUID(), question_id: round.dbId, round: round.round, pair_key: pair.pairId,

@@ -165,3 +165,17 @@ alter table blindspot_pairs           enable row level security;
 alter table blindspot_clarity_ratings enable row level security;
 alter table ai_summaries              enable row level security;
 alter table documents                 enable row level security;
+
+-- ---- Class feedback ----
+-- The stars + comment a student sends when the teacher closes the class. One row per student; sending it
+-- again replaces the first one. "anonymous" = the teacher's report must not show the name.
+create table if not exists class_feedback (
+  id          uuid primary key,
+  session_id  uuid not null references sessions(id) on delete cascade,
+  student_id  uuid not null references students(id) on delete cascade,
+  rating      int not null check (rating between 1 and 5),
+  comment     text not null default '',
+  anonymous   boolean not null default false,
+  created_at  timestamptz not null default now(),
+  unique (session_id, student_id)
+);

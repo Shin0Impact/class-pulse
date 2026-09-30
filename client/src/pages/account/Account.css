@@ -395,3 +395,41 @@ html[data-theme="dark"] .cal--underconfident {
 .stat-tile strong {color:var(--primary);}
 .account__section {border-radius:24px;}
 
+
+/* ---- Class report additions: who got it wrong, timeline, feedback, print ---- */
+.account__print {border:0;cursor:pointer;font:inherit;font-weight:900;}
+.cs-wrong {margin:14px 0 0;padding:12px 14px;border-radius:14px;background:rgba(228,95,102,0.08);}
+.cs-wrong strong {display:block;margin-bottom:8px;color:#b8434b;font-size:0.86rem;}
+.cs-wrong ul {margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;list-style:none;}
+.cs-wrong li {padding:4px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--border-soft);font-size:0.86rem;font-weight:700;}
+.cs-wrong__sure {border-color:#e45f66 !important;}
+.cs-wrong__sure small {color:#b8434b;font-weight:800;}
+.cs-wrong--none {background:var(--primary-soft);color:var(--primary);font-weight:800;font-size:0.88rem;}
+html[data-theme="dark"] .cs-wrong strong,html[data-theme="dark"] .cs-wrong__sure small {color:#f08b91;}
+.cs-who {margin-top:10px;}
+.cs-who > summary {cursor:pointer;color:var(--primary);font-weight:800;font-size:0.88rem;}
+.cs-row--wrong td {background:rgba(228,95,102,0.07);}
+.cs-timeline {margin:14px 0 0;padding:0;display:grid;list-style:none;}
+.cs-timeline li {padding:12px 0;display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,38%) auto;align-items:center;gap:4px 14px;border-bottom:1px solid var(--border-soft);font-size:0.9rem;}
+.cs-timeline li:last-child {border-bottom:0;}
+.cs-timeline small {grid-column:1 / -1;color:var(--muted);font-size:0.76rem;}
+.cs-timeline__bar {height:10px;border-radius:999px;background:var(--surface-alt);overflow:hidden;}
+.cs-timeline__fill {display:block;height:100%;border-radius:999px;}
+.cs-timeline__fill--good {background:#28a66b;}
+.cs-timeline__fill--mid {background:#e4ad46;}
+.cs-timeline__fill--low {background:#e45f66;}
+.cs-timeline__fill--none {background:transparent;}
+.cs-feedback__avg {margin:12px 0 0;}
+.cs-feedback {margin:12px 0 0;padding:0;display:grid;gap:10px;list-style:none;}
+.cs-feedback li {padding:12px 14px;border-radius:14px;background:var(--surface-alt);}
+.cs-feedback__stars {margin-inline-end:10px;color:#e4ad46;letter-spacing:2px;}
+.cs-feedback__stars span {color:var(--border);}
+.cs-feedback p {margin:6px 0 0;color:var(--text);}
+@media (max-width:700px) {.cs-timeline li {grid-template-columns:1fr auto;}.cs-timeline__bar {grid-column:1 / -1;order:3;}}
+
+@media print {
+  .account__nav,.account__actions,.cs-who > summary,.site-controls,.site-control,.app-bar {display:none !important;}
+  .account,.account__shell {background:#fff !important;box-shadow:none !important;}
+  .account__section,.cs-question {break-inside:avoid;box-shadow:none !important;}
+  body {background:#fff !important;}
+}

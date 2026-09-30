@@ -311,15 +311,25 @@ export default function Present() {
   }, []);
   // Another device (same teacher account) mirrors the same state through the server: a few small
   // messages, at most about ten a second while scrolling.
+  // Sent straight away, then at most every 60 ms: waiting 100 ms before sending anything (as before) added
+  // that much to every page turn on top of the network trip to the server and back.
+  const pendingRemote = useRef(false);
   const sendRemote = useCallback(() => {
-    if (remoteTimer.current !== null) return;
+    if (remoteTimer.current !== null) {
+      pendingRemote.current = true;
+      return;
+    }
+    const m = mirror.current;
+    socket.emit(EVENTS.TEACHER_SCREEN_STATE, {
+      state: { doc: m.savedDoc, page: m.page, question: m.screenQuestion, fit: m.fit, scroll: scrollRef.current },
+    });
     remoteTimer.current = window.setTimeout(() => {
       remoteTimer.current = null;
-      const m = mirror.current;
-      socket.emit(EVENTS.TEACHER_SCREEN_STATE, {
-        state: { doc: m.savedDoc, page: m.page, question: m.screenQuestion, fit: m.fit, scroll: scrollRef.current },
-      });
-    }, 100);
+      if (pendingRemote.current) {
+        pendingRemote.current = false;
+        sendRemote();
+      }
+    }, 60);
   }, []);
   useEffect(
     () => () => {

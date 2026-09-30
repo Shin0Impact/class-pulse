@@ -254,3 +254,9 @@
 .feedback-form__submit {background:var(--brand-gradient);}
 .feedback-form__counter {right:auto;inset-inline-end:14px;}
 
+/* The switch: the knob sits at the start of the track and slides toward the end, in either direction
+   of writing. (A button centres its content, so the old translateX pushed it out of the track in Arabic.) */
+.feedback-form__switch {display:flex;align-items:center;justify-content:flex-start;}
+.feedback-form__privacy .feedback-form__switch > span {display:block;flex:none;width:24px;height:24px;margin:0;transform:none;}
+.feedback-form__privacy .feedback-form__switch--active > span {transform:translateX(22px);}
+html[dir="rtl"] .feedback-form__privacy .feedback-form__switch--active > span {transform:translateX(-22px);}
