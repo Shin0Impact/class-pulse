@@ -21,6 +21,7 @@ import {
   feedbackSummary,
 } from "../services/feedbackService.ts";
 
+import { answerQuiz, submitQuiz, quizResults } from "../services/quizService.ts";
 import { studentState } from "../services/views.ts";
 import { verifyToken } from "../services/authService.ts";
 
@@ -192,4 +193,25 @@ export function registerStudentHandlers(io: Server, socket: Socket): void {
     emitStudents(io, session);
     emitPulse(io, session);
   });
+  // Quiz: each answer is saved as it is picked; Submit locks them in and returns the review.
+  socket.on(
+    EVENTS.STUDENT_QUIZ_ANSWER,
+    handle((payload: { quizId?: unknown; questionId?: unknown; optionId?: unknown; text?: unknown }) => {
+      const { session, student } = requireStudent();
+      answerQuiz(session, student, payload);
+      io.to(teacherRoom(session.code)).emit(EVENTS.QUIZ_UPDATE, quizResults(session));
+      return {};
+    }),
+  );
+
+  socket.on(
+    EVENTS.STUDENT_QUIZ_SUBMIT,
+    handle((payload: { quizId?: unknown }) => {
+      const { session, student } = requireStudent();
+      const quiz = submitQuiz(session, student, payload);
+      io.to(teacherRoom(session.code)).emit(EVENTS.QUIZ_UPDATE, quizResults(session));
+      return { quiz };
+    }),
+  );
+
 }

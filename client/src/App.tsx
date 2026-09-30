@@ -9,7 +9,7 @@ import Play from "./pages/student/Play.tsx";
 import DemoIndex from "./pages/DemoIndex.tsx";
 import Checkout from "./pages/checkout/Checkout.tsx";
 import BlindspotDemo from "./pages/BlindspotDemo.tsx";
-import SiteControls from "./components/global/SiteControls/SiteControls.tsx";
+import AppBar from "./components/global/AppBar/AppBar.tsx";
 import { PreferencesProvider } from "./context/PreferencesContext.tsx";
 import { AuthProvider } from "./auth/AuthContext.tsx";
 import AuthPage from "./pages/auth/AuthPage.tsx";
@@ -19,12 +19,13 @@ import AIAssistant from "./components/global/AIAssistant/AIAssistant.tsx";
 
 // The Present page carries the PDF renderer: only load it when a teacher opens it.
 const Present = lazy(() => import("./pages/teacher/present/Present.tsx"));
+const Screen = lazy(() => import("./pages/teacher/present/Screen.tsx"));
 
 export default function App() {
   return (
     <PreferencesProvider>
       <AuthProvider>
-        <SiteControls />
+        <AppBar />
         <AIAssistant />
         <Routes>
           <Route path="/" element={<Landing />} />
@@ -37,6 +38,14 @@ export default function App() {
             element={
               <Suspense fallback={null}>
                 <Present />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/teacher/:code/screen"
+            element={
+              <Suspense fallback={null}>
+                <Screen />
               </Suspense>
             }
           />

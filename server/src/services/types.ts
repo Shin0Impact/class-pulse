@@ -78,6 +78,30 @@ export type ClassFeedback = {
   anonymous: boolean;
   createdAt: number;
 };
+// ---- Quiz: student-paced, one at a time per class ----
+export type QuizQuestion = {
+  id: string;
+  kind: QuestionKind;
+  prompt: string;
+  options: QuestionOption[];
+  correctOptionId: string; // "" for open
+  modelAnswer: string;
+};
+
+export type QuizResponse = {
+  answers: Map<string, { optionId?: string; text?: string }>;
+  submitted: boolean;
+};
+
+export type Quiz = {
+  id: string;
+  title: string;
+  questions: QuizQuestion[];
+  closed: boolean;
+  responses: Map<string, QuizResponse>; // studentId -> response
+  startedAt: number;
+};
+
 export type Session = {
   id: string;
   code: string;
@@ -96,4 +120,5 @@ export type Session = {
   pairs: Pair[];
   feedbackOpen: boolean;
   feedback: ClassFeedback[];
+  quiz: Quiz | null;
 };

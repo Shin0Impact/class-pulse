@@ -45,7 +45,7 @@ export default function PulseBar({ pulse }: { pulse: Pulse }) {
           </div>
         </div>
         <div className="text-end">
-          <strong className="text-3xl">
+          <strong className="text-3xl text-slate-900">
             {pulse.marked}/{pulse.total}
           </strong>
           <div className="text-sm text-slate-500">{t("marked")}</div>

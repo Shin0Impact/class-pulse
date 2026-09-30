@@ -19,6 +19,8 @@ import {
   answerRevealsForCurrentRound,
   recheckQuestion,
 } from "../services/questionService.ts";
+import { startQuiz, closeQuiz, quizForStudent, quizResults } from "../services/quizService.ts";
+import { store } from "../db/store.ts";
 import { aiEnabled } from "../ai/llm.ts";
 import { startSummary } from "../ai/summaryRunner.ts";
 
@@ -374,16 +376,52 @@ export function registerTeacherHandlers(io: Server, socket: Socket): void {
 
   socket.on(
     EVENTS.TEACHER_END_SESSION,
-    handle(() => {
+    handle(async () => {
       const session = requireTeacher();
 
       io.to(studentRoom(session.code)).emit(EVENTS.SESSION_ENDED, {});
 
-      io.to(teacherRoom(session.code)).emit(EVENTS.SESSION_ENDED, {});
-
       endSession(session);
+
+      // The teacher lands on this class's recap, so let the last writes reach the database first
+      // (never wait more than a few seconds).
+      await Promise.race([store.flush(), new Promise((r) => setTimeout(r, 4000))]);
+
+      io.to(teacherRoom(session.code)).emit(EVENTS.SESSION_ENDED, {
+        classId: session.id,
+      });
 
       return {};
     }),
   );
+  // -------------------------------------------------------
+  // QUIZ (student-paced): start it, watch the results, close it
+  // -------------------------------------------------------
+
+  socket.on(
+    EVENTS.TEACHER_START_QUIZ,
+    handle((payload: { title?: unknown; questions?: unknown }) => {
+      const session = requireTeacher();
+      startQuiz(session, payload);
+      // Each student gets their own view (nothing answered yet, no answer key).
+      for (const student of session.students.values()) {
+        if (!student.connected) continue;
+        io.to(student.socketId).emit(EVENTS.QUIZ_STARTED, quizForStudent(session, student));
+      }
+      io.to(teacherRoom(session.code)).emit(EVENTS.QUIZ_UPDATE, quizResults(session));
+      return {};
+    }),
+  );
+
+  socket.on(
+    EVENTS.TEACHER_CLOSE_QUIZ,
+    handle(() => {
+      const session = requireTeacher();
+      const quiz = closeQuiz(session);
+      io.to(studentRoom(session.code)).emit(EVENTS.QUIZ_CLOSED, { quizId: quiz.id });
+      io.to(teacherRoom(session.code)).emit(EVENTS.QUIZ_UPDATE, quizResults(session));
+      return {};
+    }),
+  );
+
 }

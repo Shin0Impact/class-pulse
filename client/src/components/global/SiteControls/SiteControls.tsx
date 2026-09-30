@@ -8,8 +8,9 @@ export default function SiteControls() {
   const { accountsEnabled, profile } = useAuth();
 
   return (
-    <aside
+    <div
       className="site-controls"
+      role="group"
       aria-label={language === "ar" ? "إعدادات الموقع" : "Site settings"}
     >
       {profile ? (
@@ -49,6 +50,6 @@ export default function SiteControls() {
       >
         <span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span>
       </button>
-    </aside>
+    </div>
   );
 }

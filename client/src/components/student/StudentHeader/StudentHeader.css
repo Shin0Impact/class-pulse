@@ -208,3 +208,25 @@
     max-width: 105px;
   }
 }
+
+/* Account / language / theme sit at the end of the header; on a phone the identity drops below. */
+.student-header .site-controls {
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .student-header {
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    padding: 12px 0;
+  }
+  .student-header__brand {
+    flex: 1 1 0;
+  }
+  .student-header .site-controls {
+    order: 2;
+  }
+  .student-header__identity {
+    order: 3;
+    flex: 1 0 100%;
+  }
+}

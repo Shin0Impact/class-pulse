@@ -1,5 +1,6 @@
 import { computePulse } from './pulseService.ts';
 import { feedbackSummary } from './feedbackService.ts';
+import { quizForStudent, quizResults } from './quizService.ts';
 import { computeBlindspotUpdate, publicQuestion } from './questionService.ts';
 import type { TeacherState, StudentState } from '../../../shared/types.ts';
 import type { Session, Student } from './types.ts';
@@ -23,6 +24,7 @@ export const teacherSnapshot = (session: Session): TeacherState => ({
   summary: session.currentQuestion?.summary ?? null,
   feedbackOpen: session.feedbackOpen,
   feedback: feedbackSummary(session),
+  quiz: quizResults(session),
 });
 
 // What a student needs to draw their screen (also used after a reconnect).
@@ -43,4 +45,5 @@ export const studentState = (session: Session, student: Student): StudentState =
   answered: session.answers.has(student.id),
   feedbackOpen: session.feedbackOpen,
   feedbackSubmitted: session.feedback.some((f) => f.studentId === student.id),
+  quiz: quizForStudent(session, student),
 });

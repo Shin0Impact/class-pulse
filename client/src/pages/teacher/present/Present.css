@@ -10,7 +10,6 @@
 .present-bar {
   min-height: 60px;
   padding: 10px 16px;
-  padding-inline-end: 200px; /* clear the fixed language/theme/account controls */
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -377,9 +376,6 @@
     min-height: 100dvh;
     overflow: visible;
   }
-  .present-bar {
-    padding-inline-end: 16px;
-  }
   .present-body--panel {
     grid-template-columns: 1fr;
   }
@@ -393,15 +389,118 @@
 }
 
 /* While presenting (body.present-mode, set by Present.tsx) */
-body.present-mode .site-controls {
-  inset-block-start: 8px;
-  inset-inline-end: 12px;
-}
 body.present-mode .ai-assistant {
   display: none;
 }
-@media (max-width: 700px) {
-  body.present-mode .site-controls {
-    inset-block-start: auto;
+
+/* ---- Screen window (/teacher/:code/screen): the slide only, plus the live question at the bottom ---- */
+.screen {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: #0f1210;
+  color: #e8ece8;
+  overflow: hidden;
+}
+.screen > .present-stage {
+  flex: 1;
+}
+.screen > .present-empty {
+  flex: 1;
+}
+.screen .present-notice {
+  position: absolute;
+  inset-block-start: 12px;
+  inset-inline-start: 12px;
+}
+body.screen-mode .site-controls {
+  display: none;
+}
+.screen-question {
+  padding: 14px 28px 20px;
+  background: rgba(16, 21, 17, 0.96);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+.screen-question__label {
+  margin: 0 0 4px;
+  color: #a9ff5b;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.screen-question h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.3rem, 2.6vw, 2.2rem);
+  line-height: 1.25;
+}
+.screen-question__options {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px 16px;
+  list-style: none;
+  font-size: clamp(1rem, 1.7vw, 1.5rem);
+}
+.screen-question__options b {
+  margin-inline-end: 8px;
+  color: #a9ff5b;
+}
+
+/* Scroll mode: every page stacked at full width, scrolled continuously */
+.present-stage--scroll {
+  display: block;
+  padding: 16px 16px 2px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+.present-scroll {
+  position: relative;
+  width: 100%;
+}
+.present-scroll__page {
+  background: #fff;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+.present-scroll__canvas {
+  display: block;
+}
+.screen .present-stage--scroll {
+  scrollbar-width: none; /* the mirror follows the teacher's scroll: no bar of its own */
+}
+.screen .present-stage--scroll::-webkit-scrollbar {
+  display: none;
+}
+.qs-preview {
+  height: 340px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #0f1210;
+}
+.qs-preview > .present-stage {
+  flex: 1;
+  height: 100%;
+}
+
+/* The account / language / theme controls live at the end of the bar; on wide screens the file name
+   gives way (truncates) instead of pushing them onto a second row. */
+.present-bar .site-controls {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+}
+@media (min-width: 1100px) {
+  .present-bar {
+    flex-wrap: nowrap;
+  }
+  .present-bar__doc {
+    flex: 1 1 60px;
+    min-width: 60px;
+  }
+  .present-bar__tools {
+    flex-shrink: 0;
   }
 }

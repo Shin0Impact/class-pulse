@@ -1,3 +1,4 @@
+import SiteControls from "../../global/SiteControls/SiteControls.tsx";
 import "./StudentHeader.css";
 
 type StudentHeaderProps = {
@@ -52,6 +53,8 @@ export default function StudentHeader({
           aria-label={connected ? "Connected" : "Disconnected"}
         />
       </div>
+
+      <SiteControls />
     </header>
   );
 }

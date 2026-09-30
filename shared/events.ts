@@ -82,6 +82,18 @@ export const EVENTS = {
 
   // Server sends updated feedback results to teacher.
   FEEDBACK_UPDATE: "feedback:update",
+
+  // =====================================================
+  // Quiz (student-paced)
+  // =====================================================
+
+  TEACHER_START_QUIZ: "teacher:startQuiz",
+  TEACHER_CLOSE_QUIZ: "teacher:closeQuiz",
+  STUDENT_QUIZ_ANSWER: "student:quizAnswer",
+  STUDENT_QUIZ_SUBMIT: "student:quizSubmit",
+  QUIZ_STARTED: "quiz:started",
+  QUIZ_CLOSED: "quiz:closed",
+  QUIZ_UPDATE: "quiz:update",
 } as const;
 
 // =====================================================

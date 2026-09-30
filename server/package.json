@@ -9,7 +9,7 @@
     "smoke": "tsx scripts/smoke.js",
     "typecheck": "tsc -p tsconfig.json",
     "ai:check": "tsx scripts/ai-check.ts",
-    "test": "tsx --test src/ai/ai.test.ts src/services/calibration.test.ts src/services/explanationIntegration.test.ts src/services/explanationRubric.test.ts src/services/historyService.test.ts src/services/openQuestion.test.ts src/services/pairing.test.ts src/services/quadrant.test.ts"
+    "test": "tsx --test src/ai/ai.test.ts src/services/calibration.test.ts src/services/explanationIntegration.test.ts src/services/explanationRubric.test.ts src/services/historyService.test.ts src/services/openQuestion.test.ts src/services/pairing.test.ts src/services/quadrant.test.ts src/services/quiz.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

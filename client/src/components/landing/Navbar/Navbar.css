@@ -131,7 +131,9 @@
     width: calc(100% - 20px);
     border-radius: 19px;
   }
-  .button--ghost {
+  /* the hero has the same call to action; the room goes to the account / language / theme controls */
+  .button--ghost,
+  .landing-nav__actions .button--primary {
     display: none;
   }
   .brand__copy small {

@@ -1,7 +1,7 @@
 import { SERVER_URL } from '../socket/socket.ts';
 import { getAccessToken } from '../auth/tokens.ts';
 import { request, HttpError } from './http.ts';
-import type { DocumentInfo, QuestionDraft, QuestionKind } from '@shared/types.ts';
+import type { DocumentInfo, QuestionDraft, QuestionKind, QuizType } from '@shared/types.ts';
 
 // The teacher's AI and document calls. The access token rides along when signed in (the server
 // requires it whenever accounts are on).
@@ -13,7 +13,7 @@ export type PageCapture = {
 
 export async function generateQuestion(
   code: string,
-  input: { kind: QuestionKind; page: PageCapture; correctAnswer?: string; language: 'ar' | 'en' },
+  input: { kind: QuestionKind; page: PageCapture; scope?: 'page' | 'so_far'; upToPage?: number; correctAnswer?: string; language: 'ar' | 'en' },
 ): Promise<QuestionDraft> {
   return request<QuestionDraft>('/ai/question', {
     method: 'POST',
@@ -23,7 +23,31 @@ export async function generateQuestion(
       kind: input.kind,
       pageText: input.page.text,
       pageImage: input.page.image,
+      scope: input.scope,
+      upToPage: input.upToPage,
       correctAnswer: input.correctAnswer || undefined,
+      language: input.language,
+    },
+  });
+}
+
+export type GeneratedQuiz = { title: string; questions: QuestionDraft[]; provider?: string };
+
+export async function generateQuiz(
+  code: string,
+  input: { type: QuizType; count: number; page: PageCapture; fromPage: number; toPage: number; language: 'ar' | 'en' },
+): Promise<GeneratedQuiz> {
+  return request<GeneratedQuiz>('/ai/quiz', {
+    method: 'POST',
+    token: await getAccessToken(),
+    body: {
+      code,
+      type: input.type,
+      count: input.count,
+      pageText: input.page.text,
+      pageImage: input.page.image,
+      fromPage: input.fromPage,
+      toPage: input.toPage,
       language: input.language,
     },
   });
