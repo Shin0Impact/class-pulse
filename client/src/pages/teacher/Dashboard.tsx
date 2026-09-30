@@ -4,7 +4,10 @@ import { EVENTS } from "@shared/events.ts";
 import { FEATURES } from "@shared/features.ts";
 import { socket, emitAck, SERVER_URL } from "../../socket/socket.ts";
 import { getAccessToken } from "../../auth/tokens.ts";
-import { useSocketEvents, type SummaryState } from "../../socket/useSocketEvents.ts";
+import {
+  useSocketEvents,
+  type SummaryState,
+} from "../../socket/useSocketEvents.ts";
 import { useAuth } from "../../auth/AuthContext.tsx";
 import SummaryCard from "../../components/ai/SummaryCard.tsx";
 import BlindspotHeadline from "../../components/BlindspotHeadline.tsx";
@@ -28,6 +31,21 @@ import type {
   TeacherState,
   TimelineSample,
 } from "@shared/types.ts";
+
+type FeedbackItem = {
+  id: string;
+  rating: 1 | 2 | 3 | 4 | 5;
+  comment: string;
+  anonymous: boolean;
+  studentName: string | null;
+  createdAt: number;
+};
+
+type FeedbackSummary = {
+  averageRating: number | null;
+  totalResponses: number;
+  feedback: FeedbackItem[];
+};
 
 type DeckSummary = {
   id: string;
@@ -76,6 +94,14 @@ export default function Dashboard() {
   const [blindspotUpdate, setBlindspotUpdate] =
     useState<BlindspotUpdate | null>(null);
   const [summary, setSummary] = useState<SummaryState | null>(null);
+  // G9 — Class Feedback
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+
+  const [feedbackSummary, setFeedbackSummary] = useState<FeedbackSummary>({
+    averageRating: null,
+    totalResponses: 0,
+    feedback: [],
+  });
 
   useEffect(() => {
     async function loadDecks() {
@@ -95,7 +121,6 @@ export default function Dashboard() {
 
     loadDecks();
   }, []);
-
 
   useEffect(() => {
     if (!selectedDeckId) {
@@ -123,7 +148,6 @@ export default function Dashboard() {
 
     loadDeck();
   }, [selectedDeckId]);
-
 
   // Every pulse is also a point on the timeline (skipping exact repeats).
   const addSample = useCallback((p: Pulse) => {
@@ -159,6 +183,8 @@ export default function Dashboard() {
       setHistory(state.history);
       setTimeline(state.timeline);
       setFocusMode(state.focusMode);
+      setFeedbackOpen(state.feedbackOpen);
+      setFeedbackSummary(state.feedback);
       setTopic((t) => t || state.pulse.checkIn.topic);
       // the live question (maybe launched from the Present page) and its AI summary
       setBlindspotUpdate(state.blindspot);
@@ -207,7 +233,9 @@ export default function Dashboard() {
     },
 
     [EVENTS.SUMMARY_UPDATE]: (s) => setSummary(s),
-
+    [EVENTS.FEEDBACK_UPDATE]: (data: FeedbackSummary) => {
+      setFeedbackSummary(data);
+    },
     [EVENTS.SESSION_ENDED]: () => navigate("/"),
   });
 
@@ -267,7 +295,6 @@ export default function Dashboard() {
     await run(EVENTS.TEACHER_RECHECK, {});
   }
 
-
   const checkIn = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     run(EVENTS.TEACHER_CHECK_IN, { topic });
@@ -282,14 +309,28 @@ export default function Dashboard() {
   }
 
   async function endClass() {
-    if (!window.confirm(t("endConfirm"))) return;
+    const confirmed = window.confirm(t("feedbackEndAskConfirm"));
+
+    if (!confirmed) return;
+
+    await run(EVENTS.TEACHER_REQUEST_FEEDBACK, {});
+    setFeedbackOpen(true);
+  }
+
+  async function finishAndCloseClass() {
+    const confirmed = window.confirm(t("feedbackFinishConfirm"));
+
+    if (!confirmed) return;
+
     await run(EVENTS.TEACHER_END_SESSION, {});
   }
 
   const isOpenQuestion = blindspotUpdate?.kind === "open";
   // Only the summary of THIS launch and round (a deck question's id repeats; a re-check is a new round).
   const currentSummary =
-    summary && blindspotUpdate && summary.launchKey === blindspotUpdate.launchKey
+    summary &&
+    blindspotUpdate &&
+    summary.launchKey === blindspotUpdate.launchKey
       ? summary
       : null;
 
@@ -343,10 +384,77 @@ export default function Dashboard() {
           {error}
         </p>
       )}
+      {feedbackOpen && (
+        <Card className="mb-5">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider">
+                {t("feedbackTeacherEyebrow")}
+              </p>
 
+              <h2 className="mt-1 text-xl font-bold">
+                {t("feedbackTeacherTitle")}
+              </h2>
+
+              <p className="mt-1 text-sm opacity-70">{t("feedbackWaiting")}</p>
+            </div>
+
+            <Button type="button" onClick={finishAndCloseClass} disabled={busy}>
+              {t("feedbackFinishClose")}
+            </Button>
+          </div>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border p-4">
+              <p className="text-sm opacity-60">{t("feedbackAverage")}</p>
+
+              <strong className="mt-1 block text-3xl">
+                {feedbackSummary.averageRating === null
+                  ? "—"
+                  : `${feedbackSummary.averageRating} / 5`}
+              </strong>
+
+              <div className="mt-1 text-xl">⭐⭐⭐⭐⭐</div>
+            </div>
+
+            <div className="rounded-xl border p-4">
+              <p className="text-sm opacity-60">{t("feedbackResponses")}</p>
+
+              <strong className="mt-1 block text-3xl">
+                {feedbackSummary.totalResponses}
+              </strong>
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-3">
+            {feedbackSummary.feedback.length === 0 ? (
+              <div className="rounded-xl border p-4 text-sm opacity-60">
+                {t("feedbackNoResponses")}
+              </div>
+            ) : (
+              feedbackSummary.feedback.map((item) => (
+                <div key={item.id} className="rounded-xl border p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <strong>
+                      {item.anonymous || !item.studentName
+                        ? t("feedbackAnonymousStudent")
+                        : item.studentName}
+                    </strong>
+
+                    <span>{"⭐".repeat(item.rating)}</span>
+                  </div>
+
+                  {item.comment && (
+                    <p className="mt-2 text-sm opacity-75">{item.comment}</p>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </Card>
+      )}
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
-
           <Card title={t("questionLauncher")}>
             <div className="space-y-4">
               <label className="block">
@@ -494,7 +602,6 @@ export default function Dashboard() {
               </Card>
             </>
           )}
-
 
           <Card title={t("teaching")}>
             <form onSubmit={checkIn} className="flex flex-wrap items-end gap-3">

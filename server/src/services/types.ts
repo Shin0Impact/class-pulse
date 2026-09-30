@@ -8,11 +8,11 @@ import type {
   Status,
   Summary,
   TimelineSample,
-} from '../../../shared/types.ts';
+} from "../../../shared/types.ts";
 import type {
   ExplanationRubric,
   ExplanationScore,
-} from './explanationRubric.ts';
+} from "./explanationRubric.ts";
 
 export type Student = {
   id: string;
@@ -48,7 +48,7 @@ export type QuestionRound = {
   correctOptionId: string;
   options: QuestionOption[];
   rubric?: ExplanationRubric;
-  source: 'deck' | 'ai' | 'teacher';
+  source: "deck" | "ai" | "teacher";
   context?: LessonContext; // the page it was asked about (teacher/AI only, never sent to students)
   modelAnswer?: string; // open questions: what a good answer says (teacher/AI only)
   closed: boolean; // teacher pressed Close: no more answers this round
@@ -68,7 +68,16 @@ export type AnswerRecord = {
   correct: boolean;
   confidence: Confidence;
 };
+// ---- G9: Class Feedback ----
 
+export type ClassFeedback = {
+  id: string;
+  studentId: string;
+  rating: 1 | 2 | 3 | 4 | 5;
+  comment: string;
+  anonymous: boolean;
+  createdAt: number;
+};
 export type Session = {
   id: string;
   code: string;
@@ -85,4 +94,6 @@ export type Session = {
   answers: Map<string, StudentAnswer>;
   answerHistory: Map<string, AnswerRecord[]>;
   pairs: Pair[];
+  feedbackOpen: boolean;
+  feedback: ClassFeedback[];
 };

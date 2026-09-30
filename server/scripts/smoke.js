@@ -256,6 +256,23 @@ try {
   const refreshed = await ask(teacher2, EVENTS.TEACHER_REJOIN, { code });
   ok(refreshed.ok && refreshed.state.question?.questionId === 'open-1' && refreshed.state.question.closed, 'a refreshed dashboard gets the live (closed) question back');
 
+  // ---- class feedback (end of class)
+  const fbOpened = await ask(teacher2, EVENTS.TEACHER_REQUEST_FEEDBACK);
+  ok(fbOpened.ok, 'teacher opened class feedback');
+  const sFb = await connect();
+  const fbJoin = await ask(sFb, EVENTS.STUDENT_JOIN, { code, name: 'ignored', studentId: students[1].studentId, rejoinKey: students[1].rejoinKey });
+  ok(fbJoin.ok && fbJoin.feedbackOpen === true && fbJoin.feedbackSubmitted === false, 'a phone that rejoins after feedback opened still gets the form');
+  ok(!(await ask(sFb, EVENTS.STUDENT_SUBMIT_FEEDBACK, { rating: 9 })).ok, 'a rating outside 1-5 is rejected');
+  const fbSeen = waitFor(teacher2, EVENTS.FEEDBACK_UPDATE, (u) => u.totalResponses === 1);
+  const fbSent = await ask(sFb, EVENTS.STUDENT_SUBMIT_FEEDBACK, { rating: 4, comment: 'more examples please', anonymous: true });
+  const fbUpdate = await fbSeen;
+  ok(fbSent.ok && fbUpdate.averageRating === 4 && fbUpdate.feedback[0].comment === 'more examples please', 'the teacher sees the rating and comment live');
+  ok(fbUpdate.feedback[0].studentName === null && !JSON.stringify(fbUpdate).includes(students[1].studentId), 'anonymous feedback carries no name and no student id');
+  const fbAgain = await ask(await connect(), EVENTS.STUDENT_JOIN, { code, name: 'ignored', studentId: students[1].studentId, rejoinKey: students[1].rejoinKey });
+  ok(fbAgain.ok && fbAgain.feedbackSubmitted === true, 'after submitting, a refresh does not show the form again');
+  const fbTeacher = await ask(teacher2, EVENTS.TEACHER_REJOIN, { code });
+  ok(fbTeacher.ok && fbTeacher.state.feedbackOpen === true && fbTeacher.state.feedback.totalResponses === 1, 'a refreshed dashboard gets the feedback panel back');
+
   // ---- end
   const ended = waitFor(students[2], EVENTS.SESSION_ENDED);
   await ask(teacher2, EVENTS.TEACHER_END_SESSION);

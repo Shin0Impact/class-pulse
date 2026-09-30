@@ -15,10 +15,11 @@ import type {
   ClassConfusionSummary,
 } from "@shared/types.ts";
 
-// SUMMARY_UPDATE: the AI class-confusion summary for a question is being written / ready / failed.
+// SUMMARY_UPDATE: the AI class-confusion summary for a question
+// is being written / ready / failed.
 export type SummaryState = {
   questionId: string;
-  launchKey?: string; // which launch + round it describes (matches BlindspotUpdate.launchKey)
+  launchKey?: string;
   status: "working" | "ready" | "failed";
   summary?: ClassConfusionSummary;
   error?: string;
@@ -47,12 +48,33 @@ type Handlers = {
   [EVENTS.ANSWER_REVEAL]?: (data: AnswerReveal) => void;
 
   [EVENTS.BLINDSPOT_UPDATE]?: (data: BlindspotUpdate) => void;
-  
+
   [EVENTS.CALIBRATION_CARD]?: (data: CalibrationCard) => void;
 
   [EVENTS.QUESTION_CLOSED]?: (data: { questionId: string }) => void;
 
   [EVENTS.SUMMARY_UPDATE]?: (data: SummaryState) => void;
+
+  // =====================================================
+  // G9 — Class Feedback
+  // =====================================================
+
+  // Sent to students when the teacher requests class feedback.
+  [EVENTS.FEEDBACK_REQUESTED]?: () => void;
+
+  // Sent to teacher whenever a student submits feedback.
+  [EVENTS.FEEDBACK_UPDATE]?: (data: {
+    averageRating: number | null;
+    totalResponses: number;
+    feedback: {
+      id: string;
+      rating: 1 | 2 | 3 | 4 | 5;
+      comment: string;
+      anonymous: boolean;
+      studentName: string | null;
+      createdAt: number;
+    }[];
+  }) => void;
 };
 
 // useSocketEvents({

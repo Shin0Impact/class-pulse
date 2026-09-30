@@ -351,8 +351,14 @@ const D = {
   iAm: ["أنا", "I am"],
   roleTeacher: ["معلم", "Teacher"],
   roleStudent: ["طالب", "Student"],
-  roleTeacherHint: ["أدير الحصص وأطرح الأسئلة", "I run classes and ask questions"],
-  roleStudentHint: ["أنضم للحصص وأتابع تقدّمي", "I join classes and track my progress"],
+  roleTeacherHint: [
+    "أدير الحصص وأطرح الأسئلة",
+    "I run classes and ask questions",
+  ],
+  roleStudentHint: [
+    "أنضم للحصص وأتابع تقدّمي",
+    "I join classes and track my progress",
+  ],
   email: ["البريد الإلكتروني", "Email"],
   password: ["كلمة المرور", "Password"],
   passwordHint: ["6 أحرف على الأقل", "At least 6 characters"],
@@ -371,7 +377,10 @@ const D = {
     "You're signed in with a student account. Sign out and use a teacher account to start a class.",
   ],
   signedInAs: ["مسجّل باسم", "Signed in as"],
-  progressSaved: ["ستُحفظ إجاباتك في سجل تقدّمك.", "Your answers will be saved to your progress."],
+  progressSaved: [
+    "ستُحفظ إجاباتك في سجل تقدّمك.",
+    "Your answers will be saved to your progress.",
+  ],
   guestJoinNote: ["تنضم كضيف.", "You're joining as a guest."],
   signInToSave: ["سجّل الدخول لحفظ تقدّمك", "Sign in to save your progress"],
 
@@ -398,7 +407,10 @@ const D = {
     "Average confidence minus accuracy. Positive means overconfident.",
   ],
   noStudents: ["لم ينضم أي طالب.", "No students joined."],
-  noQuestions: ["لم تُطرح أسئلة في هذه الحصة.", "No questions were asked in this class."],
+  noQuestions: [
+    "لم تُطرح أسئلة في هذه الحصة.",
+    "No questions were asked in this class.",
+  ],
   answered: ["أجاب", "Answered"],
   avgConfidence: ["متوسط الثقة", "Avg confidence"],
   calibrationWord: ["المعايرة", "Calibration"],
@@ -430,7 +442,10 @@ const D = {
     "Join a class while signed in and answer its questions. Your progress shows up here.",
   ],
   classesWord: ["الحصص", "Classes"],
-  calibrationOverTime: ["الثقة مقابل الدقة مع الوقت", "Confidence vs accuracy over time"],
+  calibrationOverTime: [
+    "الثقة مقابل الدقة مع الوقت",
+    "Confidence vs accuracy over time",
+  ],
   calibrationOverTimeHint: [
     "عندما يكون خط الثقة أعلى من خط الدقة، فأنت واثق أكثر مما تعرف.",
     "When the confidence line sits above accuracy, you're surer than you are right.",
@@ -448,9 +463,18 @@ const D = {
   recentFiles: ["ملفاتي", "My files"],
   opening: ["جارٍ الفتح…", "Opening…"],
   savingFile: ["جارٍ حفظ الملف في حسابك…", "Saving the file to your account…"],
-  saveFileFailed: ["الملف معروض، لكن لم يُحفظ في حسابك.", "The file is shown, but it wasn't saved to your account."],
-  fileTypeError: ["افتح ملف PDF أو صورة (PNG أو JPG أو WebP).", "Open a PDF or an image (PNG, JPG, WebP)."],
-  fileSizeError: ["الحد الأقصى لحجم الملف 25 ميغابايت.", "Files can be at most 25 MB."],
+  saveFileFailed: [
+    "الملف معروض، لكن لم يُحفظ في حسابك.",
+    "The file is shown, but it wasn't saved to your account.",
+  ],
+  fileTypeError: [
+    "افتح ملف PDF أو صورة (PNG أو JPG أو WebP).",
+    "Open a PDF or an image (PNG, JPG, WebP).",
+  ],
+  fileSizeError: [
+    "الحد الأقصى لحجم الملف 25 ميغابايت.",
+    "Files can be at most 25 MB.",
+  ],
   pageWord: ["الصفحة", "Page"],
   prevPage: ["الصفحة السابقة", "Previous page"],
   nextPage: ["الصفحة التالية", "Next page"],
@@ -464,10 +488,16 @@ const D = {
   questionType: ["نوع السؤال", "Question type"],
   multipleChoice: ["اختيار من متعدد", "Multiple choice"],
   openQuestion: ["سؤال مفتوح", "Open question"],
-  correctAnswerOptional: ["الإجابة الصحيحة (اختياري)", "Correct answer (optional)"],
+  correctAnswerOptional: [
+    "الإجابة الصحيحة (اختياري)",
+    "Correct answer (optional)",
+  ],
   generateFromPage: ["أنشئ سؤالًا من الصفحة", "Generate from page"],
   generating: ["جارٍ الإنشاء…", "Generating…"],
-  openFileFirst: ["افتح ملفًا أولًا، أو اكتب سؤالك بنفسك.", "Open a file first, or write your own question."],
+  openFileFirst: [
+    "افتح ملفًا أولًا، أو اكتب سؤالك بنفسك.",
+    "Open a file first, or write your own question.",
+  ],
   orWord: ["أو", "or"],
   writeOwn: ["اكتب سؤالك", "Write your own"],
   checkBeforeLaunch: ["راجع قبل الإرسال", "Check before launching"],
@@ -475,7 +505,10 @@ const D = {
   regenerate: ["أنشئ غيره", "Regenerate"],
   discard: ["إلغاء", "Discard"],
   questionWord: ["السؤال", "Question"],
-  optionsMarkCorrect: ["الخيارات (اضغط على الحرف لتحديد الصحيح)", "Options (tap a letter to mark the right one)"],
+  optionsMarkCorrect: [
+    "الخيارات (اضغط على الحرف لتحديد الصحيح)",
+    "Options (tap a letter to mark the right one)",
+  ],
   markCorrect: ["حدّد كصحيح", "Mark correct"],
   optionWord: ["خيار", "Option"],
   removeOption: ["احذف الخيار", "Remove option"],
@@ -487,7 +520,10 @@ const D = {
     "Students never see this. It helps the AI tell what the class is confused by.",
   ],
   needPrompt: ["اكتب السؤال أولًا.", "Write the question first."],
-  needOptions: ["املأ كل الخيارات (خياران على الأقل).", "Fill in every option (at least two)."],
+  needOptions: [
+    "املأ كل الخيارات (خياران على الأقل).",
+    "Fill in every option (at least two).",
+  ],
   needCorrect: ["حدّد الإجابة الصحيحة.", "Mark the correct answer."],
   questionLive: ["السؤال مفتوح الآن", "Question is live"],
   questionClosed: ["أُغلق السؤال", "Question closed"],
@@ -505,17 +541,126 @@ const D = {
     "AI isn't set up on the server, so there's no summary.",
   ],
   aiSummary: ["قراءة الذكاء الاصطناعي للصف", "AI read of the class"],
-  aiSummarizing: ["الذكاء الاصطناعي يقرأ إجابات الصف…", "The AI is reading the class's answers…"],
-  aiSummaryFailed: ["تعذّر كتابة الملخص الآن.", "Couldn't write a summary right now."],
+  aiSummarizing: [
+    "الذكاء الاصطناعي يقرأ إجابات الصف…",
+    "The AI is reading the class's answers…",
+  ],
+  aiSummaryFailed: [
+    "تعذّر كتابة الملخص الآن.",
+    "Couldn't write a summary right now.",
+  ],
   aiReteach: ["أعد الشرح", "Re-teach"],
   aiMoveOn: ["تابع", "Move on"],
   aiWrittenBy: ["بواسطة", "by"],
   presentButton: ["اعرض الدرس", "Present"],
   openAnswers: ["إجابات الطلاب", "Students' answers"],
   noAnswersYet: ["لا توجد إجابات بعد.", "No answers yet."],
-  openAnswerPlaceholder: ["اكتب إجابتك بكلماتك…", "Write your answer in your own words…"],
-  teacherClosedQuestion: ["أغلق المعلم السؤال.", "Your teacher closed the question."],
+  openAnswerPlaceholder: [
+    "اكتب إجابتك بكلماتك…",
+    "Write your answer in your own words…",
+  ],
+  teacherClosedQuestion: [
+    "أغلق المعلم السؤال.",
+    "Your teacher closed the question.",
+  ],
+  // ---- G9: Class Feedback ----
 
+  feedbackEyebrow: ["تقييم الحصة", "CLASS FEEDBACK"],
+
+  feedbackTitle: ["كيف كانت حصة اليوم؟", "How was today's class?"],
+
+  feedbackDescription: [
+    "رأيك يساعد في جعل الحصة القادمة أفضل.",
+    "Your feedback helps make the next class better.",
+  ],
+
+  feedbackRate: ["قيّم حصة اليوم", "Rate today's class"],
+
+  feedbackTellMore: ["أخبر معلمك بالمزيد", "Tell your teacher more"],
+
+  feedbackOptional: ["اختياري", "Optional"],
+
+  feedbackPlaceholder: [
+    "ما الذي ساعدك اليوم؟ وما الذي يمكن تحسينه؟",
+    "What helped you today? What could be better?",
+  ],
+
+  feedbackAnonymous: ["تقييم مجهول", "Anonymous feedback"],
+
+  feedbackShowName: ["إظهار اسمي", "Show my name"],
+
+  feedbackAnonymousHint: [
+    "لن يظهر اسمك للمعلم.",
+    "Your name won't be shown to the teacher.",
+  ],
+
+  feedbackNameHint: [
+    "سيظهر اسمك للمعلم مع هذا التقييم.",
+    "Your teacher will see your name with this feedback.",
+  ],
+
+  feedbackSend: ["إرسال التقييم", "Submit feedback"],
+
+  feedbackSending: ["جارٍ الإرسال…", "Sending..."],
+
+  feedbackAnonymousNote: [
+    "سيتم إرسال هذا التقييم بشكل مجهول.",
+    "This feedback will be sent anonymously.",
+  ],
+
+  feedbackNameNote: [
+    "سيتم إرفاق اسمك بهذا التقييم.",
+    "Your name will be included with this feedback.",
+  ],
+
+  feedbackChooseRating: [
+    "اختر تقييمًا أولًا.",
+    "Please choose a rating first.",
+  ],
+
+  feedbackSendError: ["تعذر إرسال تقييمك.", "Could not send your feedback."],
+
+  feedbackThanks: ["شكرًا لك!", "Thank you!"],
+
+  feedbackSuccess: [
+    "تم إرسال تقييمك بنجاح.",
+    "Your feedback was sent successfully.",
+  ],
+
+  feedbackStars: ["نجوم", "stars"],
+  // ---- G9: Teacher Feedback ----
+
+  feedbackTeacherEyebrow: ["تقييم الحصة", "CLASS FEEDBACK"],
+
+  feedbackTeacherTitle: ["تقييم الحصة", "Class Feedback"],
+
+  feedbackWaiting: [
+    "بانتظار تقييمات الطلاب للحصة.",
+    "Waiting for students to rate the class.",
+  ],
+
+  feedbackAverage: ["متوسط التقييم", "Average rating"],
+
+  feedbackResponses: ["عدد الردود", "Responses"],
+
+  feedbackNoResponses: [
+    "لا توجد تقييمات بعد. ستظهر ردود الطلاب هنا مباشرة.",
+    "No feedback yet. Student responses will appear here live.",
+  ],
+
+  feedbackFinishClose: ["إنهاء التقييم وإغلاق الحصة", "Finish & Close Class"],
+
+  feedbackAnonymousStudent: ["طالب مجهول", "Anonymous student"],
+
+  feedbackFinishConfirm: [
+    "هل تريد إنهاء التقييم وإغلاق الحصة؟",
+    "Finish feedback and close the class?",
+  ],
+
+  feedbackEndAskConfirm: [
+    "هل تريد إنهاء الحصة وطلب تقييم من الطلاب؟",
+    "End the class and ask students for feedback?",
+  ],
   // ---- Reasons (what would help) ----
   reasonTooFast: ["الشرح سريع جدًا", "Too fast"],
   reasonUnclearSteps: ["الخطوات غير واضحة", "Steps unclear"],
@@ -523,10 +668,12 @@ const D = {
   reasonMissingBasics: ["تنقصني الأساسيات", "Missing basics"],
   reasonOther: ["سبب آخر", "Other reason"],
   reasonOtherLabel: ["اكتب السبب بطريقتك", "Tell us in your own words"],
-  reasonOtherPlaceholder: ["مثلًا: لم أفهم لماذا قسمنا هنا", "For example: I didn't get why we divided here"],
+  reasonOtherPlaceholder: [
+    "مثلًا: لم أفهم لماذا قسمنا هنا",
+    "For example: I didn't get why we divided here",
+  ],
   reasonSend: ["إرسال", "Send"],
   reasonSent: ["وصلت رسالتك للمعلم", "Your teacher got it"],
-
 } as const;
 
 export type TranslationKey = keyof typeof D;

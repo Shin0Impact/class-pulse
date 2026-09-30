@@ -1,5 +1,6 @@
 import { EVENTS } from "../../../shared/events.ts";
 import { FEATURES } from "../../../shared/features.ts";
+import { openFeedback, feedbackSummary } from "../services/feedbackService.ts";
 import {
   createSession,
   getSession,
@@ -103,7 +104,8 @@ export function registerTeacherHandlers(io: Server, socket: Socket): void {
         // Only the teacher who owns the class can reopen its dashboard.
         if (session.teacherId) {
           const teacher = await verifyToken(accessToken);
-          if (!teacher) throw new AuthError("Please sign in to open this class");
+          if (!teacher)
+            throw new AuthError("Please sign in to open this class");
           if (teacher.id !== session.teacherId) {
             throw new AuthError("This class belongs to another teacher");
           }
@@ -339,7 +341,33 @@ export function registerTeacherHandlers(io: Server, socket: Socket): void {
       return {};
     }),
   );
+  // -------------------------------------------------------
+  // G9 — CLASS FEEDBACK
+  // Teacher asks students to rate the class.
+  // -------------------------------------------------------
 
+  socket.on(
+    EVENTS.TEACHER_REQUEST_FEEDBACK,
+    handle(() => {
+      const session = requireTeacher();
+
+      // Open feedback for this class.
+      openFeedback(session);
+
+      // Tell every student to show the feedback form.
+      io.to(studentRoom(session.code)).emit(EVENTS.FEEDBACK_REQUESTED, {});
+
+      // Send the current summary to the teacher.
+      io.to(teacherRoom(session.code)).emit(
+        EVENTS.FEEDBACK_UPDATE,
+        feedbackSummary(session),
+      );
+
+      return {
+        feedbackOpen: true,
+      };
+    }),
+  );
   // -------------------------------------------------------
   // END SESSION
   // -------------------------------------------------------

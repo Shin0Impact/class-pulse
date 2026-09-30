@@ -52,9 +52,14 @@ export type TeacherState = {
   history: Summary[];
   timeline: TimelineSample[];
   // The live question and its latest AI summary, so a refreshed dashboard/present page picks up where it was.
-  question: (PublicQuestion & { closed: boolean; correctOptionId: string }) | null;
+  question:
+    | (PublicQuestion & { closed: boolean; correctOptionId: string })
+    | null;
   blindspot: BlindspotUpdate | null;
   summary: ClassConfusionSummary | null;
+  // Class feedback (end of class): a refreshed dashboard must not lose the panel or the close button.
+  feedbackOpen: boolean;
+  feedback: ClassFeedbackSummary;
 };
 
 export type StudentState = {
@@ -71,6 +76,9 @@ export type StudentState = {
   // whether this student already answered it this round.
   question: PublicQuestion | null;
   answered: boolean;
+  // Class feedback: a phone that refreshes (or joins late) still gets the form, until it has submitted.
+  feedbackOpen: boolean;
+  feedbackSubmitted: boolean;
 };
 
 export type FocusAlert = { studentId: string; name: string; count: number };
@@ -136,7 +144,12 @@ export type BlindspotUpdate = {
   closed?: boolean; // the teacher closed the question: no more answers
   responses?: number; // how many students answered this round
   // Open questions have no quadrant: the teacher sees the answers themselves.
-  openAnswers?: Array<{ id: string; name: string; text: string; confidence: Confidence }>;
+  openAnswers?: Array<{
+    id: string;
+    name: string;
+    text: string;
+    confidence: Confidence;
+  }>;
   groups: QuadrantGroups;
   counts: QuadrantCounts;
   illusionGap: number | null; // felt-confident % minus actually-correct %
@@ -355,4 +368,20 @@ export type DocumentInfo = {
   size: number;
   createdAt: string;
   lastUsedAt: string;
+};
+// ---- G9: Class Feedback ----
+
+export type ClassFeedback = {
+  id: string;
+  rating: 1 | 2 | 3 | 4 | 5;
+  comment: string;
+  anonymous: boolean;
+  studentName: string | null;
+  createdAt: number;
+};
+
+export type ClassFeedbackSummary = {
+  averageRating: number | null;
+  totalResponses: number;
+  feedback: ClassFeedback[];
 };

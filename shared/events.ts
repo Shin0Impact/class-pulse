@@ -2,140 +2,186 @@
 // Change a name here and both sides pick it up. Payload shapes are documented in PROJECT.md section 7.
 
 export const EVENTS = {
-  // ---- teacher -> server (all use an ack callback: { ok, ...data } or { ok:false, error }) ----
-  TEACHER_CREATE: "teacher:create", // { title? } -> { code, state }
-  TEACHER_REJOIN: "teacher:rejoin", // { code } -> { code, state }   (full snapshot, after a refresh)
-  TEACHER_CHECK_IN: "teacher:checkIn", // { topic? } -> {}   clears everyone's colors, starts a new check-in
-  TEACHER_SET_FOCUS_MODE: "teacher:setFocusMode", // { enabled } -> { focusMode }
-  TEACHER_END_SESSION: "teacher:endSession", // {} -> {}
+  // ---- teacher -> server ----
+  TEACHER_CREATE: "teacher:create",
+  TEACHER_REJOIN: "teacher:rejoin",
+  TEACHER_CHECK_IN: "teacher:checkIn",
+  TEACHER_SET_FOCUS_MODE: "teacher:setFocusMode",
+  TEACHER_END_SESSION: "teacher:endSession",
 
   // ---- student -> server ----
-  STUDENT_JOIN: "student:join", // { code, name, studentId? } -> { studentId, name, title, topic, checkInId, status, reason, focusMode }
-  STUDENT_SET_STATUS: "student:setStatus", // { status: green|yellow|red, reason? } -> {}   (can be sent at any time)
-  STUDENT_FOCUS_EVENT: "student:focusEvent", // { type: 'left' }  (focus mode, no ack)
+  STUDENT_JOIN: "student:join",
+  STUDENT_SET_STATUS: "student:setStatus",
+  STUDENT_FOCUS_EVENT: "student:focusEvent",
 
   // ---- server -> clients ----
-  SESSION_STUDENTS: "session:students", // to teacher: { students: [{ id, name, connected }] }
-  PULSE_UPDATE: "pulse:update", // to teacher: the live pulse (see pulseService.computePulse)
-  CHECK_IN_STARTED: "checkin:started", // to students: { checkInId, topic } | to teacher: { checkIn, history }
-  FOCUS_ALERT: "focus:alert", // to teacher: { studentId, name, count }
-  FOCUS_MODE: "session:focusMode", // to students: { enabled }
-  SESSION_ENDED: "session:ended", // to everyone
+  SESSION_STUDENTS: "session:students",
+  PULSE_UPDATE: "pulse:update",
+  CHECK_IN_STARTED: "checkin:started",
+  FOCUS_ALERT: "focus:alert",
+  FOCUS_MODE: "session:focusMode",
+  SESSION_ENDED: "session:ended",
 
-  // ---- Blindspot: teacher -> server (same ack convention as above) ----
-  // Launches a real question (from a Deck, see deckService.ts). Every student answers a choice
-  // AND rates how sure they are of it -- that pairing is the whole idea.
+  // =====================================================
+  // Blindspot — teacher -> server
+  // =====================================================
+
   TEACHER_LAUNCH_QUESTION: "teacher:launchQuestion",
-  // { question: { id, topic, prompt, correctOptionId, options: [{ id, text }] } } -> {}
-  // broadcasts QUESTION_STARTED to students (without correctOptionId or any misconception), clears prior answers.
 
-  // Computes pairs from the latest quadrant groups for a question and hands them out.
+  // Computes pairs from the latest quadrant groups.
   TEACHER_PAIR_UP: "teacher:pairUp",
-  // { questionId } -> { pairs: Pair[] }   pairs a confident-wrong student with a confident-right student (pairing.ts)
 
-  // Stops answers for the live question (students go back to waiting). With AI configured it also
-  // starts a class-confusion summary, delivered later as SUMMARY_UPDATE.
+  // Stops answers for the current live question.
   TEACHER_CLOSE_QUESTION: "teacher:closeQuestion",
-  // { language?: 'ar'|'en' } -> { summarizing: boolean }
 
-  // Asks the AI for a class-confusion summary of the live question's answers so far.
+  // Asks AI for a class-confusion summary.
   TEACHER_SUMMARIZE: "teacher:summarize",
-  // { language?: 'ar'|'en' } -> {}   result arrives as SUMMARY_UPDATE
 
-  // Re-opens the same question after pairing/discussion, to see if minds changed.
+  // Re-opens the same question after discussion.
   TEACHER_RECHECK: "teacher:recheck",
-  // { questionId } -> {}   clears answers for that question and re-broadcasts QUESTION_STARTED (isRecheck: true)
 
-  // ---- Blindspot: student -> server ----
-  // A student's answer to the launched question, plus a confidence rating.
+  // =====================================================
+  // Blindspot — student -> server
+  // =====================================================
+
   STUDENT_ANSWER: "student:answer",
-  // { questionId, optionId, confidence: 'guess'|'fairly-sure'|'certain', explanation? } -> {}
-  // open questions: { questionId, text, confidence } -> {}
 
-  // After being paired, the listener rates how clearly their partner explained their reasoning.
+  // Student rates how clearly their partner explained.
   STUDENT_RATE_CLARITY: "student:rateClarity",
-  // { pairId, rating: 1|2|3|4|5 } -> {}
 
-  // ---- Blindspot: server -> clients ----
-  // To students: the question is live (mirrors CHECK_IN_STARTED's pattern for the pulse).
+  // =====================================================
+  // Blindspot — server -> clients
+  // =====================================================
+
   QUESTION_STARTED: "question:started",
-  // Sent privately to each student when a question round closes.
-  // Reveals whether their answer was correct and helps calibrate confidence.
+
   ANSWER_REVEAL: "answer:reveal",
-  // {
-  //   questionId,
-  //   selectedOptionId,
-  //   selectedOptionText,
-  //   correctOptionId,
-  //   correctOptionText,
-  //   confidence,
-  //   correct
-  // }
-  // { questionId, topic, prompt, options: [{ id, text }], isRecheck?: boolean }
 
-  // To students: the teacher closed the question; no more answers.
   QUESTION_CLOSED: "question:closed",
-  // { questionId }
 
-  // To the teacher: an AI class-confusion summary is being written / is ready / failed.
   SUMMARY_UPDATE: "summary:update",
-  // { questionId, status: 'working'|'ready'|'failed', summary?: ClassConfusionSummary, error?: string }
 
-  // To the teacher: the live 2x2 quadrant breakdown for the current question (quadrant.ts).
   BLINDSPOT_UPDATE: "blindspot:update",
-  // { questionId, groups: { mastered, fragile, blindspot, aware }: QuadrantStudent[], counts: {...}, illusionGap, headline }
 
-  // To a paired student: who they were paired with and what to do.
   PAIR_ASSIGNED: "pair:assigned",
-  // { pairId, partner: { id, name }, role: 'explainer'|'listener', questionId }
-  // explainer = was confident and wrong (defends their reasoning); listener = was confident and right.
 
-  // To the teacher (and optionally the pair): a per-student calibration summary after a question/recheck cycle.
   CALIBRATION_CARD: "calibration:card",
-  // { studentId, accuracy, avgConfidence, calibration: 'well-calibrated'|'overconfident'|'underconfident'|'no-data', illusionGap }
+
+  // =====================================================
+  // G9 — Class Feedback
+  // =====================================================
+
+  // Teacher asks students to rate the class.
+  TEACHER_REQUEST_FEEDBACK: "teacher:requestFeedback",
+
+  // Student sends stars + comment + privacy preference.
+  STUDENT_SUBMIT_FEEDBACK: "student:submitFeedback",
+
+  // Server tells students that feedback is now open.
+  FEEDBACK_REQUESTED: "feedback:requested",
+
+  // Server sends updated feedback results to teacher.
+  FEEDBACK_UPDATE: "feedback:update",
 } as const;
 
-// What a student can mark, and what the teacher sees for someone who has not marked yet.
+// =====================================================
+// Student understanding status
+// =====================================================
+
 export const STATUS = {
-  GREEN: "green", // "I follow"
-  YELLOW: "yellow", // "Not sure"
-  RED: "red", // "I'm lost"
-  WAITING: "waiting", // has not marked anything in this check-in
-};
+  GREEN: "green",
+  YELLOW: "yellow",
+  RED: "red",
+  WAITING: "waiting",
+} as const;
 
-// Optional one-tap reasons a student can add after choosing yellow or red.
+// =====================================================
+// Optional reasons for yellow / red
+// =====================================================
+
 export const REASONS = [
-  { id: "too-fast", label: "Too fast" },
-  { id: "unclear-steps", label: "Steps unclear" },
-  { id: "need-example", label: "Need an example" },
-  { id: "missing-basics", label: "Missing basics" },
-];
+  {
+    id: "too-fast",
+    label: "Too fast",
+  },
+  {
+    id: "unclear-steps",
+    label: "Steps unclear",
+  },
+  {
+    id: "need-example",
+    label: "Need an example",
+  },
+  {
+    id: "missing-basics",
+    label: "Missing basics",
+  },
+] as const;
 
-// "Other": the student types their own reason (up to CUSTOM_REASON_MAX characters).
-// It travels in the same `reason` string as "other:<text>", so join / rejoin / the database, which
-// already carry a reason, need no changes. Always go through these helpers, never parse it by hand.
+// =====================================================
+// Custom / Other reason
+// =====================================================
+
+// Student can type their own reason.
+// Stored as:
+//
+// other:<student text>
+//
+// This means the existing reason field can still be used
+// without changing the rest of the application.
+
 export const CUSTOM_REASON_PREFIX = "other:";
+
 export const CUSTOM_REASON_MAX = 160;
-export const OTHER_REASON_ID = "other"; // the id of the single aggregated "Other" bar
-export const isCustomReason = (r: string | null | undefined): r is string =>
-  typeof r === "string" && r.startsWith(CUSTOM_REASON_PREFIX);
-export const customReasonText = (r: string): string =>
-  r.slice(CUSTOM_REASON_PREFIX.length).trim();
 
-// Class understanding % = (green x 100 + yellow x 50 + red x 0) / students who marked
-export const WEIGHTS = { green: 100, yellow: 50, red: 0 };
+export const OTHER_REASON_ID = "other";
 
-// How sure a student is of their answer. This confidence, crossed with correctness, is the whole idea.
+export const isCustomReason = (
+  reason: string | null | undefined,
+): reason is string =>
+  typeof reason === "string" && reason.startsWith(CUSTOM_REASON_PREFIX);
+
+export const customReasonText = (reason: string): string =>
+  reason.slice(CUSTOM_REASON_PREFIX.length).trim();
+
+// =====================================================
+// Understanding percentage weights
+// =====================================================
+
+// green = understands
+// yellow = partially understands
+// red = lost
+
+export const WEIGHTS = {
+  green: 100,
+  yellow: 50,
+  red: 0,
+} as const;
+
+// =====================================================
+// Blindspot confidence
+// =====================================================
+
 export const CONFIDENCE = {
-  GUESS: "guess", // "I'm not sure"
+  GUESS: "guess",
   FAIRLY_SURE: "fairly-sure",
   CERTAIN: "certain",
 } as const;
 
-// The 2x2 quadrant every answered student falls into (correctness x confidence).
+// =====================================================
+// Blindspot quadrants
+// =====================================================
+
 export const QUADRANTS = {
-  MASTERED: "mastered", // confident and correct: actually knows it
-  FRAGILE: "fragile", // correct but unsure: got it right without trusting themselves
-  BLINDSPOT: "blindspot", // confident and wrong: the dangerous one, thinks they know but don't
-  AWARE: "aware", // unsure and wrong: knows they don't know
+  // Correct + confident
+  MASTERED: "mastered",
+
+  // Correct + unsure
+  FRAGILE: "fragile",
+
+  // Wrong + confident
+  BLINDSPOT: "blindspot",
+
+  // Wrong + unsure
+  AWARE: "aware",
 } as const;

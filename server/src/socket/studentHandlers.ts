@@ -1,4 +1,5 @@
-import { EVENTS } from '../../../shared/events.ts';
+import { EVENTS } from "../../../shared/events.ts";
+
 import {
   requireSession,
   getSession,
@@ -6,33 +7,41 @@ import {
   setStatus,
   recordFocus,
   UserError,
-} from '../services/sessionService.ts';
+} from "../services/sessionService.ts";
+
 import {
   recordAnswer,
   computeBlindspotUpdate,
   recordClarityRating,
-} from '../services/questionService.ts';
-import { studentState } from '../services/views.ts';
-import { verifyToken } from '../services/authService.ts';
+} from "../services/questionService.ts";
+
+// G9 — Class Feedback
+import {
+  submitFeedback,
+  feedbackSummary,
+} from "../services/feedbackService.ts";
+
+import { studentState } from "../services/views.ts";
+import { verifyToken } from "../services/authService.ts";
+
 import {
   handle,
   teacherRoom,
   studentRoom,
   emitStudents,
   emitPulse,
-} from './helpers.ts';
-import type { Server, Socket } from 'socket.io';
+} from "./helpers.ts";
+
+import type { Server, Socket } from "socket.io";
 
 export function registerStudentHandlers(io: Server, socket: Socket): void {
   const requireStudent = () => {
     const session =
-      socket.data.role === 'student'
-        ? getSession(socket.data.code)
-        : null;
+      socket.data.role === "student" ? getSession(socket.data.code) : null;
     const student = session?.students.get(socket.data.studentId);
 
     if (!session || !student) {
-      throw new UserError('Please rejoin the class');
+      throw new UserError("Please rejoin the class");
     }
 
     return { session, student };
@@ -63,12 +72,12 @@ export function registerStudentHandlers(io: Server, socket: Socket): void {
           studentId,
           rejoinKey,
           socketId: socket.id,
-          userId: account?.role === 'student' ? account.id : null,
+          userId: account?.role === "student" ? account.id : null,
         });
 
         socket.join(studentRoom(session.code));
         socket.data = {
-          role: 'student',
+          role: "student",
           code: session.code,
           studentId: student.id,
         };
@@ -79,7 +88,36 @@ export function registerStudentHandlers(io: Server, socket: Socket): void {
       },
     ),
   );
+  // -------------------------------------------------------
+  // G9 — CLASS FEEDBACK
+  // Student submits stars + comment + privacy choice.
+  // -------------------------------------------------------
 
+  socket.on(
+    EVENTS.STUDENT_SUBMIT_FEEDBACK,
+    handle(
+      (payload: {
+        rating?: unknown;
+        comment?: unknown;
+        anonymous?: unknown;
+      }) => {
+        const { session, student } = requireStudent();
+
+        submitFeedback(session, student, payload);
+
+        // Send the updated summary only to the teacher.
+        // Anonymous student identity is stripped by feedbackSummary().
+        io.to(teacherRoom(session.code)).emit(
+          EVENTS.FEEDBACK_UPDATE,
+          feedbackSummary(session),
+        );
+
+        return {
+          submitted: true,
+        };
+      },
+    ),
+  );
   socket.on(
     EVENTS.STUDENT_SET_STATUS,
     handle((payload: { status: unknown; reason?: unknown }) => {
@@ -125,28 +163,25 @@ export function registerStudentHandlers(io: Server, socket: Socket): void {
     }),
   );
 
-  socket.on(
-    EVENTS.STUDENT_FOCUS_EVENT,
-    (payload?: { type?: unknown }) => {
-      try {
-        const { session, student } = requireStudent();
-        const count = recordFocus(session, student, payload?.type);
-        if (!count) return;
+  socket.on(EVENTS.STUDENT_FOCUS_EVENT, (payload?: { type?: unknown }) => {
+    try {
+      const { session, student } = requireStudent();
+      const count = recordFocus(session, student, payload?.type);
+      if (!count) return;
 
-        io.to(teacherRoom(session.code)).emit(EVENTS.FOCUS_ALERT, {
-          studentId: student.id,
-          name: student.name,
-          count,
-        });
-        emitPulse(io, session);
-      } catch {
-        // Focus events must never block the student.
-      }
-    },
-  );
+      io.to(teacherRoom(session.code)).emit(EVENTS.FOCUS_ALERT, {
+        studentId: student.id,
+        name: student.name,
+        count,
+      });
+      emitPulse(io, session);
+    } catch {
+      // Focus events must never block the student.
+    }
+  });
 
-  socket.on('disconnect', () => {
-    if (socket.data.role !== 'student') return;
+  socket.on("disconnect", () => {
+    if (socket.data.role !== "student") return;
 
     const session = getSession(socket.data.code);
     const student = session?.students.get(socket.data.studentId);
