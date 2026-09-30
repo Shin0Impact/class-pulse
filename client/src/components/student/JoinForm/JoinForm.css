@@ -274,3 +274,11 @@
     height: 58px;
   }
 }
+
+/* Reference-inspired lilac design. */
+
+.student-join-form {background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:clamp(24px,3vw,40px);box-shadow:var(--shadow-md);width:min(100%,510px);}
+.student-join-form__header h1 {line-height:1.3;font-size:clamp(2rem,4vw,3rem);letter-spacing:-.03em;}
+.student-join-form__field input {background:var(--page);border-color:var(--border);border-radius:12px;}
+.student-join-form__submit {background:var(--brand-gradient);color:#fff;border-radius:12px;box-shadow:0 10px 24px var(--primary-soft);}
+

@@ -114,3 +114,20 @@
     border-radius: 23px;
   }
 }
+
+/* Class Pulse · lilac visual theme */
+
+.features {width:min(1240px,calc(100% - 72px));padding:70px 0;}
+.features__grid {margin-top:40px;gap:22px;}
+.feature-card {border-radius:24px;padding:28px;min-height:255px;}
+.feature-card:nth-child(1),.feature-card:nth-child(4) {background:var(--surface);color:var(--text);}
+.feature-card:nth-child(1) p {color:var(--muted);}
+.feature-card > span,.feature-card:nth-child(1)>span {background:var(--primary-soft);border-color:var(--primary-border);color:var(--primary);}
+.feature-card h3 {margin:24px 0 10px;font-size:1.5rem;line-height:1.45;}
+.feature-card:nth-child(2):after,.feature-card:nth-child(5):after {display:none;}
+@media(max-width:1000px){.features{width:calc(100% - 48px)}}
+@media(max-width:620px){.features{width:calc(100% - 32px);padding:56px 0}.features__grid{margin-top:28px}.feature-card{min-height:220px}}
+
+
+/* Lilac cards and readable Arabic typography. */
+.feature-card > span,.feature-card:nth-child(1)>span {background:var(--brand-gradient);color:#fff;border:0;border-radius:14px;box-shadow:0 8px 20px var(--primary-soft);}

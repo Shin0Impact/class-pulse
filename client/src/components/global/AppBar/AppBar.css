@@ -36,3 +36,16 @@
 .app-bar__mark i:nth-child(3) { height: 20px; }
 .app-bar__mark i:nth-child(4) { height: 12px; }
 .app-bar__mark i:nth-child(5) { height: 16px; }
+
+/* Reference-inspired lilac design. */
+
+.app-bar {height:68px;padding-inline:clamp(16px,4vw,56px);border-color:var(--border);box-shadow:0 3px 18px var(--primary-soft);}
+.app-bar__mark {background:linear-gradient(135deg,#4f46e5,#6366f1);border-radius:11px;}
+@media(max-width:480px){.app-bar{padding-inline:12px;height:60px}.app-bar__brand strong{font-size:.9rem}.app-bar .site-control{padding-inline:7px;min-width:34px}}
+
+
+.app-bar__mark {background:var(--brand-gradient);box-shadow:none;}
+
+.app-bar__mark > i {display:none;}
+
+.app-bar__mark {width:36px;height:36px;display:grid;place-items:center;flex:0 0 36px;align-items:center;}

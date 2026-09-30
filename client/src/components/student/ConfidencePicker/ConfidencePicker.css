@@ -339,3 +339,10 @@ html[data-theme="dark"] .confidence-picker__option--selected {
     font-size: 0.7rem;
   }
 }
+
+/* Reference-inspired lilac design. */
+
+.confidence-picker__header h2 {line-height:1.4;letter-spacing:-.02em;}
+.confidence-picker__option {border-color:var(--border);background:var(--surface);border-radius:18px;box-shadow:var(--shadow-sm);}
+.confidence-picker__option--selected {border-color:var(--primary);background:var(--primary-soft);}
+

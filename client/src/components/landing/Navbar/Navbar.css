@@ -144,3 +144,48 @@
     height: 40px;
   }
 }
+
+/* Reference-inspired lilac design. */
+
+.landing-nav {padding:0;border-bottom:1px solid var(--border-soft);}
+.landing-nav__inner {width:min(1440px,calc(100% - 48px));min-height:84px;height:auto;padding:14px 0;gap:24px;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none;}
+.brand {flex-shrink:0;}
+.brand__mark {background:linear-gradient(135deg,#4f46e5,#6366f1);box-shadow:0 5px 14px var(--primary-soft);}
+.brand__mark i {background:#fff;width:3px;}
+.brand__copy strong {font-size:1.15rem;color:var(--text);}
+.landing-nav__links {gap:22px;}
+.landing-nav__links a {white-space:nowrap;color:var(--muted);font-size:.82rem;}
+.landing-nav__actions {align-items:center;gap:10px;margin-inline-start:auto;}
+.button {border-radius:12px;white-space:nowrap;min-height:44px;font-size:.82rem;padding:0 16px;}
+.button--primary {background:var(--brand-gradient);color:#fff;box-shadow:0 6px 18px var(--primary-soft);}
+.button--ghost {border:0;color:var(--primary);padding:0 8px;}
+@media(max-width:1250px){.landing-nav__links{display:none}.landing-nav__inner{gap:16px;}}
+@media(max-width:700px){.landing-nav__actions>.button{display:none}.landing-nav__inner{width:calc(100% - 32px);min-height:76px}.brand__copy small{display:none}}
+@media(max-width:480px){.landing-nav__inner{width:calc(100% - 24px);gap:8px}.brand{gap:8px}.brand__copy strong{font-size:.85rem}.brand__mark{width:34px;height:34px}.landing-nav__actions{gap:0}.landing-nav .site-controls{gap:0}.landing-nav .site-control{padding:0 6px;min-width:32px;height:34px}.landing-nav .site-control strong{font-size:.62rem}}
+
+
+.brand__mark {background:var(--brand-gradient);box-shadow:none;}
+
+.brand__mark > i {display:none;}
+
+.brand__mark {display:grid;place-items:center;flex-shrink:0;}
+.brand__mark::before {width:30px;height:30px;}
+@media(max-width:480px){.brand__mark::before {width:24px;height:24px;}}
+
+/* Landing profile disclosure and relocated teacher/student actions. */
+.landing-profile {position:relative;flex-shrink:0;}
+.landing-profile__trigger {display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid var(--primary-border);border-radius:12px;background:var(--primary-soft);color:var(--primary);font:inherit;font-size:.82rem;font-weight:750;cursor:pointer;white-space:nowrap;}
+.landing-profile__trigger svg {width:20px;height:20px;}
+.landing-profile__trigger:hover {background:var(--surface-alt);}
+.landing-profile__trigger:focus-visible,.landing-profile__links a:focus-visible {outline:2px solid var(--primary);outline-offset:3px;}
+.landing-profile__links {position:absolute;inset-inline-end:0;top:calc(100% + 12px);width:240px;padding:7px;border:1px solid var(--primary-border);border-radius:16px;background:var(--surface);box-shadow:0 12px 36px rgba(15,23,42,.12);z-index:60;}
+.landing-profile__links a {display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:10px;text-decoration:none;color:var(--text);font-size:.9rem;}
+.landing-profile__links a:hover {background:var(--primary-soft);}
+.landing-profile__links small {color:var(--muted);font-size:.75rem;}
+@media(max-width:480px){.landing-profile__trigger{width:36px;min-height:36px;padding:0}.landing-profile__trigger>span{display:none}.landing-nav__actions{gap:5px}}
+
+/* Signed in: the profile button is a link to /me with the user's initial and name. */
+.landing-profile__trigger--user {text-decoration:none;}
+.landing-profile__avatar {width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:var(--brand-gradient);color:#fff;font-size:.8rem;font-weight:900;flex:0 0 26px;}
+.landing-profile__name {max-width:140px;overflow:hidden;text-overflow:ellipsis;}
+@media(max-width:480px){.landing-profile__trigger--user{width:auto;padding:0 5px}.landing-profile__name{display:none}}

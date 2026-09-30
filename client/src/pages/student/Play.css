@@ -245,3 +245,11 @@ html[data-theme="dark"] .student-play:before {
   color: var(--muted);
   font-size: 0.9rem;
 }
+
+/* Reference-inspired lilac design. */
+
+.student-play__stage {background:var(--surface);border:1px solid var(--border);border-radius:26px;padding:clamp(22px,4vw,48px);box-shadow:var(--shadow-sm);}
+.student-play__state h1,.student-play__state h2,.student-play__waiting h1 {font-size:clamp(2rem,5vw,4rem);line-height:1.35;letter-spacing:-.025em;}
+.student-play__state-mark {background:var(--brand-gradient);color:#fff;}
+@media(max-width:700px){.student-play__stage{border-radius:20px;padding:24px 18px}.student-play__content{padding-top:24px}}
+

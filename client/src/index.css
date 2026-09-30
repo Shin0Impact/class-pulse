@@ -1,17 +1,17 @@
 @import "tailwindcss";
 :root {
-  --page: #f5f7f4;
+  --page: #f8fbff;
   --surface: #fff;
-  --surface-alt: #eef2ed;
-  --text: #101410;
-  --text-soft: #313a33;
-  --muted: #6b756d;
-  --faint: #cbd2cc;
-  --border: rgba(16, 20, 16, 0.11);
-  --border-soft: rgba(16, 20, 16, 0.065);
-  --track: #e7ebe7;
-  --primary: #5146e5;
-  --primary-2: #7a5af8;
+  --surface-alt: #eff5fb;
+  --text: #18324b;
+  --text-soft: #456079;
+  --muted: #637a90;
+  --faint: #d8e4ef;
+  --border: rgba(61, 107, 153, 0.14);
+  --border-soft: rgba(61, 107, 153, 0.08);
+  --track: #e8f0f7;
+  --primary: #3476bb;
+  --primary-2: #6ca8d0;
   --primary-soft: rgba(81, 70, 229, 0.08);
   --primary-border: rgba(81, 70, 229, 0.2);
   --primary-glow: rgba(81, 70, 229, 0.2);
@@ -19,23 +19,25 @@
   --cyan: #61e7d3;
   --danger: #e45f66;
   --warning: #e4ad46;
-  --shadow-sm: 0 8px 24px rgba(19, 28, 21, 0.06);
-  --shadow-md: 0 20px 55px rgba(19, 28, 21, 0.09);
-  --shadow-lg: 0 45px 120px rgba(19, 28, 21, 0.14);
-  --radius: 28px;
+  --shadow-sm: 0 8px 24px rgba(38, 76, 115, 0.05);
+  --shadow-md: 0 20px 55px rgba(38, 76, 115, 0.09);
+  --shadow-lg: 0 45px 120px rgba(38, 76, 115, 0.13);
+  --radius: 24px;
+  --brand-gradient: linear-gradient(115deg, #3476bb, #6ca8d0);
+  --heading-gradient: linear-gradient(100deg, #3476bb 20%, #6ca8d0 58%, #0891b2 100%);
   color-scheme: light;
 }
 html[data-theme="dark"] {
-  --page: #0a0d0b;
-  --surface: #101511;
-  --surface-alt: #141a15;
-  --text: #f4f7f2;
-  --text-soft: #d7ddd6;
-  --muted: #929d94;
-  --faint: #3d463f;
+  --page: #111820;
+  --surface: #19232e;
+  --surface-alt: #222e3a;
+  --text: #e7eff7;
+  --text-soft: #d3deea;
+  --muted: #a5b5c5;
+  --faint: #465563;
   --border: rgba(244, 247, 242, 0.12);
   --border-soft: rgba(244, 247, 242, 0.07);
-  --track: #1b231d;
+  --track: #2d3b49;
   --primary: #8e86ff;
   --primary-2: #ad85ff;
   --primary-soft: rgba(142, 134, 255, 0.1);
@@ -166,3 +168,123 @@ html[data-theme="dark"] select {
     font-size: 17px;
   }
 }
+
+/* Shared brand treatment; understanding, warning and danger signals retain their colors. */
+button.bg-indigo-600:not(:disabled) {
+  background: var(--brand-gradient);
+  color: #fff;
+  box-shadow: 0 8px 22px var(--primary-soft);
+}
+button.bg-indigo-600:hover:not(:disabled) { filter: brightness(1.06); }
+button:disabled { box-shadow: none; }
+
+/* Reference-inspired lilac design. */
+
+:root {--brand-gradient:linear-gradient(110deg,#387ab8,#326797);--heading-gradient:linear-gradient(100deg,#3476bb 12%,#4385bd 42%,#4598b8 100%);--primary-soft:rgba(52,118,187,.07);--primary-border:rgba(52,118,187,.18);--primary-glow:rgba(52,118,187,.18);}
+html[data-theme="dark"] {--heading-gradient:linear-gradient(100deg,#c5a4ff,#a99dff,#68cde7);}
+::selection {background:#d7eafb;color:#18324b;}
+/* Tailwind-based teacher and demo panels share the same surface system. */
+main.text-slate-950 {color:var(--text);}
+section.rounded-2xl.border.bg-white {background:var(--surface);border-color:var(--border);border-radius:24px;padding:clamp(18px,2vw,28px);box-shadow:var(--shadow-sm);}
+section.rounded-2xl.border.bg-white > header {padding-bottom:14px;border-bottom:1px solid var(--border-soft);margin-bottom:20px;flex-wrap:wrap;}
+section.rounded-2xl.border.bg-white > header h2 {color:var(--primary);font-size:.9rem;font-weight:800;letter-spacing:0;text-transform:none;}
+button.bg-white.ring-1 {background:var(--surface);color:var(--text-soft);--tw-ring-color:var(--primary-border);}
+main:has(> header.bg-indigo-600) {max-width:1440px;padding-block:28px 80px;}
+main > header.bg-indigo-600 {background:var(--brand-gradient);border-radius:24px;padding:28px;box-shadow:var(--shadow-md);position:relative;overflow:hidden;}
+main > header.bg-indigo-600 > div {min-width:0;}
+main > header.bg-indigo-600 .font-mono {font-size:clamp(2rem,5vw,3.5rem);}
+main > header.bg-indigo-600 .text-base {overflow-wrap:anywhere;}
+main:has(> header.bg-indigo-600) > .sticky {top:76px;}
+input[type="checkbox"] {accent-color:var(--primary);}
+@media(max-width:700px){main > header.bg-indigo-600{padding:22px 18px;border-radius:20px}section.rounded-2xl.border.bg-white{border-radius:20px}main:has(> header.bg-indigo-600) > .sticky{top:68px}}
+
+
+/* Quiet blue palette, shared by every route and decorative pulse logo. */
+:root {
+  --primary: #3476bb;
+  --primary-2: #5898c9;
+  --brand-gradient: linear-gradient(110deg,#387ab8,#326797);
+  --heading-gradient: linear-gradient(100deg,#3476bb,#4598b8);
+  --primary-soft: rgba(52,118,187,.055);
+  --primary-border: rgba(52,118,187,.16);
+  --primary-glow: rgba(52,118,187,.10);
+}
+html[data-theme="dark"] {
+  --primary: #91b5dc;
+  --primary-2: #a9c6e2;
+  --primary-soft: rgba(145,181,220,.065);
+  --primary-border: rgba(145,181,220,.18);
+  --primary-glow: rgba(145,181,220,.04);
+  --brand-gradient: linear-gradient(110deg,#365673,#304b65);
+  --heading-gradient: linear-gradient(100deg,#b2cde7,#9abed5);
+}
+.brand__mark,.app-bar__mark,.student-header__pulse-mark {
+  display: grid; place-items: center; background: var(--brand-gradient);
+  border: 0; border-radius: 11px; box-shadow: none;
+}
+.brand__mark > i,.app-bar__mark > i,.student-header__pulse-mark > span {display:none;}
+.brand__mark::before,.app-bar__mark::before,.student-header__pulse-mark::before {
+  content:""; display:block; width:75%; height:75%; background:#fff;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M2 17h7l3-9 5 17 3-11 3 3h7' fill='none' stroke='black' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+html[data-theme="dark"] main > header.bg-indigo-600 {
+  background: var(--surface-alt); border:1px solid var(--primary-border); box-shadow:none;
+}
+html[data-theme="dark"] .hero__glow {opacity:.2;}
+html[data-theme="dark"] .demo-card {box-shadow:var(--shadow-md);}
+html[data-theme="dark"] .landing-page:before {opacity:.3;}
+html[data-theme="dark"] .hero__cta,
+html[data-theme="dark"] .landing-final a,
+html[data-theme="dark"] .checkout-pay-button {box-shadow:none;}
+
+.brand__mark::before,.app-bar__mark::before,.student-header__pulse-mark::before {width:26px;height:26px;}
+
+/* Reference logo: five lavender columns, with no containing tile. */
+.brand__mark.brand__mark,.app-bar__mark.app-bar__mark,.student-header__pulse-mark.student-header__pulse-mark {
+ background:transparent;border:0;box-shadow:none;border-radius:0;display:grid;place-items:center;
+}
+.brand__mark::before,.app-bar__mark::before,.student-header__pulse-mark::before {
+ width:32px;height:32px;background:#a59cda;
+ mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 32'%3E%3Crect x='0' y='21' width='6' height='11' rx='3'/%3E%3Crect x='8.5' y='11' width='6' height='21' rx='3'/%3E%3Crect x='17' y='2' width='6' height='30' rx='3'/%3E%3Crect x='25.5' y='14' width='6' height='18' rx='3'/%3E%3Crect x='34' y='9' width='6' height='23' rx='3'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+html[data-theme="dark"] .brand__mark::before,html[data-theme="dark"] .app-bar__mark::before,html[data-theme="dark"] .student-header__pulse-mark::before {background:#b3abe0;}
+
+/* Requested teacher-page palette and restored pulse tile. */
+body:has(.teacher-create),body:has(main > header.bg-indigo-600) {
+ --primary:oklch(0.511 0.262 276.966);--primary-2:#6366f1;
+ --primary-soft:rgba(79,70,229,.055);--primary-border:rgba(79,70,229,.15);--primary-glow:rgba(79,70,229,.12);
+ --brand-gradient:linear-gradient(110deg,oklch(0.511 0.262 276.966),#4338ca);
+}
+html[data-theme="dark"] body:has(.teacher-create),html[data-theme="dark"] body:has(main > header.bg-indigo-600) {
+ --primary:#b0b2df;--primary-2:#bec1e5;--primary-soft:rgba(176,178,223,.065);--primary-border:rgba(176,178,223,.18);--primary-glow:rgba(176,178,223,.04);
+ --brand-gradient:linear-gradient(110deg,#4b5377,#404864);
+}
+.brand__mark.brand__mark,.app-bar__mark.app-bar__mark,.student-header__pulse-mark.student-header__pulse-mark {
+ background:oklch(0.511 0.262 276.966);border-radius:11px;box-shadow:none;
+}
+.brand__mark::before,.app-bar__mark::before,.student-header__pulse-mark::before {
+ width:26px;height:26px;background:#fff;
+ mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M2 17h7l3-9 5 17 3-11 3 3h7' fill='none' stroke='black' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+html[data-theme="dark"] .brand__mark::before,html[data-theme="dark"] .app-bar__mark::before,html[data-theme="dark"] .student-header__pulse-mark::before {background:#fff;}
+
+/* One indigo scheme for every route (landing, account, student and teacher pages). */
+:root {
+  --primary: oklch(0.511 0.262 276.966);
+  --primary-2: #6366f1;
+  --primary-soft: rgba(79,70,229,.055);
+  --primary-border: rgba(79,70,229,.15);
+  --primary-glow: rgba(79,70,229,.12);
+  --brand-gradient: linear-gradient(110deg,oklch(0.511 0.262 276.966),#4338ca);
+  --heading-gradient: linear-gradient(100deg,#4f46e5,#6366f1);
+}
+html[data-theme="dark"] {
+  --primary: #b0b2df;
+  --primary-2: #bec1e5;
+  --primary-soft: rgba(176,178,223,.065);
+  --primary-border: rgba(176,178,223,.18);
+  --primary-glow: rgba(176,178,223,.04);
+  --brand-gradient: linear-gradient(110deg,#4b5377,#404864);
+  --heading-gradient: linear-gradient(100deg,#c5a4ff,#a99dff,#68cde7);
+}
+::selection {background:#e0e0fb;color:#1e1b4b;}

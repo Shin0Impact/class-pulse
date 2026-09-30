@@ -240,3 +240,17 @@
     gap: 3px;
   }
 }
+
+/* Reference-inspired lilac design. */
+
+.feedback-form {border-color:var(--border);box-shadow:var(--shadow-md);}
+.feedback-form__header h1 {line-height:1.4;}
+.feedback-form__eyebrow {color:var(--primary);}
+.feedback-form__header p,.feedback-form__privacy span,.feedback-form--thanks p {color:var(--muted);}
+.feedback-form__comment textarea {border-color:var(--border);color:var(--text);background:var(--page);}
+.feedback-form__comment textarea:focus {border-color:var(--primary);}
+.feedback-form__privacy {background:var(--primary-soft);}
+.feedback-form__switch--active {background:var(--primary);}
+.feedback-form__submit {background:var(--brand-gradient);}
+.feedback-form__counter {right:auto;inset-inline-end:14px;}
+

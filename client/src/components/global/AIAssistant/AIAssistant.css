@@ -153,3 +153,9 @@
     height: min(560px, 70vh);
   }
 }
+
+/* Class Pulse · lilac visual theme */
+
+.ai-trigger,.ai-avatar {background:var(--brand-gradient);color:#fff;}
+.ai-trigger span {color:#fff;}
+
