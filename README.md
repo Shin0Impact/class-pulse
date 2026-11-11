@@ -6,6 +6,16 @@ Built for the Newtech hackathon, theme **Reimagine Learning**. Team: Maher, Mala
 
 Arabic and English throughout (full right-to-left layout), light and dark mode, phone-first student screens.
 
+## At a glance
+
+| | |
+|---|---|
+| **What** | Live-class tool: students signal understanding in real time, then a blindspot check tests confidence against correctness |
+| **Stack** | React, TypeScript, Vite, Tailwind (client); Node 24, Express, Socket.IO (server); optional Supabase; Gemini with Claude as backup for AI features |
+| **Languages** | Arabic and English, full right-to-left layout, light and dark mode |
+| **Quality** | Unit tests for the pure logic, a socket-level smoke test that plays a teacher and students, and a load test; CI runs typecheck, tests, build and smoke on every push |
+| **Team** | Four-person Newtech hackathon team (Maher, Malak, Salam, Ramez) |
+
 ## What it does
 
 **1. The live pulse**
@@ -42,7 +52,7 @@ Arabic and English throughout (full right-to-left layout), light and dark mode, 
 Requirements: **Node 24.12 or newer** (see `.node-version`; the server runs `.ts` files directly with no build step) and git. No accounts or API keys are needed to try it.
 
 ```bash
-git clone <your-repo-url> class-pulse
+git clone https://github.com/Shin0Impact/class-pulse.git
 cd class-pulse
 npm install          # installs server AND client (npm workspaces)
 npm run dev          # server on :3001, client on :5173
